@@ -1,42 +1,28 @@
 <?php
-session_start();
-require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../config/utils.php';
+require_once __DIR__ . '/auth.php';
 
-$error = '';
-if ($_SERVER['REQUEST_METHOD']==='POST') {
-  $user = trim($_POST['username'] ?? '');
-  $pass = trim($_POST['password'] ?? '');
-
-  $stmt = $pdo->prepare("SELECT USERNAME, PASSWORD_HASH FROM ADMIN_USER WHERE USERNAME=?");
-  $stmt->execute([$user]);
-  $row = $stmt->fetch();
-
-  if ($row && (password_verify($pass, $row['PASSWORD_HASH']) || hash_equals($row['PASSWORD_HASH'], $pdo->query("SELECT PASSWORD(".$pdo->quote($pass).")")->fetchColumn()))) {
-    $_SESSION['admin_user'] = $row['USERNAME'];
-    header('Location: /admin/dashboard.php');
-    exit;
-  } else {
-    $error = 'Invalid credentials.';
-  }
+if ($_SERVER['REQUEST_METHOD']==='POST'){
+  csrf_check();
+  $ok = try_login(trim($_POST['email']??''), trim($_POST['password']??''));
+  if ($ok) redirect('/dashboard.php');
+  $error = 'Invalid credentials';
 }
 ?>
 <!DOCTYPE html>
-<html><head>
-  <meta charset="utf-8"><title>Admin Login — School of Mary</title>
-  <link href="/assets/styles.css" rel="stylesheet" />
-</head>
-<body>
-  <div class="container" style="max-width:420px;margin-top:80px">
-    <div class="detail">
-      <h2>Admin Login</h2>
-      <?php if($error): ?><p style="color:#b91c1c"><?php echo htmlspecialchars($error); ?></p><?php endif; ?>
-      <form method="post">
-        <label>Username</label>
-        <input class="input" name="username" required />
-        <label style="margin-top:8px">Password</label>
-        <input class="input" name="password" type="password" required />
-        <button class="btn" style="margin-top:12px" type="submit">Sign in</button>
-      </form>
-    </div>
-  </div>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/assets/admin.css">
+<title>Admin Login</title>
+</head><body style="display:grid;place-items:center;min-height:100vh;background:#f8fafc">
+  <form method="post" style="width:min(420px,92vw)" class="card">
+    <h1>Admin Login</h1>
+    <?php if (!empty($error)): ?>
+      <div class="panel" style="border-left:4px solid #b91c1c;color:#7f1d1d"><?php echo htmlspecialchars($error);?></div>
+    <?php endif; ?>
+    <input type="hidden" name="csrf" value="<?php echo csrf_token(); ?>">
+    <div class="field"><label>Email</label><input class="input" type="email" name="email" required></div>
+    <div class="field"><label>Password</label><input class="input" type="password" name="password" required></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn primary">Login</button></div>
+  </form>
 </body></html>

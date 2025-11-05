@@ -23,6 +23,18 @@ function v_number_nullable($s){
     return $s==='' || is_numeric($s); 
 }
 
-function guardFail($msg){ 
-    http_response_code(422); die($msg); 
+function guardFail($msg, $field = null){
+  http_response_code(422);
+  // If request came from fetch (AJAX), return JSON so JS can highlight the field
+  $isAjax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) || (isset($_SERVER['HTTP_ACCEPT']) && str_contains($_SERVER['HTTP_ACCEPT'],'application/json'));
+  $payload = ['ok'=>false, 'message'=>$msg];
+  if ($field) $payload['field'] = $field;
+  if ($isAjax) {
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode($payload);
+  } else {
+    echo $msg;
+  }
+  exit;
 }
+
