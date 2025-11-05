@@ -1,0 +1,275 @@
+@font-face {
+  font-family: "Newsreader";
+  src: url("/assets/fonts/Newsreader-VariableFont_opsz,wght.ttf") format("truetype");
+  font-weight: 200 800; font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Patua One";
+  src: url("/assets/fonts/PatuaOne-Regular.ttf") format("truetype");
+  font-weight: 400; font-style: normal;
+  font-display: swap;
+}
+
+/* Palette */
+:root{
+  --crimson: #a51c30;   /* primary color */
+  --crimson-700:#821728;
+  --ink: #1b1b1b;       /* body text */
+  --muted:#6b7280;
+  --bg:#f7f7f7;
+  --card:#ffffff;
+  --accent:#16a34a;     /* for positive buttons */
+  --border:#e5e7eb;
+  --shadow: 0 8px 24px rgba(0,0,0,0.06);
+}
+
+*{
+    box-sizing:border-box
+}
+
+html,body{
+    margin:0;
+    padding:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Newsreader",system-ui,-apple-system,Segoe UI,Roboto,Arial
+}
+
+a{
+    text-decoration:none;
+    color:var(--crimson)
+}
+
+a:hover{
+    color:var(--crimson-700)
+}
+
+.container{
+    max-width:1120px;
+    margin:0 auto;
+    padding:0 16px
+}
+
+/* Topbar */
+.topbar{
+    background:var(--crimson);
+    color:#fff
+}
+
+.topbar .container{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    height:64px
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    color:#fff
+}
+
+.logo{
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    margin-right:10px
+}
+
+.brand-text{
+    font-family:"Patua One", serif;
+    font-size:20px;
+    letter-spacing:.3px
+}
+
+.nav a{
+    color:#fff;
+    margin-left:18px;
+    opacity:.95
+}
+
+.nav a:hover{
+    opacity:1;
+    text-decoration:underline
+}
+
+.admin-link{
+    padding:8px 12px;
+    border:1px solid rgba(255,255,255,.6);
+    border-radius:10px
+}
+
+/* Page */
+.page{
+    padding:40px 0
+}
+
+/* Hero */
+.hero{
+    padding:72px 0;
+    background:#fff;
+    border-bottom:1px solid var(--border)
+}
+
+.hero h1{
+    font-family:"Patua One",serif;
+    font-size:40px;
+    margin:0 0 10px
+}
+
+.hero p{
+    max-width:720px;
+    color:var(--muted);
+    line-height:1.6
+}
+
+/* Search panel (filters) */
+.search-panel{
+    margin-top:32px;
+    background:var(--card);
+    padding:20px;
+    border:1px solid var(--border);
+    border-radius:16px;
+    box-shadow:var(--shadow)
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(12,1fr);
+    gap:12px
+}
+
+.field{
+    grid-column: span 3
+}
+
+.field label{
+    display:block;
+    font-size:13px;
+    color:var(--muted);
+    margin-bottom:6px
+}
+
+.input, select, .btn{
+    width:100%;
+    height:42px;
+    padding:10px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    background:#fff
+}
+
+.btn{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:#fff;
+    cursor:pointer
+}
+
+.btn:hover{
+    filter:brightness(.95)
+}
+
+/* Cards */
+.cards{
+    margin-top:28px;
+    display:grid;
+    grid-template-columns:repeat(12,1fr);
+    gap:18px
+}
+
+.card{
+    grid-column: span 6;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:16px;
+    box-shadow:var(--shadow);
+    padding:18px;
+    display:flex;
+    gap:16px;
+    align-items:center
+}
+
+.card img.avatar{
+    width:84px;
+    height:84px;
+    border-radius:999px;
+    object-fit:cover;
+    border:2px solid var(--border)
+}
+
+.card h3{
+    margin:0 0 6px;
+    font-size:18px
+}
+
+.meta{
+    font-size:13px;
+    color:var(--muted)
+}
+
+.card-actions{
+    margin-left:auto;
+    display:flex;
+    gap:8px
+}
+
+.pill{
+    display:inline-block;
+    padding:6px 10px;
+    border-radius:999px;
+    background:#f3f4f6;
+    color:#374151;
+    font-size:12px
+}
+
+/* Detail sections */
+.detail{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:16px;
+    box-shadow:var(--shadow);
+    padding:20px;
+    margin-top:20px
+}
+
+/* Footer */
+.footer{
+    background:#fff;
+    border-top:1px solid var(--border);
+    padding:28px 0;
+    margin-top:42px
+}
+
+.footer-grid{
+    display:grid;
+    grid-template-columns:repeat(12,1fr);
+    gap:18px
+}
+
+.footer-grid > div{
+    grid-column: span 4
+}
+
+.footer-title{
+    font-weight:700;
+    margin-bottom:8px
+}
+
+.brand-mini{
+    font-family:"Patua One";
+    font-size:18px
+}
+
+.muted{
+    color:var(--muted)
+}
+
+.footnote{
+    margin-top:16px;
+    color:var(--muted);
+    font-size:13px;
+    text-align:center
+}
