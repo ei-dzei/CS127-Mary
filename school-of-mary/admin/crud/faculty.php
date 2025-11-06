@@ -213,21 +213,16 @@ $stmt = $pdo->prepare($sql); $stmt->execute($params); $rows = $stmt->fetchAll();
   </table>
 </div>
 
-<!-- Inject the MODAL FIELD BLOCK for this page -->
 <script>
 (function(){
   const form = document.getElementById('modal-form');
   if (!form) return;
-
-  // Point modal form to this page and use your action name "update" by default.
   form.action = location.pathname;
-
   const ensureAction = () => {
     const id = (form.querySelector('[name=FACULTY_ID]')?.value||'').trim();
     form.querySelector('[name=action]').value = id ? 'update' : 'create';
   };
 
-  // Build fields (once)
   form.insertAdjacentHTML('afterbegin', `
     <input type="hidden" name="FACULTY_ID">
 
@@ -273,7 +268,6 @@ $stmt = $pdo->prepare($sql); $stmt->execute($params); $rows = $stmt->fetchAll();
       </select>
     </div>
   `);
-
   document.addEventListener('modal:populated', ensureAction);
   form.addEventListener('submit', ensureAction);
 })();
