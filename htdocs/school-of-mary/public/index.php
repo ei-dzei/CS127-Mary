@@ -1,4 +1,7 @@
 <?php
+header('Location: /school-of-mary/public/');
+exit;
+
 $pageTitle = 'Welcome';
 require_once __DIR__ . '/partials/init.php';
 require_once __DIR__ . '/../partials/site_header.php';
