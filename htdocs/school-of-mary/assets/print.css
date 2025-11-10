@@ -1,0 +1,110 @@
+/* =======================================
+   PRINTING
+   ======================================= */
+
+@page {
+  size: A4;
+  margin: 18mm 16mm 18mm 16mm;
+}
+
+:root {
+  --ink: #111;
+  --muted: #555;
+  --rule: #bbb;
+  --accent: #000;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  color: var(--ink) !important;
+  background: #fff !important;
+  font: 12pt/1.45 "Newsreader", Georgia, "Times New Roman", serif !important;
+}
+
+/* Hide non-print UI */
+.topbar,
+.footer,
+#modal,
+.admin-stripe,
+button,
+.btn,
+.dropdown,
+.dropdown__menu,
+a[href^="/admin/"],
+a[href^="/public/"][class*="btn"],
+nav,
+form {
+  display: none !important;
+}
+
+/* Make content full width */
+.container {
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+/* Headings & metadata */
+h1, h2, h3 {
+  font-family: "Patua One", "Times New Roman", serif !important;
+  margin: 0 0 6pt;
+  color: var(--ink) !important;
+}
+
+h1 {
+  font-size: 18pt;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 6pt;
+  margin-bottom: 10pt;
+}
+
+h2 {
+  font-size: 14pt;
+  margin-top: 12pt;
+}
+
+h3 {
+  font-size: 12.5pt;
+}
+
+.muted {
+  color: var(--muted) !important;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8pt 0 12pt;
+}
+
+th, td {
+  padding: 6pt 8pt;
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+  vertical-align: top;
+  font-size: 10.5pt;
+}
+
+th {
+  font-weight: 700;
+}
+
+/* Spacing utilities for print */
+.mt-0 { margin-top: 0 !important; }
+.mt-1 { margin-top: 6pt !important; }
+.mt-2 { margin-top: 12pt !important; }
+.mt-3 { margin-top: 18pt !important; }
+
+.mb-0 { margin-bottom: 0 !important; }
+.mb-1 { margin-bottom: 6pt !important; }
+.mb-2 { margin-bottom: 12pt !important; }
+.mb-3 { margin-bottom: 18pt !important; }
+
+/* Prevent links from showing long URLs after text */
+a::after {
+  content: "";
+}
