@@ -285,3 +285,131 @@
   show(0);
   start();
 })();
+
+/* -------------------------
+    READ MORE OVERLAY
+------------------------- */
+
+(() => {
+  const overlay = document.getElementById('overlay');
+  const bodyEl  = document.getElementById('overlay-body');
+  const titleEl = document.getElementById('overlay-title');
+
+  if (!overlay || !bodyEl || !titleEl) return;
+
+  function openOverlay(title) {
+    titleEl.textContent = title || 'Details';
+    bodyEl.innerHTML = '<div class="overlay__loading">Loading…</div>';
+    overlay.removeAttribute('hidden');
+  }
+  function closeOverlay() { overlay.setAttribute('hidden', ''); }
+
+  overlay.addEventListener('click', (e) => {
+    if (e.target.matches('[data-close="overlay"], .overlay__backdrop')) closeOverlay();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !overlay.hasAttribute('hidden')) closeOverlay();
+  });
+
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('[data-read-more]');
+    if (!btn) return;
+
+    const type = btn.getAttribute('data-type'); 
+    const id   = btn.getAttribute('data-id');
+    const title= btn.getAttribute('data-title') || 'Details';
+
+    if (!type || !id) return;
+
+    openOverlay(title);
+
+    try {
+      const endpoint =
+        type === 'faculty'
+          ? '/public/api/faculty_show.php?id=' + encodeURIComponent(id)
+          : '/public/api/research_show.php?id=' + encodeURIComponent(id);
+
+
+      const res = await fetch(endpoint, { headers: { 'Accept': 'application/json' }});
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+
+      if (type === 'faculty') {
+        bodyEl.innerHTML = renderFacultyDetail(data);
+      } else {
+        bodyEl.innerHTML = renderResearchDetail(data);
+      }
+    } catch (err) {
+      bodyEl.innerHTML = `<p style="color:#b00020">Failed to load details. ${String(err)}</p>`;
+    }
+  });
+
+  function renderFacultyDetail(d) {
+    const dept = d.dept_name
+      ? `<p class="kv"><b>Department:</b> ${escapeHtml(d.dept_name)}${d.dept_classification ? ` <span style="opacity:.65">(${escapeHtml(d.dept_classification)})</span>` : ''}</p>`
+      : '';
+    const email = d.email ? `<p class="kv"><b>Email:</b> <a href="mailto:${escapeHtml(d.email)}">${escapeHtml(d.email)}</a></p>` : '';
+
+    const items = (d.assignments || []).map(p => {
+      const funders = (p.funding || [])
+        .map(f => `${escapeHtml(f.AGENCY_NAME)} (₱${escapeHtml(f.FUNDING_AMOUNT || '0.00')})`)
+        .join(', ');
+      return `
+        <li>
+          <a href="/public/research.php?id=${escapeHtml(p.RESEARCH_ID)}">${escapeHtml(p.RESEARCH_TITLE)}</a>
+          <span style="opacity:.75"> — ${escapeHtml(p.RESEARCH_STATUS)}</span>
+          ${funders ? `<br><span style="font-size:13px;opacity:.8">Funded by: ${funders}</span>` : ''}
+        </li>
+      `;
+    }).join('');
+
+    return `
+      <div class="detail-grid">
+        <div></div>
+        <div>
+          <h4>${escapeHtml(d.full_name || '')}</h4>
+          ${dept}${email}
+          ${items ? `<div class="section-title">Research & Funding</div><ul class="list">${items}</ul>` : '<p class="kv">No research assignments yet.</p>'}
+        </div>
+      </div>
+    `;
+  }
+
+
+  function renderResearchDetail(d) {
+    const badge = d.status ? `<span class="badge">${escapeHtml(d.status)}</span>` : '';
+
+    const people = (d.people || []).map(p => `
+      <span class="badge">
+        ${escapeHtml(p.name)}${p.role_name ? ` · ${escapeHtml(p.role_name)}` : ''}${p.rank_name ? ` · ${escapeHtml(p.rank_name)}` : ''}
+      </span>
+    `).join('');
+
+    const funds = (d.funding || []).map(f => `
+      <li>
+        ${escapeHtml(f.AGENCY_NAME)}${f.AGENCY_TYPE ? ` <span style="opacity:.7">(${escapeHtml(f.AGENCY_TYPE)})</span>` : ''}
+        — ₱${escapeHtml(f.FUNDING_AMOUNT || '0.00')}
+        ${f.DATE_FUNDED ? ` <span style="opacity:.65">(${escapeHtml(f.DATE_FUNDED)})</span>` : ''}
+      </li>
+    `).join('');
+
+    return `
+      <div class="detail-grid">
+        <div></div>
+        <div>
+          <h4>${escapeHtml(d.title || '')}</h4>
+          ${badge ? `<p class="kv"><b>Status:</b> ${badge}</p>` : ''}
+          ${d.start_date ? `<p class="kv"><b>Start:</b> ${escapeHtml(d.start_date)}</p>` : ''}
+          ${d.end_date ? `<p class="kv"><b>End:</b> ${escapeHtml(d.end_date)}</p>` : ''}
+
+          ${people ? `<div class="section-title">Assigned Faculty</div><div class="badges">${people}</div>` : ''}
+          ${funds ? `<div class="section-title">Funding</div><ul class="list">${funds}</ul>` : ''}
+          <p class="kv"><b>Total Funding:</b> ₱${escapeHtml(d.total_funding || '0.00')}</p>
+        </div>
+      </div>
+    `;
+  }
+
+  function escapeHtml(s){ return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+})();
+

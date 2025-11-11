@@ -1,13 +1,23 @@
-<?php  ?>
+<?php ?>
 </main>
 
 <footer class="footer">
   <div class="container footer__inner">
     <div>© <?= date('Y') ?> School of Mary</div>
     <nav class="footernav">
-      <a href="<?= BASE_URL ?>/public/" class="<?= current_path()=== BASE_URL.'/public/' || current_path()==='/public/' ? 'active' : '' ?>">Home</a>
-      <a href="<?= BASE_URL ?>/public/faculty.php"   class="<?= strpos(current_path(), '/public/faculty') !== false ? 'active' : '' ?>">Faculty</a>
-      <a href="<?= BASE_URL ?>/public/research.php"  class="<?= strpos(current_path(), '/public/research') !== false ? 'active' : '' ?>">Research</a>
+      <a href="<?= BASE_URL ?>/public/" 
+         class="<?= current_path()=== BASE_URL.'/public/' || current_path()==='/public/' ? 'active' : '' ?>">
+         Home
+      </a>
+      <a href="<?= BASE_URL ?>/public/faculty.php" 
+         class="<?= strpos(current_path(), '/public/faculty') !== false ? 'active' : '' ?>">
+         Faculty
+      </a>
+      <a href="<?= BASE_URL ?>/public/research.php"  
+         class="<?= strpos(current_path(), '/public/research') !== false ? 'active' : '' ?>">
+         Research
+      </a>
+
       <?php if (!is_admin()): ?>
         <a href="<?= BASE_URL ?>/admin/login.php">Admin Login</a>
       <?php else: ?>
@@ -17,7 +27,9 @@
   </div>
 </footer>
 
-<!-- Modal -->
+<!-- ============================
+     Admin Modal
+============================= -->
 <div id="modal" class="modal" hidden>
   <div class="modal__dialog">
     <div class="modal__head">
@@ -26,14 +38,33 @@
     </div>
 
     <form id="modal-form" method="post" class="grid">
-      <input type="hidden" name="csrf" value="<?php echo htmlspecialchars(csrf_token()); ?>">
+      <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
       <input type="hidden" name="action" value="">
-      <!-- Page-specific inputs gets injected -->
       <div class="modal__actions">
         <button class="btn primary" type="submit">Save</button>
         <button class="btn" type="button" data-close="modal">Cancel</button>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- ============================
+     Read More Overlay (Faculty / Research)
+============================= -->
+<div id="overlay" class="overlay" hidden>
+  <div class="overlay__backdrop" data-close="overlay"></div>
+
+  <div class="overlay__dialog" role="dialog" aria-modal="true" aria-labelledby="overlay-title">
+    <!-- Close button inside header -->
+    <div class="overlay__header">
+      <h3 id="overlay-title" class="overlay__title">Details</h3>
+      <button class="overlay__close" type="button" aria-label="Close" data-close="overlay">×</button>
+    </div>
+
+    <!-- Body content dynamically filled by app.js -->
+    <div id="overlay-body" class="overlay__body">
+      <div class="overlay__loading">Loading…</div>
+    </div>
   </div>
 </div>
 

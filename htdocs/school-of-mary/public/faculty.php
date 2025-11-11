@@ -177,9 +177,7 @@ $rows = $stmt->fetchAll();
   <?php else: ?>
     <div class="grid" style="gap:12px">
       <?php foreach ($rows as $row): ?>
-        <a href="/public/faculty.php?id=<?php echo (int)$row['FACULTY_ID']; ?>"
-           class="panel slide-up"
-           style="grid-column: span 4; text-decoration:none; color:inherit;">
+        <div class="panel slide-up" style="grid-column: span 4;">
           <h3 style="margin-top:0">
             <?php
               echo htmlspecialchars($row['FACULTY_LNAME'].', '.$row['FACULTY_FNAME']);
@@ -191,7 +189,17 @@ $rows = $stmt->fetchAll();
             <?php echo htmlspecialchars($row['DEPT_SPECIALIZATION']); ?><br/>
             <?php echo htmlspecialchars($row['FACULTY_EMAIL']); ?>
           </div>
-        </a>
+
+          <button
+            class="btn small"
+            data-read-more
+            data-type="faculty"
+            data-id="<?php echo (int)$row['FACULTY_ID']; ?>"
+            data-title="<?php echo htmlspecialchars($row['FACULTY_LNAME'].', '.$row['FACULTY_FNAME']); ?>">
+            Read More
+          </button>
+        </div>
+
       <?php endforeach; ?>
     </div>
   <?php endif; ?>

@@ -240,9 +240,7 @@ $rows = $stmt->fetchAll();
   <?php else: ?>
     <div class="grid" style="gap:12px;">
       <?php foreach ($rows as $row): ?>
-        <a href="/public/research.php?id=<?php echo (int)$row['RESEARCH_ID']; ?>"
-           class="panel slide-up"
-           style="grid-column: span 6; text-decoration:none; color:inherit;">
+        <div class="panel slide-up" style="grid-column: span 6;">
           <h3 style="margin-top:0;"><?php echo htmlspecialchars($row['RESEARCH_TITLE']); ?></h3>
           <div class="muted" style="font-size:.95rem; margin-top:4px;">
             <span class="pill" style="background:#eef4ff; border:1px solid #cdd8f0; padding:2px 8px; border-radius:999px;">
@@ -253,7 +251,17 @@ $rows = $stmt->fetchAll();
               <?php if ($row['RESEARCH_ENDDATE']) echo " · End: ".htmlspecialchars($row['RESEARCH_ENDDATE']); ?>
             </span>
           </div>
-        </a>
+
+          <button
+            class="btn small"
+            data-read-more
+            data-type="research"
+            data-id="<?php echo (int)$row['RESEARCH_ID']; ?>"
+            data-title="<?php echo htmlspecialchars($row['RESEARCH_TITLE']); ?>">
+            Read More
+          </button>
+        </div>
+
       <?php endforeach; ?>
     </div>
   <?php endif; ?>
