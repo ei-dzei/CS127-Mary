@@ -5,10 +5,9 @@
   <div class="container footer__inner">
     <div>© <?= date('Y') ?> School of Mary</div>
     <nav class="footernav">
-      <a href="<?= BASE_URL ?>/">Home</a>
-      <a href="<?= BASE_URL ?>/public/faculty.php">Faculty</a>
-      <a href="<?= BASE_URL ?>/public/research.php">Research</a>
-      <a href="<?= BASE_URL ?>/public/agencies.php">Agencies</a>
+      <a href="<?= BASE_URL ?>/public/" class="<?= current_path()=== BASE_URL.'/public/' || current_path()==='/public/' ? 'active' : '' ?>">Home</a>
+      <a href="<?= BASE_URL ?>/public/faculty.php"   class="<?= strpos(current_path(), '/public/faculty') !== false ? 'active' : '' ?>">Faculty</a>
+      <a href="<?= BASE_URL ?>/public/research.php"  class="<?= strpos(current_path(), '/public/research') !== false ? 'active' : '' ?>">Research</a>
       <?php if (!is_admin()): ?>
         <a href="<?= BASE_URL ?>/admin/login.php">Admin Login</a>
       <?php else: ?>

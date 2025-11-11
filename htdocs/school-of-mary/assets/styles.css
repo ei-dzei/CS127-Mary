@@ -99,8 +99,10 @@ img {
 }
 
 .brand__logo {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  display: block;
 }
 
 .mainnav {
@@ -349,4 +351,112 @@ th {
   padding: 4px 0;
   font-weight: 600;
   letter-spacing: 0.5px;
+}
+
+/* -------------------------
+   HERO SLIDER
+-------------------------- */
+
+.hero {
+  position: relative;
+  margin-top: 16px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #eef3f8;
+}
+
+.hero__slide {
+  position: relative;
+  width: 100%;
+  min-height: 420px;
+  max-height: 520px;
+  background-image: var(--bg);
+  background-size: cover;         
+  background-position: center; 
+  display: none;
+}
+
+.hero__slide.is-active {
+  display: block;
+  animation: slideIn 0.5s ease both;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: scale(1.01) translateY(6px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
+.hero__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.05) 100%);
+}
+
+.hero__content {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  gap: 1rem;
+  padding: 2.5rem;
+  max-width: 900px;
+  color: #fff;
+}
+
+.hero__icon {
+  font-size: 1.8rem;
+  line-height: 1;
+  opacity: 0.95;
+}
+
+.hero__title {
+  font-family: 'Patua One', serif;
+  font-size: clamp(1.8rem, 2.4rem + 0.6vw, 3rem);
+  line-height: 1.2;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.35);
+}
+
+.hero__subtitle {
+  font-family: 'Newsreader', serif;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  max-width: 60ch;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.25);
+  color: #e8f0f7;
+}
+
+.hero__actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.hero__dots {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 5;
+}
+
+.hero__dots button {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(255,255,255,0.6);
+  cursor: pointer;
+  transition: transform var(--transition), background var(--transition);
+}
+
+.hero__dots button:hover {
+  transform: scale(1.1);
+  background: rgba(255,255,255,0.85);
+}
+
+.hero__dots button.is-active {
+  width: 24px;
+  background: #ffcc00;
 }

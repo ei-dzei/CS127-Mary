@@ -32,17 +32,16 @@ $path = $path === '' ? '/' : $path;
 <header id="topbar" class="topbar">
   <div class="container topbar__inner">
 
-    <a class="brand" href="<?= BASE_URL ?>/">
-      <img class="brand__logo" src="<?= BASE_URL ?>/public/logo.svg" alt="School of Mary">
+    <a class="brand" href="<?= BASE_URL ?>/public/">
+      <img class="brand__logo" src="<?= BASE_URL ?>/public/logo.png" alt="School of Mary">
       <span>School of Mary</span>
     </a>
 
     <nav class="mainnav">
       <!-- Public nav -->
-      <a href="<?= BASE_URL ?>/"                 class="<?= ($path==='/' || $path==='/public/' || $path==='/index.php') ? 'active' : '' ?>">Home</a>
-      <a href="<?= BASE_URL ?>/public/faculty.php"  class="<?= (strpos($path, '/public/faculty')===0) ? 'active' : '' ?>">Faculty</a>
-      <a href="<?= BASE_URL ?>/public/research.php" class="<?= (strpos($path, '/public/research')===0) ? 'active' : '' ?>">Research</a>
-      <a href="<?= BASE_URL ?>/public/agencies.php" class="<?= (strpos($path, '/public/agencies')===0) ? 'active' : '' ?>">Agencies</a>
+      <a href="<?= BASE_URL ?>/public/" class="<?= current_path()=== BASE_URL.'/public/' || current_path()==='/public/' ? 'active' : '' ?>">Home</a>
+      <a href="<?= BASE_URL ?>/public/faculty.php"   class="<?= strpos(current_path(), '/public/faculty') !== false ? 'active' : '' ?>">Faculty</a>
+      <a href="<?= BASE_URL ?>/public/research.php"  class="<?= strpos(current_path(), '/public/research') !== false ? 'active' : '' ?>">Research</a>
 
       <?php if ($isAdmin): ?>
         <span class="divider" aria-hidden="true"></span>

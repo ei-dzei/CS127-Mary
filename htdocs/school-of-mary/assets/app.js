@@ -237,3 +237,51 @@
     utils: { qs, qsa, serializeForm }
   };
 })();
+
+/* -------------------------
+    HERO SLIDER 
+------------------------- */
+(function () {
+  const hero = document.querySelector('.hero');
+  if (!hero) return;
+
+  const slides = Array.from(hero.querySelectorAll('.hero__slide'));
+  const dots = Array.from(hero.querySelectorAll('.hero__dots button'));
+  let i = 0;
+  let timer = null;
+
+  function show(n) {
+    slides.forEach((s, idx) => s.classList.toggle('is-active', idx === n));
+    dots.forEach((d, idx) => d.classList.toggle('is-active', idx === n));
+    i = n;
+  }
+
+  function next() {
+    show((i + 1) % slides.length);
+  }
+
+  dots.forEach((dot, idx) => {
+    dot.addEventListener('click', () => {
+      show(idx);
+      restart();
+    });
+  });
+
+  function start() {
+    timer = setInterval(next, 7000);
+  }
+  function stop() {
+    if (timer) clearInterval(timer);
+    timer = null;
+  }
+  function restart() {
+    stop(); start();
+  }
+
+  hero.addEventListener('mouseenter', stop);
+  hero.addEventListener('mouseleave', start);
+
+  // initialize
+  show(0);
+  start();
+})();
