@@ -206,13 +206,18 @@ $total = count($rows);
 
   <!-- Filter Bar -->
   <form method="get" class="filterbar" style="margin-bottom:14px;">
-    <div class="searchbox">
-      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 18a8 8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/></svg>
-      <input name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search research titles…" />
-    </div>
+    <!-- Inputs row -->
+    <div class="filter-inputs">
+      <!-- Search pill -->
+      <div class="searchbox" style="flex:1 1 360px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M10 18a8 8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/>
+        </svg>
+        <input name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search research titles…" />
+      </div>
 
-    <div class="grid" style="grid-template-columns: repeat(12,1fr); gap:10px;">
-      <div class="field" style="grid-column: span 3;">
+      <!-- Status -->
+      <div class="field" style="min-width:200px;">
         <label>Status</label>
         <select class="input" name="status">
           <option value="">All</option>
@@ -224,22 +229,26 @@ $total = count($rows);
         </select>
       </div>
 
-      <div class="field" style="grid-column: span 3;">
+      <!-- Date from -->
+      <div class="field" style="min-width:180px;">
         <label>Start from</label>
         <input class="input" type="date" name="from" value="<?= htmlspecialchars($from) ?>" />
       </div>
 
-      <div class="field" style="grid-column: span 3;">
+      <!-- Date to -->
+      <div class="field" style="min-width:180px;">
         <label>End by</label>
         <input class="input" type="date" name="to" value="<?= htmlspecialchars($to) ?>" />
       </div>
+    </div>
 
-      <div class="field" style="grid-column: span 3; display:flex; align-items:flex-end; gap:8px;">
-        <button class="btn btn--primary" type="submit">Apply</button>
-        <a class="btn btn--ghost" href="<?= BASE_URL ?>/public/research.php">Clear</a>
-      </div>
+    <!-- Actions row (buttons under the search bar) -->
+    <div class="filter-actions">
+      <button class="btn" type="submit">Apply</button>
+      <a class="clear-btn" href="<?= BASE_URL ?>/public/research.php">Clear</a>
     </div>
   </form>
+
 
   <p class="muted" style="margin:6px 0 12px;">Showing <?= (int)$total ?> <?= $total===1 ? 'project' : 'projects' ?></p>
 

@@ -595,37 +595,94 @@ th {
   border: 1px solid rgba(11,83,148,.20);
   border-radius: 14px;
   padding: 12px;
-  display: grid;
-  gap: 10px;
+  display: flex;
+  flex-direction: column;        
+  align-items: flex-start;
+  gap: 1rem;                    
 }
-@media (min-width:860px){
-  .filterbar{ grid-template-columns:1fr auto auto; align-items:center; }
+@media (min-width: 860px) {
+  .filterbar { align-items: center; }
 }
 .filter-chips {
-  display: flex; flex-wrap: wrap; gap: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
-.filterbar .input, .filterbar select, .filterbar input[type="date"]{
+.filterbar .input,
+.filterbar select,
+.filterbar input[type="date"] {
   border-radius: 9999px;
   background: #fff;
 }
-.searchbox{
-   display: flex; 
-  align-items: center; 
+.filter-inputs {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+.filter-actions {
+  display: flex;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+.filter-actions .btn,
+.filter-actions .clear-btn {
+  min-width: 110px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 500;
+  text-align: center;
+}
+.filter-actions .btn {
+  background: var(--color-accent);
+  color: #fff;
+  border: 1px solid var(--color-accent);
+}
+.filter-actions .clear-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  background: #fff;
+  color: var(--color-accent);
+  border: 1px solid rgba(11,83,148,0.3);
+  transition: background var(--transition), color var(--transition);
+}
+.filter-actions .clear-btn:hover {
+  background: rgba(11,83,148,0.05);
+}
+@media (max-width: 768px) {
+  .filter-actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+  .filter-actions .btn,
+  .filter-actions .clear-btn {
+    width: 100%;
+  }
+}
+.searchbox {
+  display: flex;
+  align-items: center;
   gap: 10px;
-  background: #fff; 
+  background: #fff;
   border-radius: 9999px;
-  border: 1px solid #d9dee3; 
+  border: 1px solid #d9dee3;
   padding: 10px 14px;
 }
-.searchbox input{ 
-  border: none; 
-  outline: none; 
+.searchbox input {
+  border: none;
+  outline: none;
   flex: 1;
-  font-size: 15px; 
+  font-size: 15px;
   background: transparent;
- }
-.searchbox .searchbox__icon{ 
-  font-size:18px; opacity:.55; 
+}
+.searchbox .searchbox__icon {
+  font-size: 18px;
+  opacity: .55;
 }
 
 /* =======================================
