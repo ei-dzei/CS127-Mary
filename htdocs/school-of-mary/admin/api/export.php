@@ -1,5 +1,5 @@
 <?php
-// CSV Export endpoint
+// CSV Export endpoint (admin only)
 require_once __DIR__ . '/../../partials/site_header.php';
 
 if (!is_admin()) {
