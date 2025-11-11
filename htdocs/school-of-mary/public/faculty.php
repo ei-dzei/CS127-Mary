@@ -9,6 +9,15 @@ $depts = $pdo->query("SELECT DEPT_ID, DEPT_SPECIALIZATION FROM DEPARTMENT ORDER 
 /* --- Detail view --- */
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
+// Pagination setup
+$perPage = 5;
+$page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $perPage;
+
+// Count total rows
+$totalRows = $pdo->query("SELECT COUNT(*) FROM FACULTY")->fetchColumn();
+$totalPages = ceil($totalRows / $perPage);
+
 if ($id > 0) {
   $stmt = $pdo->prepare("
     SELECT f.FACULTY_ID, f.FACULTY_FNAME, f.FACULTY_INITIAL, f.FACULTY_LNAME, f.FACULTY_EMAIL,
@@ -123,16 +132,21 @@ if ($dept !== '') {
   $sql .= " AND f.DEPT_ID = ?";
   $params[] = $dept;
 }
-$sql .= " ORDER BY f.FACULTY_LNAME, f.FACULTY_FNAME LIMIT 60";
+$sql .= " ORDER BY f.FACULTY_LNAME, f.FACULTY_FNAME LIMIT :limit OFFSET :offset";
 $stmt = $pdo->prepare($sql);
-$stmt->execute($params);
+foreach ($params as $i => $p) {
+  $stmt->bindValue($i + 1, $p);
+}
+$stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+$stmt->execute();
 $rows = $stmt->fetchAll();
 $total = count($rows);
 ?>
 
 <section class="container fade-in" style="margin-top:6px;">
   <h1 style="margin-bottom:6px;">Faculty</h1>
-  <p class="muted" style="margin-bottom:10px;">Explore our faculty or refine using search and filters.</p>
+  <p class="muted" style="margin-bottom:10px;">Explore the faculty of School of Mary</p>
 
   <!-- Filter Bar -->
   <form method="get" class="filterbar" style="margin-bottom:14px;">
@@ -184,35 +198,23 @@ $total = count($rows);
     <div class="cards">
       <?php foreach ($rows as $row): ?>
         <div class="card">
-          <div class="card__head">
-            <div class="card__icon">👩‍🏫</div>
-            <div>
-              <div class="card__title">
-                <?php
-                  echo htmlspecialchars($row['FACULTY_LNAME'].', '.$row['FACULTY_FNAME']);
-                  if (!empty($row['FACULTY_INITIAL'])) echo ' '.htmlspecialchars($row['FACULTY_INITIAL']);
-                ?>
-              </div>
-              <div class="card__meta">
-                <?= htmlspecialchars($row['RANK_DESCRIPTION']) ?> ·
-                <?= htmlspecialchars($row['DEPT_SPECIALIZATION']) ?>
-              </div>
+          <div class="card__icon">👩‍🏫</div>
+          <div class="card__content">
+            <h3 class="card__title">
+              <?= htmlspecialchars($row['FACULTY_LNAME'] . ', ' . $row['FACULTY_FNAME']); ?>
+            </h3>
+            <p class="card__desc">
+              <?= htmlspecialchars($row['RANK_DESCRIPTION']); ?> · <?= htmlspecialchars($row['DEPT_SPECIALIZATION']); ?>
+            </p>
+            <div class="card__meta">
+              📧 <?= htmlspecialchars($row['FACULTY_EMAIL']); ?>
             </div>
           </div>
-
-          <div class="card__excerpt"><?= htmlspecialchars($row['FACULTY_EMAIL']) ?></div>
-
           <div class="card__actions">
-            <a class="btn btn--ghost small" href="<?= BASE_URL ?>/public/faculty.php?id=<?= (int)$row['FACULTY_ID'] ?>">Open Profile</a>
-            <button
-              class="btn small"
+            <button class="btn small"
               data-read-more
               data-type="faculty"
-              data-id="<?= (int)$row['FACULTY_ID'] ?>"
-              data-title="<?=
-                htmlspecialchars($row['FACULTY_LNAME'].', '.$row['FACULTY_FNAME'].
-                  (!empty($row['FACULTY_INITIAL'])?' '.$row['FACULTY_INITIAL']:''))
-              ?>">
+              data-id="<?= (int)$row['FACULTY_ID']; ?>">
               Read More
             </button>
           </div>
@@ -220,6 +222,29 @@ $total = count($rows);
       <?php endforeach; ?>
     </div>
   <?php endif; ?>
+  
+  <div class="pagination">
+    <?php
+    $queryParams = $_GET;
+    foreach (['page'] as $skip) unset($queryParams[$skip]);
+    $baseQuery = http_build_query($queryParams);
+    $baseUrl = '?' . ($baseQuery ? $baseQuery . '&' : '');
+    ?>
+
+    <?php if ($page > 1): ?>
+      <a href="<?= $baseUrl ?>page=<?= $page - 1 ?>" class="page-btn">Previous</a>
+    <?php endif; ?>
+
+    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+      <a href="<?= $baseUrl ?>page=<?= $i ?>" class="page-btn <?= $i === $page ? 'active' : '' ?>"><?= $i ?></a>
+    <?php endfor; ?>
+
+    <?php if ($page < $totalPages): ?>
+      <a href="<?= $baseUrl ?>page=<?= $page + 1 ?>" class="page-btn">Next</a>
+    <?php endif; ?>
+  </div>
+
+
 </section>
 
 <?php require_once __DIR__ . '/../partials/site_footer.php'; ?>
