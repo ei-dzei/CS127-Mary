@@ -5,11 +5,57 @@ if (session_status() === PHP_SESSION_NONE) {
 
 require_once __DIR__ . '/../config/db.php';
 
-/** ---------- Helpers ---------- */
-function is_admin(): bool {
-  return !empty($_SESSION['admin_user']);
+/** ---------- URL & Redirect Helpers---------- */
+
+/**
+ * Returns scheme://host
+ */
+function http_origin(): string {
+  $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+  $host   = $_SERVER['HTTP_HOST'] ?? 'localhost';
+  return $scheme . '://' . $host;
 }
 
+/**
+ * Returns the app's root path portion derived from SCRIPT_NAME.
+ */
+function app_root_path(): string {
+  $script = $_SERVER['SCRIPT_NAME'] ?? '/';
+  $dirOfScript = rtrim(dirname($script), '/\\');
+  if (preg_match('~/admin$~', $dirOfScript)) {
+    return rtrim(dirname($dirOfScript), '/\\');
+  }
+  return $dirOfScript === '/' ? '' : $dirOfScript;
+}
+
+/**
+ * Build a full absolute URL for a given app-relative $path.
+ */
+function app_url(string $path = ''): string {
+  $origin = http_origin();
+
+  if ($path === '') {
+    return $origin . (app_root_path() ?: '/');
+  }
+
+  if ($path[0] === '/') {
+    $root = app_root_path();
+    return $origin . ($root ? $root : '') . $path;
+  }
+
+  $base = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/'), '/\\');
+  return $origin . ($base === '/' ? '' : $base) . '/' . $path;
+}
+
+/**
+ * Safe redirect
+ */
+function redirect_to(string $path): void {
+  header('Location: ' . app_url($path));
+  exit;
+}
+
+/** ---------- Path Helpers ---------- */
 function current_path(): string {
   $uri = $_SERVER['REQUEST_URI'] ?? '/';
   $path = parse_url($uri, PHP_URL_PATH) ?: '/';
@@ -18,7 +64,12 @@ function current_path(): string {
 
 function in_admin_area(): bool {
   $path = current_path();
-  return substr($path, 0, 7) === '/admin/';
+  return (bool)preg_match('~/admin(/|$)~', $path);
+}
+
+/** ---------- Auth Helpers ---------- */
+function is_admin(): bool {
+  return !empty($_SESSION['admin_user']);
 }
 
 /** ---------- CSRF ---------- */
