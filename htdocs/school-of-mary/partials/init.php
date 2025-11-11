@@ -5,10 +5,8 @@ if (session_status() === PHP_SESSION_NONE) {
 
 require_once __DIR__ . '/../config/db.php';
 
-/** ---------- URL & Redirect Helpers---------- */
-
 /**
- * Returns scheme://host
+ * Returns scheme://host (no path).
  */
 function http_origin(): string {
   $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
@@ -17,41 +15,67 @@ function http_origin(): string {
 }
 
 /**
- * Returns the app's root path portion derived from SCRIPT_NAME.
+ * Returns the app base path
  */
-function app_root_path(): string {
-  $script = $_SERVER['SCRIPT_NAME'] ?? '/';
-  $dirOfScript = rtrim(dirname($script), '/\\');
-  if (preg_match('~/admin$~', $dirOfScript)) {
-    return rtrim(dirname($dirOfScript), '/\\');
+function app_base(): string {
+  static $base = null;
+  if ($base !== null) return $base;
+
+  $env = getenv('SOM_APP_BASE');
+  if (is_string($env) && $env !== '') {
+    $env = '/' . ltrim($env, '/');
+    $env = rtrim($env, '/');
+    $base = $env === '' ? '/' : $env;
+    return $base;
   }
-  return $dirOfScript === '/' ? '' : $dirOfScript;
+
+  // Default hardcoded base (project folder)
+  $base = '/school-of-mary';
+  return $base;
 }
 
 /**
- * Build a full absolute URL for a given app-relative $path.
+ * Build a FULL absolute URL
  */
 function app_url(string $path = ''): string {
+  // Pass through full URLs
+  if (preg_match('~^https?://~i', $path)) {
+    return $path;
+  }
+
   $origin = http_origin();
+  $base   = app_base();
 
-  if ($path === '') {
-    return $origin . (app_root_path() ?: '/');
+  if ($path === '' || $path === '/') {
+    return $origin . $base . '/';
   }
 
-  if ($path[0] === '/') {
-    $root = app_root_path();
-    return $origin . ($root ? $root : '') . $path;
+  // Ensure single slash between base and path
+  if ($path[0] !== '/') {
+    $path = '/' . $path;
   }
-
-  $base = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/'), '/\\');
-  return $origin . ($base === '/' ? '' : $base) . '/' . $path;
+  return $origin . $base . $path;
 }
 
 /**
- * Safe redirect
+ * Build a RELATIVE app path
+ */
+function app_path(string $path = ''): string {
+  $base = app_base();
+  if ($path === '' || $path === '/') return $base . '/';
+  if ($path[0] !== '/') $path = '/' . $path;
+  return $base . $path;
+}
+
+/**
+ * Safe redirect.
  */
 function redirect_to(string $path): void {
-  header('Location: ' . app_url($path));
+  if (preg_match('~^https?://~i', $path)) {
+    header('Location: ' . $path);
+  } else {
+    header('Location: ' . app_url($path));
+  }
   exit;
 }
 
@@ -64,7 +88,12 @@ function current_path(): string {
 
 function in_admin_area(): bool {
   $path = current_path();
-  return (bool)preg_match('~/admin(/|$)~', $path);
+  $base = app_base();
+  if (strpos($path, $base) === 0) {
+    $path = substr($path, strlen($base));
+    if ($path === false) $path = '/';
+  }
+  return (bool)preg_match('~^/admin(/|$)~', $path);
 }
 
 /** ---------- Auth Helpers ---------- */

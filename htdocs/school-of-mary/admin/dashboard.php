@@ -16,21 +16,20 @@ function get_page(string $param): int {
 }
 $PAGE_SIZE = 10;
 
+/** Build a label for a faculty row given the ID */
 function faculty_label(PDO $pdo, int $facultyId): string {
-  $stmt = $pdo->prepare("SELECT * FROM FACULTY WHERE FACULTY_ID = ?");
+  $stmt = $pdo->prepare("SELECT FACULTY_FNAME, FACULTY_INITIAL, FACULTY_LNAME FROM FACULTY WHERE FACULTY_ID = ?");
   $stmt->execute([$facultyId]);
-  $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
-
-  foreach (['FACULTY_NAME','NAME','FULL_NAME'] as $c) {
-    if (isset($row[$c]) && trim((string)$row[$c]) !== '') return trim((string)$row[$c]);
-  }
-  $first = isset($row['FIRST_NAME']) ? trim((string)$row['FIRST_NAME']) : '';
-  $mid   = isset($row['MIDDLE_NAME']) ? trim((string)$row['MIDDLE_NAME']) : '';
-  $last  = isset($row['LAST_NAME']) ? trim((string)$row['LAST_NAME']) : '';
-  $label = trim($first . ' ' . ($mid !== '' ? mb_substr($mid, 0, 1) . '. ' : '') . $last);
-  return $label !== '' ? $label : ('Faculty #' . $facultyId);
+  $row = $stmt->fetch(PDO::FETCH_ASSOC);
+  if (!$row) return 'Faculty #'.$facultyId;
+  $first = trim((string)($row['FACULTY_FNAME'] ?? ''));
+  $init  = trim((string)($row['FACULTY_INITIAL'] ?? ''));
+  $last  = trim((string)($row['FACULTY_LNAME'] ?? ''));
+  $name = trim($last . ', ' . $first . ($init !== '' ? ' ' . $init : ''));
+  return $name !== '' ? $name : 'Faculty #'.$facultyId;
 }
 
+/** Fetch a page of audit rows with robust column aliasing */
 function fetch_audit_page(PDO $pdo, int $limit, int $offset): array {
   $idCandidates   = ['ID', 'id', 'log_id', 'audit_id'];
   $timeCandidates = ['CREATED_AT', 'created_at', 'logged_at', 'timestamp', 'createdOn'];
@@ -122,7 +121,6 @@ $audit      = fetch_audit_page($pdo, $PAGE_SIZE, $log_offset);
 
 require_once __DIR__ . '/../partials/site_header.php';
 ?>
-
 <style>
   /* Grid */
   .dash-wrap {
@@ -148,7 +146,7 @@ require_once __DIR__ . '/../partials/site_header.php';
     border-radius: 14px;
     box-shadow: 0 1px 2px rgba(0,0,0,.04);
     padding: 18px;
-    min-height: 160px;    
+    min-height: 160px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -205,7 +203,6 @@ require_once __DIR__ . '/../partials/site_header.php';
   @media (max-width: 960px) {
     .kpi-col { grid-column: span 12; }
   }
-  /* Cards (lift + shadow on hover) */
   .kpi-card,
   .section-card,
   .hero-card {
@@ -218,29 +215,23 @@ require_once __DIR__ . '/../partials/site_header.php';
     box-shadow: 0 6px 18px rgba(0,0,0,.08);
     border-color: #dfe7f3;
   }
-  /* Buttons */
   .btn-link {
     transition: filter .2s ease, transform .06s ease, box-shadow .15s ease;
   }
   .btn-link:hover { filter: brightness(.94); box-shadow: 0 4px 10px rgba(0,0,0,.06); }
   .btn-link:active { transform: translateY(1px); }
-  /* Lists (row highlight) */
   .list tr { transition: background-color .12s ease; }
   .list tbody tr:hover { background: #f7fbff; }
-  /* Pager (pill hover) */
   .pager a {
     transition: background-color .15s ease, color .15s ease, border-color .15s ease, transform .06s ease;
   }
   .pager a:hover { background: #e8f0fb; border-color: #c7d5ef; }
   .pager a:active { transform: translateY(1px); }
-  /* Focus states */
-  .btn-link:focus,
-  .pager a:focus {
+  .btn-link:focus, .pager a:focus {
     outline: 2px solid #234b7a;
     outline-offset: 2px;
   }
-  .kpi-card:focus-within,
-  .section-card:focus-within {
+  .kpi-card:focus-within, .section-card:focus-within {
     box-shadow: 0 0 0 2px #c7d5ef inset, 0 6px 18px rgba(0,0,0,.08);
   }
   @media (prefers-reduced-motion: reduce) {
@@ -262,7 +253,7 @@ require_once __DIR__ . '/../partials/site_header.php';
       <div>
         <div class="kpi-emoji">👩‍🏫</div>
         <div class="kpi-title">Faculty</div>
-        <div class="kpi-value"><?= number_format($kpi['faculty']); ?></div>
+        <div class="kpi-value" id="kpi-faculty"><?= number_format($kpi['faculty']); ?></div>
       </div>
       <a class="btn-link" href="<?= app_url('/admin/crud/faculty.php'); ?>">Manage</a>
     </div>
@@ -271,7 +262,7 @@ require_once __DIR__ . '/../partials/site_header.php';
       <div>
         <div class="kpi-emoji">📚</div>
         <div class="kpi-title">Research</div>
-        <div class="kpi-value"><?= number_format($kpi['research']); ?></div>
+        <div class="kpi-value" id="kpi-research"><?= number_format($kpi['research']); ?></div>
       </div>
       <a class="btn-link" href="<?= app_url('/admin/crud/research.php'); ?>">Manage</a>
     </div>
@@ -280,16 +271,16 @@ require_once __DIR__ . '/../partials/site_header.php';
       <div>
         <div class="kpi-emoji">🏢</div>
         <div class="kpi-title">Agencies</div>
-        <div class="kpi-value"><?= number_format($kpi['agencies']); ?></div>
+        <div class="kpi-value" id="kpi-agencies"><?= number_format($kpi['agencies']); ?></div>
       </div>
-      <a class="btn-link" href<?= '"'.app_url('/admin/crud/agency.php').'"'; ?>>Manage</a>
+      <a class="btn-link" href="<?= app_url('/admin/crud/agency.php'); ?>">Manage</a>
     </div>
 
     <div class="kpi-card kpi-col">
       <div>
         <div class="kpi-emoji">💰</div>
         <div class="kpi-title">Fundings</div>
-        <div class="kpi-value"><?= number_format($kpi['funding']); ?></div>
+        <div class="kpi-value" id="kpi-funding"><?= number_format($kpi['funding']); ?></div>
       </div>
       <a class="btn-link" href="<?= app_url('/admin/crud/funding.php'); ?>">Manage</a>
     </div>
@@ -298,7 +289,7 @@ require_once __DIR__ . '/../partials/site_header.php';
       <div>
         <div class="kpi-emoji">✅</div>
         <div class="kpi-title">Assignments</div>
-        <div class="kpi-value"><?= number_format($kpi['assignment']); ?></div>
+        <div class="kpi-value" id="kpi-assignment"><?= number_format($kpi['assignment']); ?></div>
       </div>
       <a class="btn-link" href="<?= app_url('/admin/crud/assignment.php'); ?>">Manage</a>
     </div>
@@ -461,5 +452,36 @@ require_once __DIR__ . '/../partials/site_header.php';
 
   </div>
 </section>
+
+<!-- KPI auto-refresh via /admin/api/dashboard_stats.php -->
+<script>
+(function(){
+  const ENDPOINT = "<?= app_url('/admin/api/dashboard_stats.php'); ?>";
+  const el = {
+    fac:  document.getElementById('kpi-faculty'),
+    res:  document.getElementById('kpi-research'),
+    ag:   document.getElementById('kpi-agencies'),
+    fund: document.getElementById('kpi-funding'),
+    asg:  document.getElementById('kpi-assignment')
+  };
+  function number(n){ return (Number(n)||0).toLocaleString(); }
+  async function refreshKPIs(){
+    try {
+      const r = await fetch(ENDPOINT, { credentials: 'same-origin' });
+      if (!r.ok) return;
+      const d = await r.json();
+      if (d && d.kpi) {
+        if (el.fac)  el.fac.textContent  = number(d.kpi.faculty);
+        if (el.res)  el.res.textContent  = number(d.kpi.research);
+        if (el.ag)   el.ag.textContent   = number(d.kpi.agencies);
+        if (el.fund) el.fund.textContent = number(d.kpi.funding);
+        if (el.asg)  el.asg.textContent  = number(d.kpi.assignment);
+      }
+    } catch(e){ /* silent */ }
+  }
+  refreshKPIs();
+  setInterval(refreshKPIs, 60000);
+})();
+</script>
 
 <?php require_once __DIR__ . '/../partials/site_footer.php'; ?>

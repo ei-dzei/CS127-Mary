@@ -1,12 +1,29 @@
 <?php
 // Printable audit log
 $pageTitle = 'Audit Log (Print View)';
-require_once __DIR__ . '/../partials/site_header.php';
 
-if (!is_admin()) {
-  header('Location: /admin/login.php');
-  exit;
+// Core first (sessions, DB, helpers)
+require_once __DIR__ . '/../partials/init.php';
+
+if (!is_admin()) { redirect_to('/admin/login.php'); }
+
+// Resolve audit table PK/timestamp columns and alias them
+function audit_resolve_cols(PDO $pdo): array {
+  $idCandidates   = ['ID','id','log_id','audit_id'];
+  $timeCandidates = ['CREATED_AT','created_at','logged_at','timestamp','createdOn'];
+
+  foreach ($idCandidates as $idCol) {
+    foreach ($timeCandidates as $tCol) {
+      try {
+        $pdo->query("SELECT {$idCol} AS ID, {$tCol} AS CREATED_AT FROM AUDIT_LOG ORDER BY {$idCol} DESC LIMIT 1");
+        return [$idCol, $tCol]; // works
+      } catch (Throwable $e) { /* try next */ }
+    }
+  }
+  // Fallback
+  return ['ID', 'CREATED_AT'];
 }
+[$AUDIT_ID, $AUDIT_TIME] = audit_resolve_cols($pdo);
 
 /* --- Filters --- */
 $actor = trim($_GET['actor'] ?? '');
@@ -15,33 +32,31 @@ $table = trim($_GET['table'] ?? '');      // FACULTY/RESEARCH/AGENCY/FUNDING/ASS
 $from  = trim($_GET['from'] ?? '');       // YYYY-MM-DD
 $to    = trim($_GET['to'] ?? '');         // YYYY-MM-DD
 
-$sql = "SELECT ID, CREATED_AT, ACTOR, ACTION_ENUM, TABLE_NAME, PK_VALUE
-        FROM AUDIT_LOG
-        WHERE 1=1";
+$sql = "
+  SELECT {$AUDIT_ID} AS ID, {$AUDIT_TIME} AS CREATED_AT, ACTOR, ACTION_ENUM, TABLE_NAME, PK_VALUE
+  FROM AUDIT_LOG
+  WHERE 1=1
+";
 $params = [];
 
-if ($actor !== '') { $sql .= " AND ACTOR LIKE ?"; $params[] = "%$actor%"; }
-if ($action !== '') { $sql .= " AND ACTION_ENUM = ?"; $params[] = $action; }
-if ($table !== '') { $sql .= " AND TABLE_NAME = ?";   $params[] = $table; }
+if ($actor !== '') { $sql .= " AND ACTOR LIKE ?";        $params[] = "%$actor%"; }
+if ($action !== '') { $sql .= " AND ACTION_ENUM = ?";    $params[] = $action; }
+if ($table !== '') { $sql .= " AND TABLE_NAME = ?";      $params[] = $table; }
+if ($from  !== '') { $sql .= " AND DATE({$AUDIT_TIME}) >= ?"; $params[] = $from; }
+if ($to    !== '') { $sql .= " AND DATE({$AUDIT_TIME}) <= ?"; $params[] = $to; }
 
-if ($from !== '') {
-  $sql .= " AND DATE(CREATED_AT) >= ?";
-  $params[] = $from;
-}
-if ($to !== '') {
-  $sql .= " AND DATE(CREATED_AT) <= ?";
-  $params[] = $to;
-}
-
-$sql .= " ORDER BY ID DESC LIMIT 500"; // cap to 500 for print
+$sql .= " ORDER BY {$AUDIT_ID} DESC LIMIT 500"; // cap to 500 for print
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
-$rows = $stmt->fetchAll();
+$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Utility: options for selects
-$tables = ['FACULTY','RESEARCH','AGENCY','FUNDING','ASSIGNMENT'];
-$actions = ['CREATE','UPDATE','DELETE'];
+$tables  = ['FACULTY','RESEARCH','AGENCY','FUNDING','ASSIGNMENT'];
+$actions = ['CREATE','UPDATE','DELETE','IMPORT'];
+
+// Include header AFTER all logic
+require_once __DIR__ . '/../partials/site_header.php';
 ?>
 
 <!-- Screen-only filter panel (hidden when printing by print.css) -->
@@ -85,7 +100,7 @@ $actions = ['CREATE','UPDATE','DELETE'];
       <button class="btn">Apply</button>
     </div>
     <div class="field" style="grid-column:span 1; display:flex; align-items:flex-end;">
-      <a class="btn" href="/admin/audit_print.php" style="background:#234b7a;">Clear</a>
+      <a class="btn" href="<?php echo app_url('/admin/audit_print.php'); ?>" style="background:#234b7a;">Clear</a>
     </div>
   </form>
 </section>

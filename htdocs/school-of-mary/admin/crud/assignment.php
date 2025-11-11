@@ -94,12 +94,12 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 require_once __DIR__ . '/../../partials/site_header.php';
 ?>
 
-<section class="panel fade-in">
+<section class="panel fade-in crud-header-card">
   <h1 style="margin-bottom:8px;">Assignments</h1>
   <p class="muted" style="margin-bottom:8px;">Manage who is assigned to which research and in what role. CSV import/export below.</p>
 
   <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
-    <a class="btn small" href="<?= app_url('/admin/api/export.php?table=ASSIGNMENT'); ?>">Export CSV</a>
+    <a class="btn small" href="<?= app_url('/admin/api/export.php'); ?>?table=ASSIGNMENT">Export CSV</a>
     <form method="post" action="<?= app_url('/admin/api/import.php'); ?>" enctype="multipart/form-data" style="display:inline-flex; gap:6px;">
       <input type="hidden" name="table" value="ASSIGNMENT">
       <input class="input" type="file" name="file" accept=".csv" required>
@@ -116,7 +116,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
   </form>
 </section>
 
-<section class="panel" style="margin-bottom:16px;">
+<section class="panel crud-form-card" style="margin-bottom:16px;">
   <h3 style="margin-top:0">Create Assignment</h3>
   <form method="post" class="grid">
     <input type="hidden" name="csrf" value="<?php echo csrf_token(); ?>">

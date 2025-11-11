@@ -1,6 +1,6 @@
 <?php
 // CSV Import endpoint (admin only)
-require_once __DIR__ . '/../../partials/site_header.php';
+require_once __DIR__ . '/../../partials/init.php';
 
 if (!is_admin()) {
   http_response_code(403);
@@ -54,7 +54,7 @@ if (!$header) {
   exit;
 }
 
-// Validate header (must contain only allowed columns; order can vary)
+// Validate header
 $header = array_map('trim', $header);
 foreach ($header as $h) {
   if (!in_array($h, $cols, true)) {
@@ -65,27 +65,23 @@ foreach ($header as $h) {
 }
 
 // Build INSERT statement using provided columns
-$insertCols = $header;
+$insertCols   = $header;
 $placeholders = array_map(fn() => '?', $insertCols);
 $sql = "INSERT INTO $table (" . implode(',', $insertCols) . ") VALUES (" . implode(',', $placeholders) . ")";
 $stmt = $pdo->prepare($sql);
 
 // Basic validators for a few fields
-function valid_email($s) {
-  return (bool)filter_var($s, FILTER_VALIDATE_EMAIL);
-}
-function normalize_empty($v) {
-  $v = trim($v);
-  return ($v === '' ? null : $v);
-}
+function valid_email($s) { return (bool)filter_var($s, FILTER_VALIDATE_EMAIL); }
+function normalize_empty($v) { $v = trim((string)$v); return ($v === '' ? null : $v); }
 
 $pdo->beginTransaction();
-
 $line = 1;
 $inserted = 0;
+
 try {
   while (($row = fgetcsv($fh)) !== false) {
     $line++;
+
     // map row to assoc by header
     $data = [];
     foreach ($header as $i => $colName) {
@@ -138,9 +134,7 @@ try {
 
     // Build a values array matching $insertCols
     $values = [];
-    foreach ($insertCols as $c) {
-      $values[] = $data[$c] ?? null;
-    }
+    foreach ($insertCols as $c) { $values[] = $data[$c] ?? null; }
 
     $stmt->execute($values);
     $inserted++;
@@ -149,12 +143,13 @@ try {
   $pdo->commit();
   fclose($fh);
 
-  // Audit trail
+  // Audit trail (mark imports explicitly)
   $pdo->prepare("INSERT INTO AUDIT_LOG (ACTOR,ACTION_ENUM,TABLE_NAME,PK_VALUE) VALUES (?,?,?,?)")
       ->execute([$_SESSION['admin_user'], 'IMPORT', $table, $inserted]);
 
   header('Content-Type: application/json');
   echo json_encode(['ok' => true, 'inserted' => $inserted]);
+  exit;
 
 } catch (Throwable $e) {
   $pdo->rollBack();
@@ -162,4 +157,5 @@ try {
   http_response_code(400);
   header('Content-Type: application/json');
   echo json_encode(['ok' => false, 'error' => $e->getMessage(), 'line' => $line]);
+  exit;
 }

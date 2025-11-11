@@ -1,6 +1,7 @@
 <?php
 // Dashboard stats (admin only)
-require_once __DIR__ . '/../../partials/site_header.php';
+require_once __DIR__ . '/../../partials/init.php';
+
 header('Content-Type: application/json');
 
 if (!is_admin()) {
@@ -24,7 +25,7 @@ $byStatus = $pdo->query("
   FROM RESEARCH
   GROUP BY RESEARCH_STATUS
   ORDER BY cnt DESC
-")->fetchAll();
+")->fetchAll(PDO::FETCH_ASSOC);
 
 // Funding per month (last 12 months)
 $fundingMonthly = $pdo->query("
@@ -35,7 +36,7 @@ $fundingMonthly = $pdo->query("
         AND DATE_FUNDED >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
   GROUP BY ym
   ORDER BY ym ASC
-")->fetchAll();
+")->fetchAll(PDO::FETCH_ASSOC);
 
 // Top departments by faculty count
 $deptTop = $pdo->query("
@@ -45,7 +46,7 @@ $deptTop = $pdo->query("
   GROUP BY d.DEPT_ID
   ORDER BY cnt DESC
   LIMIT 6
-")->fetchAll();
+")->fetchAll(PDO::FETCH_ASSOC);
 
 // Most funded research (top 5)
 $topResearch = $pdo->query("
@@ -56,7 +57,7 @@ $topResearch = $pdo->query("
   GROUP BY re.RESEARCH_ID
   ORDER BY total DESC
   LIMIT 5
-")->fetchAll();
+")->fetchAll(PDO::FETCH_ASSOC);
 
 echo json_encode([
   'kpi'            => $kpi,
@@ -66,3 +67,4 @@ echo json_encode([
   'topResearch'    => $topResearch,
   'generatedAt'    => date('c'),
 ]);
+exit;

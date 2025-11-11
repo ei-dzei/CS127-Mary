@@ -806,3 +806,56 @@ th {
   .actions-cell select[style*="width:140px"] { width: 120px !important; }
 }
 .table-scroll { overflow-x: auto; }
+
+/* =========================================================
+   CRUD HEADER + FORM CARDS
+   ========================================================= */
+.crud-header-card {
+  background: #fff !important;
+  border: 1px solid rgba(11,83,148,0.20) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 20px 35px rgba(11,83,148,0.08), 0 2px 4px rgba(0,0,0,0.04) !important;
+  padding: 22px 20px !important;
+}
+.crud-header-card h1 {
+  margin: 0 0 6px;
+  font-family: 'Patua One', serif;
+  color: var(--color-primary);
+}
+.crud-header-card .muted {
+  color: #374151;
+  margin-bottom: 10px;
+}
+.crud-header-card .grid {
+  align-items: end;
+}
+.crud-header-card .input,
+.crud-header-card select,
+.crud-header-card input[type="date"] {
+  border-radius: 10px;
+  height: 42px;
+}
+.crud-form-card {
+  background: #fff !important;
+  border: 1px solid rgba(11,83,148,0.20) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 20px 35px rgba(11,83,148,0.08), 0 2px 4px rgba(0,0,0,0.04) !important;
+  padding: 22px 20px !important;
+}
+.crud-form-card h3 {
+  margin: 0 0 12px;
+  font-family: 'Patua One', serif;
+  color: var(--color-primary);
+}
+.crud-form-card .input,
+.crud-form-card select,
+.crud-form-card input[type="date"] {
+  border-radius: 10px;
+  height: 42px;
+}
+@media (min-width: 900px) {
+  .crud-header-card .grid,
+  .crud-form-card .grid {
+    gap: 14px;
+  }
+}
