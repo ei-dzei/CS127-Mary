@@ -40,5 +40,7 @@
 <!-- Print stylesheet -->
 <link rel="stylesheet" href="<?= BASE_URL ?>/assets/print.css" media="print" />
 
+<script src="<?= BASE_URL ?>/assets/app.js" defer></script>
+
 </body>
 </html>
