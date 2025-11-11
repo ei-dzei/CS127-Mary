@@ -69,26 +69,30 @@ require_once __DIR__ . '/../partials/site_header.php';
 </section>
 
 <!-- About us -->
-<section class="fade-in" style="margin-top: 2rem;">
-  <div class="panel" style="text-align: left;">
-    <h2 style="font-family: 'Patua One', serif;">About the Portal</h2>
-    <p>
-      The <strong>School of Mary Research Portal</strong> provides a unified system for managing 
-      research, faculty information, funding records, and agencies involved in academic collaboration.
-      While the general public can browse and view data, administrators can securely log in to manage 
+<section class="feature">
+  <div class="feature-card">
+    <div class="feature-icon" aria-hidden="true">🏫</div>
+    <h2 class="feature-title">About the Portal</h2>
+    <p class="feature-text">
+      The <strong>School of Mary Research Portal</strong> provides a unified system for managing research,
+      faculty information, funding records, and agencies involved in academic collaboration.
+      While the general public can browse and view data, administrators can securely log in to manage
       records, ensuring accurate and up-to-date information.
     </p>
   </div>
 </section>
 
-<section class="fade-in" style="margin-top: 2rem;">
-  <div class="panel" style="text-align: left;">
-    <h2 style="font-family: 'Patua One', serif;">Admin Access</h2>
-    <p>
+<section class="feature">
+  <div class="feature-card">
+    <div class="feature-icon" aria-hidden="true">🛡️</div>
+    <h2 class="feature-title">Admin Access</h2>
+    <p class="feature-text">
       Authorized staff may log in to the Admin Dashboard to view and manage database records in real time.
       The dashboard includes tools for CRUD operations, CSV imports/exports, and printable audit logs.
     </p>
-    <a href="<?= BASE_URL ?>/admin/login.php" class="btn" style="margin-top: 1rem;">Go to Admin Login</a>
+    <div class="feature-actions">
+      <a href="<?= BASE_URL ?>/admin/login.php" class="btn btn--primary">Go to Admin Login</a>
+    </div>
   </div>
 </section>
 
