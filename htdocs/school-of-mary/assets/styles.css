@@ -696,6 +696,13 @@ th {
   display: flex; flex-wrap: wrap; gap: 8px;
 }
 
+.filterbar .input,
+.filterbar select,
+.filterbar input[type="date"] {
+  border-radius: 9999px;
+  background: #fff;
+}
+
 .chip {
   border-radius: 999px;
   background: #fff;
@@ -710,13 +717,21 @@ th {
 }
 
 .searchbox {
-  display: flex; align-items: center; gap: 10px;
-  background: #fff; border-radius: 9999px;
-  border: 1px solid #d9dee3; padding: 10px 14px;
+  display: flex; 
+  align-items: center; 
+  gap: 10px;
+  background: #fff; 
+  border-radius: 9999px;
+  border: 1px solid #d9dee3; 
+  padding: 10px 14px;
 }
+
 .searchbox input {
-  border: none; outline: none; flex: 1;
-  font-size: 15px; background: transparent;
+  border: none; 
+  outline: none; 
+  flex: 1;
+  font-size: 15px; 
+  background: transparent;
 }
 
 .cards {
@@ -724,6 +739,7 @@ th {
   grid-template-columns: repeat(12, 1fr);
   gap: 18px;
 }
+
 .card {
   grid-column: span 12;
   background: #fff;
@@ -733,25 +749,64 @@ th {
   box-shadow: 0 12px 28px rgba(11,83,148,.10);
   display: flex; flex-direction: column;
 }
+
 @media (min-width: 720px) {
   .card { grid-column: span 6; }
 }
+
 @media (min-width: 1040px) {
   .card { grid-column: span 4; }
 }
-.card__head { display: flex; gap: 12px; align-items: center; }
-.card__icon {
-  width: 52px; height: 52px; border-radius: 14px;
-  background: rgba(11,83,148,.10); display: grid; place-items: center; font-size: 22px; color: #0b5394;
+
+.card__head { 
+  display: flex; 
+  gap: 12px; 
+  align-items: center; 
 }
-.card__title { font-weight: 800; color: var(--color-primary); }
-.card__meta { color: #5a6676; font-size: 14px; margin: 4px 0 0; }
-.card__excerpt { color: #364152; margin: 10px 0 0; }
-.card__actions { display: flex; gap: 10px; margin-top: auto; }
+
+.card__icon {
+  width: 52px; 
+  height: 52px; 
+  border-radius: 14px;
+  background: rgba(11,83,148,.10); 
+  display: grid; 
+  place-items: center; 
+  font-size: 22px; 
+  color: #0b5394;
+}
+
+.card__title { 
+  font-weight: 800; 
+  color: var(--color-primary); 
+}
+
+.card__meta { 
+  color: #5a6676; 
+  font-size: 14px; 
+  margin: 4px 0 0; 
+}
+
+.card__excerpt { 
+  color: #364152; 
+  margin: 10px 0 0; 
+}
+
+.card__actions { 
+  display: flex; 
+  gap: 10px; 
+  margin-top: auto; 
+}
+
+.card .btn.small {
+  border-radius: 9999px;
+}
 
 .btn--ghost {
   background: transparent;
   color: var(--color-accent);
   border-color: rgba(11,83,148,.35);
 }
-.btn--ghost:hover { background: rgba(11,83,148,.06); }
+
+.btn--ghost:hover { 
+  background: rgba(11,83,148,.06); 
+}

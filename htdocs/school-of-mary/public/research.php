@@ -5,11 +5,10 @@ require_once __DIR__ . '/../partials/site_header.php';
 /* --- Lookups --- */
 $statuses = $pdo->query("SELECT STATUS_CODE, STATUS_LABEL FROM RESEARCH_STATUS ORDER BY STATUS_LABEL")->fetchAll();
 
-/* --- Detail view (?id=) --- */
+/* --- Detail view --- */
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 if ($id > 0) {
-  // main record
   $stmt = $pdo->prepare("
     SELECT re.*
     FROM RESEARCH re
@@ -20,7 +19,6 @@ if ($id > 0) {
   $research = $stmt->fetch();
 
   if ($research) {
-    // assigned faculty
     $as = $pdo->prepare("
       SELECT a.ASSIGNMENT_ID, a.DATE_ASSIGNED, a.ROLE_ID,
              f.FACULTY_ID, f.FACULTY_FNAME, f.FACULTY_INITIAL, f.FACULTY_LNAME,
@@ -34,7 +32,6 @@ if ($id > 0) {
     $as->execute([$id]);
     $people = $as->fetchAll();
 
-    // funding
     $fs = $pdo->prepare("
       SELECT fu.FUNDING_ID, fu.FUNDING_AMOUNT, fu.DATE_FUNDED,
              ag.AGENCY_ID, ag.AGENCY_NAME
@@ -56,68 +53,56 @@ if ($id > 0) {
     <?php if (!$research): ?>
       <h1>Research</h1>
       <p class="muted">Record not found.</p>
-      <p><a class="btn small" href="/public/research.php">Back to list</a></p>
+      <p><a class="btn small" href="<?= BASE_URL ?>/public/research.php">Back to list</a></p>
     <?php else: ?>
-      <a class="btn small" href="/public/research.php" style="float:right;margin-top:-4px;">← Back</a>
-      <h1 style="margin-bottom:6px">
-        <?php echo htmlspecialchars($research['RESEARCH_TITLE']); ?>
-      </h1>
+      <a class="btn small" href="<?= BASE_URL ?>/public/research.php" style="float:right;margin-top:-4px;">← Back</a>
+      <h1 style="margin-bottom:6px"><?= htmlspecialchars($research['RESEARCH_TITLE']); ?></h1>
       <div class="muted" style="margin-bottom:10px;">
-        <span class="pill" style="background:#eef4ff; border:1px solid #cdd8f0; padding:2px 8px; border-radius:999px;">
-          <?php echo htmlspecialchars($research['RESEARCH_STATUS']); ?>
-        </span>
-        <span style="margin-left:6px;">Start: <?php echo htmlspecialchars($research['RESEARCH_STARTDATE']); ?></span>
+        <span class="pill" style="background:#eef4ff; border:1px solid #cdd8f0; padding:2px 8px; border-radius:999px;"><?= htmlspecialchars($research['RESEARCH_STATUS']); ?></span>
+        <span style="margin-left:6px;">Start: <?= htmlspecialchars($research['RESEARCH_STARTDATE']); ?></span>
         <?php if ($research['RESEARCH_ENDDATE']) : ?>
-          <span style="margin-left:6px;">End: <?php echo htmlspecialchars($research['RESEARCH_ENDDATE']); ?></span>
+          <span style="margin-left:6px;">End: <?= htmlspecialchars($research['RESEARCH_ENDDATE']); ?></span>
         <?php endif; ?>
       </div>
 
       <div class="grid">
-        <!-- summary card -->
         <div class="panel" style="grid-column: span 6; background:#fff;">
           <h3 style="margin-top:0; font-family:'Patua One',serif;">Overview</h3>
           <div class="field">
             <label>Title</label>
-            <input class="input" value="<?php echo htmlspecialchars($research['RESEARCH_TITLE']); ?>" readonly />
+            <input class="input" value="<?= htmlspecialchars($research['RESEARCH_TITLE']); ?>" readonly />
           </div>
           <div class="grid">
             <div class="field" style="grid-column: span 6;">
               <label>Status</label>
-              <input class="input" value="<?php echo htmlspecialchars($research['RESEARCH_STATUS']); ?>" readonly />
+              <input class="input" value="<?= htmlspecialchars($research['RESEARCH_STATUS']); ?>" readonly />
             </div>
             <div class="field" style="grid-column: span 3;">
               <label>Start</label>
-              <input class="input" value="<?php echo htmlspecialchars($research['RESEARCH_STARTDATE']); ?>" readonly />
+              <input class="input" value="<?= htmlspecialchars($research['RESEARCH_STARTDATE']); ?>" readonly />
             </div>
             <div class="field" style="grid-column: span 3;">
               <label>End</label>
-              <input class="input" value="<?php echo htmlspecialchars($research['RESEARCH_ENDDATE'] ?? '—'); ?>" readonly />
+              <input class="input" value="<?= htmlspecialchars($research['RESEARCH_ENDDATE'] ?? '—'); ?>" readonly />
             </div>
           </div>
         </div>
 
-        <!-- funding summary -->
         <div class="panel" style="grid-column: span 6; background:#fff;">
           <h3 style="margin-top:0; font-family:'Patua One',serif;">Funding</h3>
           <div class="field" style="grid-column: span 6;">
             <label>Total Funding</label>
-            <input class="input" value="<?php echo '₱' . number_format($totalFunding, 2); ?>" readonly />
+            <input class="input" value="<?= '₱' . number_format($totalFunding, 2); ?>" readonly />
           </div>
           <?php if ($funds): ?>
             <table style="margin-top:8px;">
-              <thead>
-                <tr>
-                  <th>Agency</th>
-                  <th>Amount</th>
-                  <th>Date Funded</th>
-                </tr>
-              </thead>
+              <thead><tr><th>Agency</th><th>Amount</th><th>Date Funded</th></tr></thead>
               <tbody>
                 <?php foreach ($funds as $f): ?>
                   <tr>
-                    <td><?php echo htmlspecialchars($f['AGENCY_NAME']); ?></td>
-                    <td><?php echo $f['FUNDING_AMOUNT'] !== null ? '₱'.number_format($f['FUNDING_AMOUNT'],2) : '—'; ?></td>
-                    <td><?php echo htmlspecialchars($f['DATE_FUNDED'] ?? '—'); ?></td>
+                    <td><?= htmlspecialchars($f['AGENCY_NAME']); ?></td>
+                    <td><?= $f['FUNDING_AMOUNT'] !== null ? '₱'.number_format($f['FUNDING_AMOUNT'],2) : '—'; ?></td>
+                    <td><?= htmlspecialchars($f['DATE_FUNDED'] ?? '—'); ?></td>
                   </tr>
                 <?php endforeach; ?>
               </tbody>
@@ -134,9 +119,7 @@ if ($id > 0) {
       <?php else: ?>
         <div class="grid" style="gap:12px;">
           <?php foreach ($people as $p): ?>
-            <a class="panel slide-up"
-               href="/public/faculty.php?id=<?php echo (int)$p['FACULTY_ID']; ?>"
-               style="grid-column: span 6; text-decoration:none; color:inherit;">
+            <a class="panel slide-up" href="<?= BASE_URL ?>/public/faculty.php?id=<?= (int)$p['FACULTY_ID']; ?>" style="grid-column: span 6; text-decoration:none; color:inherit;">
               <h3 style="margin-top:0">
                 <?php
                   echo htmlspecialchars($p['FACULTY_LNAME'].', '.$p['FACULTY_FNAME']);
@@ -144,18 +127,16 @@ if ($id > 0) {
                 ?>
               </h3>
               <div class="muted" style="font-size:.95rem; margin-top:4px;">
-                <?php echo htmlspecialchars($p['RANK_DESCRIPTION']); ?>
-                · Role: <?php echo htmlspecialchars($p['ROLE_ID']); ?>
-                · Assigned: <?php echo htmlspecialchars($p['DATE_ASSIGNED']); ?>
+                <?= htmlspecialchars($p['RANK_DESCRIPTION']); ?>
+                · Role: <?= htmlspecialchars($p['ROLE_ID']); ?>
+                · Assigned: <?= htmlspecialchars($p['DATE_ASSIGNED']); ?>
               </div>
             </a>
           <?php endforeach; ?>
         </div>
       <?php endif; ?>
-
     <?php endif; ?>
   </section>
-
   <?php
   require_once __DIR__ . '/../partials/site_footer.php';
   exit;
@@ -187,81 +168,93 @@ if ($from !== '') {
   $params[] = $from;
 }
 if ($to !== '') {
-  // include records that end by this date OR ongoing that started before or equal to
   $sql .= " AND (re.RESEARCH_ENDDATE <= ? OR (re.RESEARCH_ENDDATE IS NULL AND re.RESEARCH_STARTDATE <= ?))";
   $params[] = $to;
   $params[] = $to;
 }
-$sql .= " ORDER BY re.RESEARCH_STARTDATE DESC, re.RESEARCH_ID DESC LIMIT 36";
+$sql .= " ORDER BY re.RESEARCH_STARTDATE DESC, re.RESEARCH_ID DESC LIMIT 60";
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $rows = $stmt->fetchAll();
+$total = count($rows);
 ?>
 
-<section class="panel fade-in">
-  <h1 style="margin-bottom:8px;">Research</h1>
+<section class="container fade-in" style="margin-top:6px;">
+  <h1 style="margin-bottom:6px;">Research</h1>
   <p class="muted" style="margin-bottom:10px;">Browse research or refine using status and dates.</p>
 
-  <form method="get" class="grid" style="margin-bottom:8px;">
-    <div class="field" style="grid-column: span 5;">
-      <label>Title contains</label>
-      <input class="input" name="q" value="<?php echo htmlspecialchars($q); ?>" placeholder="e.g., AI, Climate, IoT..." />
+  <!-- Filter Bar -->
+  <form method="get" class="filterbar" style="margin-bottom:14px;">
+    <div class="searchbox">
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 18a8 8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/></svg>
+      <input name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search research titles…" />
     </div>
-    <div class="field" style="grid-column: span 3;">
-      <label>Status</label>
-      <select class="input" name="status">
-        <option value="">All</option>
-        <?php foreach ($statuses as $s): ?>
-          <option value="<?php echo htmlspecialchars($s['STATUS_CODE']); ?>"<?php if ($status===$s['STATUS_CODE']) echo ' selected'; ?>>
-            <?php echo htmlspecialchars($s['STATUS_LABEL']); ?>
-          </option>
-        <?php endforeach; ?>
-      </select>
-    </div>
-    <div class="field" style="grid-column: span 2;">
-      <label>Start from</label>
-      <input class="input" type="date" name="from" value="<?php echo htmlspecialchars($from); ?>" />
-    </div>
-    <div class="field" style="grid-column: span 2;">
-      <label>End by</label>
-      <input class="input" type="date" name="to" value="<?php echo htmlspecialchars($to); ?>" />
-    </div>
-    <div class="field" style="grid-column: span 12; display:flex; gap:8px; align-items:flex-end;">
-      <button class="btn">Apply</button>
-      <a class="btn" href="/public/research.php" style="background:#234b7a">Clear</a>
+
+    <div class="grid" style="grid-template-columns: repeat(12,1fr); gap:10px;">
+      <div class="field" style="grid-column: span 3;">
+        <label>Status</label>
+        <select class="input" name="status">
+          <option value="">All</option>
+          <?php foreach ($statuses as $s): ?>
+            <option value="<?= htmlspecialchars($s['STATUS_CODE']) ?>"<?= $status===$s['STATUS_CODE'] ? ' selected' : '' ?>>
+              <?= htmlspecialchars($s['STATUS_LABEL']) ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+
+      <div class="field" style="grid-column: span 3;">
+        <label>Start from</label>
+        <input class="input" type="date" name="from" value="<?= htmlspecialchars($from) ?>" />
+      </div>
+
+      <div class="field" style="grid-column: span 3;">
+        <label>End by</label>
+        <input class="input" type="date" name="to" value="<?= htmlspecialchars($to) ?>" />
+      </div>
+
+      <div class="field" style="grid-column: span 3; display:flex; align-items:flex-end; gap:8px;">
+        <button class="btn btn--primary" type="submit">Apply</button>
+        <a class="btn btn--ghost" href="<?= BASE_URL ?>/public/research.php">Clear</a>
+      </div>
     </div>
   </form>
-</section>
 
-<section class="container fade-in" style="margin-top:6px; margin-bottom:24px;">
+  <p class="muted" style="margin:6px 0 12px;">Showing <?= (int)$total ?> <?= $total===1 ? 'project' : 'projects' ?></p>
+
+  <!-- Cards -->
   <?php if (!$rows): ?>
     <div class="panel">No matching research.</div>
   <?php else: ?>
-    <div class="grid" style="gap:12px;">
+    <div class="cards">
       <?php foreach ($rows as $row): ?>
-        <div class="panel slide-up" style="grid-column: span 6;">
-          <h3 style="margin-top:0;"><?php echo htmlspecialchars($row['RESEARCH_TITLE']); ?></h3>
-          <div class="muted" style="font-size:.95rem; margin-top:4px;">
-            <span class="pill" style="background:#eef4ff; border:1px solid #cdd8f0; padding:2px 8px; border-radius:999px;">
-              <?php echo htmlspecialchars($row['RESEARCH_STATUS']); ?>
-            </span>
-            <span style="margin-left:6px;">
-              Start: <?php echo htmlspecialchars($row['RESEARCH_STARTDATE']); ?>
-              <?php if ($row['RESEARCH_ENDDATE']) echo " · End: ".htmlspecialchars($row['RESEARCH_ENDDATE']); ?>
-            </span>
+        <div class="card">
+          <div class="card__head">
+            <div class="card__icon">📄</div>
+            <div>
+              <div class="card__title"><?= htmlspecialchars($row['RESEARCH_TITLE']); ?></div>
+              <div class="card__meta">
+                <span class="pill" style="background:#eef4ff; border:1px solid #cdd8f0; padding:2px 8px; border-radius:999px;"><?= htmlspecialchars($row['RESEARCH_STATUS']); ?></span>
+                <span style="margin-left:6px;">Start: <?= htmlspecialchars($row['RESEARCH_STARTDATE']); ?>
+                  <?php if ($row['RESEARCH_ENDDATE']) echo " · End: ".htmlspecialchars($row['RESEARCH_ENDDATE']); ?>
+                </span>
+              </div>
+            </div>
           </div>
 
-          <button
-            class="btn small"
-            data-read-more
-            data-type="research"
-            data-id="<?php echo (int)$row['RESEARCH_ID']; ?>"
-            data-title="<?php echo htmlspecialchars($row['RESEARCH_TITLE']); ?>">
-            Read More
-          </button>
+          <div class="card__actions">
+            <a class="btn btn--ghost small" href="<?= BASE_URL ?>/public/research.php?id=<?= (int)$row['RESEARCH_ID'] ?>">Open</a>
+            <button
+              class="btn small"
+              data-read-more
+              data-type="research"
+              data-id="<?= (int)$row['RESEARCH_ID'] ?>"
+              data-title="<?= htmlspecialchars($row['RESEARCH_TITLE']) ?>">
+              Read More
+            </button>
+          </div>
         </div>
-
       <?php endforeach; ?>
     </div>
   <?php endif; ?>
