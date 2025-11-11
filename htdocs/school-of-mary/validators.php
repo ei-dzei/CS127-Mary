@@ -1,55 +1,23 @@
 <?php
-/* Validators used by admin CRUD */
+// Load sessions, DB, csrf_* and shared helpers
+require_once __DIR__ . '/partials/init.php';
 
-function guardFail($msg='Invalid input'){
-  http_response_code(400);
-  echo '<section class="panel"><h3>Error</h3><p class="muted">'.htmlspecialchars($msg).'</p><p><a class="btn" href="javascript:history.back()">Back</a></p></section>';
-  require_once __DIR__ . '/partials/site_footer.php';
-  exit;
-}
-
-function csrf_token(){
-  if (empty($_SESSION['csrf'])) $_SESSION['csrf'] = bin2hex(random_bytes(16));
-  return $_SESSION['csrf'];
-}
-
-function csrf_check(){
-  if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $in = $_POST['csrf'] ?? '';
-    $sess = $_SESSION['csrf'] ?? '';
-    if (!$in || !$sess || !hash_equals($sess, $in)) {
-      guardFail('Invalid request token. Please retry.');
-    }
+// Integer validator (used by CRUD pages)
+if (!function_exists('v_int')) {
+  function v_int($s): bool {
+    if (is_int($s)) return true;
+    if (is_string($s) && $s !== '' && preg_match('/^-?\d+$/', $s)) return true;
+    return filter_var($s, FILTER_VALIDATE_INT) !== false;
   }
 }
 
-function v_int($v){
-  return isset($v) && preg_match('/^\d+$/', (string)$v);
-}
-function v_decimal_nullable($v){
-  if ($v === '' || $v === null) return true;
-  return preg_match('/^\d+(\.\d{1,2})?$/', (string)$v);
-}
-function v_date($v){
-  if (!$v) return false;
-  $d = DateTime::createFromFormat('Y-m-d', $v);
-  return $d && $d->format('Y-m-d') === $v;
-}
-function v_date_nullable($v){
-  return ($v==='' || $v===null) ? true : v_date($v);
-}
-function v_varchar($v,$len){
-  return isset($v) && mb_strlen(trim($v))>0 && mb_strlen($v) <= $len;
-}
-function v_char_nullable($v,$len){
-  if ($v==='' || $v===null) return true;
-  return mb_strlen($v) <= $len;
-}
-function v_email($v){
-  return (bool)filter_var($v, FILTER_VALIDATE_EMAIL);
-}
-function v_enum_exists(PDO $pdo, $table, $col, $value){
-  $stmt = $pdo->prepare("SELECT 1 FROM $table WHERE $col = ? LIMIT 1");
-  $stmt->execute([$value]);
-  return (bool)$stmt->fetchColumn();
+if (!function_exists('guardFail')) {
+  function guardFail(string $msg): void {
+    http_response_code(422);
+    echo '<section class="panel" style="max-width:720px;margin:24px auto;background:#fff3f3;border:1px solid #f3c2c2;color:#7a1111;">';
+    echo '<h3 style="margin:0 0 8px;">Validation failed</h3>';
+    echo '<p style="margin:0;">' . htmlspecialchars($msg) . '</p>';
+    echo '</section>';
+    exit;
+  }
 }
