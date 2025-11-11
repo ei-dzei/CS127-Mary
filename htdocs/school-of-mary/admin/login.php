@@ -14,8 +14,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $pass = trim($_POST['password'] ?? '');
   $csrf = $_POST['csrf'] ?? '';
 //need to filter and sanitize 
-
-//check if empty
+  $user = filter_input(INPUT_POST, "username", FILTER_SANITIZE_SPECIAL_CHARS);
+  $password = filter_input(INPUT_POST, "password", FILTER_SANITIZE_SPECIAL_CHARS);
 
   if (!hash_equals($_SESSION['csrf'] ?? '', $csrf)) {
     $error = 'Invalid request. Please refresh and try again.';
