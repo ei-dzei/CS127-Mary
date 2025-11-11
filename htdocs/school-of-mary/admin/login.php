@@ -7,25 +7,32 @@ if (is_admin()) {
   header('Location: /admin/dashboard.php');
   exit;
 }
-
+//rhona
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $user = trim($_POST['username'] ?? '');
   $pass = trim($_POST['password'] ?? '');
   $csrf = $_POST['csrf'] ?? '';
+//need to filter and sanitize 
+
+//check if empty
 
   if (!hash_equals($_SESSION['csrf'] ?? '', $csrf)) {
     $error = 'Invalid request. Please refresh and try again.';
   } else {
     $ADMIN_USER = getenv('SOM_ADMIN_USER') ?: 'admin';
-    $ADMIN_PASS = getenv('SOM_ADMIN_PASS') ?: 'admin123'; //can be changed
+    $ADMIN_PASS = getenv('SOM_ADMIN_PASS') ?: 'admin123'; //can be changed //changeme in database though?
 
     if ($user === $ADMIN_USER && hash_equals($ADMIN_PASS, $pass)) {
       $_SESSION['admin_user'] = $user;
       header('Location: /admin/dashboard.php');
       exit;
     } else {
-      $error = 'Incorrect username or password.';
+      if(!($user === $ADMIN_USER)) {
+        $error = 'Incorrect username.';
+      } elseif (!(hash_equals($ADMIN_PASS, $pass))) {
+        $error = 'Incorrect password.';//shows at opening, if close tab dapat wala na
+      }
     }
   }
 }
@@ -55,8 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <div class="field" style="grid-column: span 12; display:flex; gap:8px;">
-      <button class="btn" type="submit">Sign In</button>
-      <a class="btn" href="/public/" style="background:#234b7a;">Back to Home</a>
+      <button class="btn" type="submit">Log In</button>
     </div>
   </form>
 </section>
