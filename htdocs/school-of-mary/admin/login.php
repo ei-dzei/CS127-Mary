@@ -7,7 +7,7 @@ if (is_admin()) {
   header('Location: /admin/dashboard.php');
   exit;
 }
-
+//rhona
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $user = trim($_POST['username'] ?? '');
