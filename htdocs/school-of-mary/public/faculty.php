@@ -6,17 +6,13 @@ require_once __DIR__ . '/../partials/site_header.php';
 $ranks = $pdo->query("SELECT RANK_ID, RANK_DESCRIPTION FROM `RANK` ORDER BY RANK_LEVEL")->fetchAll();
 $depts = $pdo->query("SELECT DEPT_ID, DEPT_SPECIALIZATION FROM DEPARTMENT ORDER BY DEPT_SPECIALIZATION")->fetchAll();
 
-/* --- Detail view --- */
+/* --- Detail view (if ?id=) --- */
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
-// Pagination setup
+/* --- Pagination setup --- */
 $perPage = 5;
-$page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
-$offset = ($page - 1) * $perPage;
-
-// Count total rows
-$totalRows = $pdo->query("SELECT COUNT(*) FROM FACULTY")->fetchColumn();
-$totalPages = ceil($totalRows / $perPage);
+$page    = (isset($_GET['page']) && is_numeric($_GET['page']) && (int)$_GET['page'] > 0) ? (int)$_GET['page'] : 1;
+$offset  = ($page - 1) * $perPage;
 
 if ($id > 0) {
   $stmt = $pdo->prepare("
@@ -26,7 +22,7 @@ if ($id > 0) {
     FROM FACULTY f
     JOIN `RANK` r ON r.RANK_ID = f.RANK_ID
     JOIN DEPARTMENT d ON d.DEPT_ID = f.DEPT_ID
-    WHERE f.FACULTY_ID=?
+    WHERE f.FACULTY_ID = ?
     LIMIT 1
   ");
   $stmt->execute([$id]);
@@ -38,7 +34,7 @@ if ($id > 0) {
              a.ROLE_ID
       FROM ASSIGNMENT a
       JOIN RESEARCH re ON re.RESEARCH_ID = a.RESEARCH_ID
-      WHERE a.FACULTY_ID=?
+      WHERE a.FACULTY_ID = ?
       ORDER BY re.RESEARCH_STARTDATE DESC
     ");
     $rs->execute([$id]);
@@ -80,7 +76,7 @@ if ($id > 0) {
       </div>
 
       <h2 style="font-family:'Patua One',serif; margin-top:16px;">Research Projects</h2>
-      <?php if (!$projects): ?>
+      <?php if (empty($projects)): ?>
         <div class="panel">No assignments found for this faculty.</div>
       <?php else: ?>
         <div class="grid" style="gap:12px">
@@ -91,7 +87,7 @@ if ($id > 0) {
                 <span class="pill" style="background:#eef4ff; border:1px solid #cdd8f0; padding:2px 8px; border-radius:999px;"><?= htmlspecialchars($p['RESEARCH_STATUS']); ?></span>
                 <span style="margin-left:6px;">
                   Start: <?= htmlspecialchars($p['RESEARCH_STARTDATE']); ?>
-                  <?php if ($p['RESEARCH_ENDDATE']) echo " · End: ".htmlspecialchars($p['RESEARCH_ENDDATE']); ?>
+                  <?php if (!empty($p['RESEARCH_ENDDATE'])) echo " · End: ".htmlspecialchars($p['RESEARCH_ENDDATE']); ?>
                 </span>
                 <span style="margin-left:6px;">Role: <?= htmlspecialchars($p['ROLE_ID']); ?></span>
               </div>
@@ -111,36 +107,61 @@ $q    = trim($_GET['q'] ?? '');
 $rank = trim($_GET['rank'] ?? '');
 $dept = trim($_GET['dept'] ?? '');
 
-$sql = "
-  SELECT f.FACULTY_ID, f.FACULTY_FNAME, f.FACULTY_INITIAL, f.FACULTY_LNAME, f.FACULTY_EMAIL,
-         r.RANK_DESCRIPTION, d.DEPT_SPECIALIZATION
+/* Build WHERE and bind parameters (all named) */
+$where  = " WHERE 1=1 ";
+$params = [];
+
+if ($q !== '') {
+  $where .= " AND (f.FACULTY_LNAME LIKE :q1 OR f.FACULTY_FNAME LIKE :q2 OR f.FACULTY_EMAIL LIKE :q3)";
+  $params[':q1'] = "%{$q}%";
+  $params[':q2'] = "%{$q}%";
+  $params[':q3'] = "%{$q}%";
+}
+if ($rank !== '') {
+  $where .= " AND f.RANK_ID = :rank";
+  $params[':rank'] = $rank;
+}
+if ($dept !== '') {
+  $where .= " AND f.DEPT_ID = :dept";
+  $params[':dept'] = $dept;
+}
+
+/* Count with the same filters (no ORDER/LIMIT) */
+$countSql = "
+  SELECT COUNT(*)
   FROM FACULTY f
   JOIN `RANK` r ON r.RANK_ID = f.RANK_ID
   JOIN DEPARTMENT d ON d.DEPT_ID = f.DEPT_ID
-  WHERE 1=1
+" . $where;
+
+$countStmt = $pdo->prepare($countSql);
+foreach ($params as $k => $v) { $countStmt->bindValue($k, $v); }
+$countStmt->execute();
+$totalRows  = (int)$countStmt->fetchColumn();
+$totalPages = (int)ceil($totalRows / $perPage);
+
+/* Paged SELECT using the same WHERE */
+$sql = "
+  SELECT
+    f.FACULTY_ID, f.FACULTY_FNAME, f.FACULTY_INITIAL, f.FACULTY_LNAME, f.FACULTY_EMAIL,
+    r.RANK_DESCRIPTION, d.DEPT_SPECIALIZATION
+  FROM FACULTY f
+  JOIN `RANK` r ON r.RANK_ID = f.RANK_ID
+  JOIN DEPARTMENT d ON d.DEPT_ID = f.DEPT_ID
+" . $where . "
+  ORDER BY f.FACULTY_LNAME, f.FACULTY_FNAME
+  LIMIT :limit OFFSET :offset
 ";
-$params = [];
-if ($q !== '') {
-  $sql .= " AND (f.FACULTY_LNAME LIKE ? OR f.FACULTY_FNAME LIKE ? OR f.FACULTY_EMAIL LIKE ?)";
-  $params[] = "%$q%"; $params[] = "%$q%"; $params[] = "%$q%";
-}
-if ($rank !== '') {
-  $sql .= " AND f.RANK_ID = ?";
-  $params[] = $rank;
-}
-if ($dept !== '') {
-  $sql .= " AND f.DEPT_ID = ?";
-  $params[] = $dept;
-}
-$sql .= " ORDER BY f.FACULTY_LNAME, f.FACULTY_FNAME LIMIT :limit OFFSET :offset";
+
 $stmt = $pdo->prepare($sql);
-foreach ($params as $i => $p) {
-  $stmt->bindValue($i + 1, $p);
-}
-$stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
-$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+/* Bind filter params */
+foreach ($params as $k => $v) { $stmt->bindValue($k, $v); }
+/* Bind pagination as integers */
+$stmt->bindValue(':limit', (int)$perPage, PDO::PARAM_INT);
+$stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+
 $stmt->execute();
-$rows = $stmt->fetchAll();
+$rows  = $stmt->fetchAll();
 $total = count($rows);
 ?>
 
@@ -227,13 +248,14 @@ $total = count($rows);
       <?php endforeach; ?>
     </div>
   <?php endif; ?>
-  
+
+  <!-- Pagination -->
   <div class="pagination">
     <?php
-    $queryParams = $_GET;
-    foreach (['page'] as $skip) unset($queryParams[$skip]);
-    $baseQuery = http_build_query($queryParams);
-    $baseUrl = '?' . ($baseQuery ? $baseQuery . '&' : '');
+      $queryParams = $_GET;
+      unset($queryParams['page']);
+      $baseQuery = http_build_query($queryParams);
+      $baseUrl   = '?' . ($baseQuery ? $baseQuery . '&' : '');
     ?>
 
     <?php if ($page > 1): ?>
@@ -248,8 +270,6 @@ $total = count($rows);
       <a href="<?= $baseUrl ?>page=<?= $page + 1 ?>" class="page-btn">Next</a>
     <?php endif; ?>
   </div>
-
-
 </section>
 
 <?php require_once __DIR__ . '/../partials/site_footer.php'; ?>

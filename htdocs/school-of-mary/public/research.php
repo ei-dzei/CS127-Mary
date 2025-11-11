@@ -10,8 +10,8 @@ $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 // Pagination setup
 $perPage = 5;
-$page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
-$offset = ($page - 1) * $perPage;
+$page    = (isset($_GET['page']) && is_numeric($_GET['page'])) ? (int)$_GET['page'] : 1;
+$offset  = ($page - 1) * $perPage;
 
 if ($id > 0) {
   $stmt = $pdo->prepare("
@@ -63,7 +63,9 @@ if ($id > 0) {
       <a class="btn small" href="<?= BASE_URL ?>/public/research.php" style="float:right;margin-top:-4px;">← Back</a>
       <h1 style="margin-bottom:6px"><?= htmlspecialchars($research['RESEARCH_TITLE']); ?></h1>
       <div class="muted" style="margin-bottom:10px;">
-        <span class="pill" style="background:#eef4ff; border:1px solid #cdd8f0; padding:2px 8px; border-radius:999px;"><?= htmlspecialchars($research['RESEARCH_STATUS']); ?></span>
+        <span class="pill" style="background:#eef4ff; border:1px solid #cdd8f0; padding:2px 8px; border-radius:999px;">
+          <?= htmlspecialchars($research['RESEARCH_STATUS']); ?>
+        </span>
         <span style="margin-left:6px;">Start: <?= htmlspecialchars($research['RESEARCH_STARTDATE']); ?></span>
         <?php if ($research['RESEARCH_ENDDATE']) : ?>
           <span style="margin-left:6px;">End: <?= htmlspecialchars($research['RESEARCH_ENDDATE']); ?></span>
@@ -147,56 +149,64 @@ if ($id > 0) {
   exit;
 }
 
-/* --- List view --- */
+/* --- List view (filters + pagination) --- */
 $q      = trim($_GET['q'] ?? '');
 $status = trim($_GET['status'] ?? '');
 $from   = trim($_GET['from'] ?? '');
 $to     = trim($_GET['to'] ?? '');
 
-$sql = "
+/* Build WHERE with named params */
+$where   = [];
+$params  = [];
+
+if ($q !== '') {
+  $where[]        = "re.RESEARCH_TITLE LIKE :q";
+  $params[':q']   = "%{$q}%";
+}
+if ($status !== '') {
+  $where[]           = "re.RESEARCH_STATUS = :status";
+  $params[':status'] = $status;
+}
+if ($from !== '') {
+  $where[]         = "re.RESEARCH_STARTDATE >= :from";
+  $params[':from'] = $from;
+}
+if ($to !== '') {
+  // include records that end by this date OR ongoing that started before or equal to this date
+  $where[]        = "(re.RESEARCH_ENDDATE <= :to OR (re.RESEARCH_ENDDATE IS NULL AND re.RESEARCH_STARTDATE <= :to2))";
+  $params[':to']  = $to;
+  $params[':to2'] = $to;
+}
+
+$whereSql = $where ? (' AND ' . implode(' AND ', $where)) : '';
+
+/* Count with same filters */
+$countSql = "SELECT COUNT(*) FROM RESEARCH re WHERE 1=1 {$whereSql}";
+$countStmt = $pdo->prepare($countSql);
+foreach ($params as $k => $v) {
+  $countStmt->bindValue($k, $v);
+}
+$countStmt->execute();
+$totalRows  = (int)$countStmt->fetchColumn();
+$totalPages = max(1, (int)ceil($totalRows / $perPage));
+
+/* Fetch page rows with same filters */
+$listSql = "
   SELECT re.RESEARCH_ID, re.RESEARCH_TITLE, re.RESEARCH_STATUS,
          re.RESEARCH_STARTDATE, re.RESEARCH_ENDDATE
   FROM RESEARCH re
-  WHERE 1=1
+  WHERE 1=1 {$whereSql}
+  ORDER BY re.RESEARCH_STARTDATE DESC, re.RESEARCH_ID DESC
+  LIMIT :limit OFFSET :offset
 ";
-$params = [];
-if ($q !== '') {
-  $sql .= " AND re.RESEARCH_TITLE LIKE ?";
-  $params[] = "%$q%";
+$listStmt = $pdo->prepare($listSql);
+foreach ($params as $k => $v) {
+  $listStmt->bindValue($k, $v);
 }
-if ($status !== '') {
-  $sql .= " AND re.RESEARCH_STATUS = ?";
-  $params[] = $status;
-}
-if ($from !== '') {
-  $sql .= " AND re.RESEARCH_STARTDATE >= ?";
-  $params[] = $from;
-}
-if ($to !== '') {
-  $sql .= " AND (re.RESEARCH_ENDDATE <= ? OR (re.RESEARCH_ENDDATE IS NULL AND re.RESEARCH_STARTDATE <= ?))";
-  $params[] = $to;
-  $params[] = $to;
-}
-$sql .= " ORDER BY re.RESEARCH_STARTDATE DESC, re.RESEARCH_ID DESC";
-
-// Count total for pagination with same filters
-$countSql = "SELECT COUNT(*) FROM (" . $sql . ") AS count_query";
-$countStmt = $pdo->prepare($countSql);
-$countStmt->execute($params);
-$totalRows = $countStmt->fetchColumn();
-$totalPages = ceil($totalRows / $perPage);
-
-// Add LIMIT + OFFSET for paginated results
-$sql .= " LIMIT :limit OFFSET :offset";
-
-$stmt = $pdo->prepare($sql);
-foreach ($params as $i => $p) {
-  $stmt->bindValue($i + 1, $p);
-}
-$stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
-$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-$stmt->execute();
-$rows = $stmt->fetchAll();
+$listStmt->bindValue(':limit',  $perPage, PDO::PARAM_INT);
+$listStmt->bindValue(':offset', $offset,  PDO::PARAM_INT);
+$listStmt->execute();
+$rows  = $listStmt->fetchAll();
 $total = count($rows);
 ?>
 
@@ -249,7 +259,6 @@ $total = count($rows);
     </div>
   </form>
 
-
   <p class="muted" style="margin:6px 0 12px;">Showing <?= (int)$total ?> <?= $total===1 ? 'project' : 'projects' ?></p>
 
   <!-- Cards -->
@@ -261,12 +270,8 @@ $total = count($rows);
         <div class="card">
           <div class="card__icon">🔬</div>
           <div class="card__content">
-            <h3 class="card__title">
-              <?= htmlspecialchars($row['RESEARCH_TITLE']); ?>
-            </h3>
-            <p class="card__desc">
-              Status: <?= htmlspecialchars($row['RESEARCH_STATUS']); ?>
-            </p>
+            <h3 class="card__title"><?= htmlspecialchars($row['RESEARCH_TITLE']); ?></h3>
+            <p class="card__desc">Status: <?= htmlspecialchars($row['RESEARCH_STATUS']); ?></p>
             <div class="card__meta">
               🗓 Start: <?= htmlspecialchars($row['RESEARCH_STARTDATE']); ?>
               <?php if ($row['RESEARCH_ENDDATE']) echo ' · End: ' . htmlspecialchars($row['RESEARCH_ENDDATE']); ?>
@@ -287,10 +292,11 @@ $total = count($rows);
 
   <div class="pagination">
     <?php
-    $queryParams = $_GET;
-    unset($queryParams['page']);
-    $baseQuery = http_build_query($queryParams);
-    $baseUrl = '?' . ($baseQuery ? $baseQuery . '&' : '');
+      // keep current filters in pagination links
+      $queryParams = $_GET;
+      unset($queryParams['page']);
+      $baseQuery = http_build_query($queryParams);
+      $baseUrl   = '?' . ($baseQuery ? $baseQuery . '&' : '');
     ?>
 
     <?php if ($page > 1): ?>
@@ -305,8 +311,6 @@ $total = count($rows);
       <a href="<?= $baseUrl ?>page=<?= $page + 1 ?>" class="page-btn">Next</a>
     <?php endif; ?>
   </div>
-
-
 </section>
 
 <?php require_once __DIR__ . '/../partials/site_footer.php'; ?>
