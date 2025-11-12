@@ -68,7 +68,7 @@ require_once __DIR__ . '/../partials/site_header.php';
     </div>
 
     <div class="field" style="grid-column: span 12; display:flex; gap:8px;">
-      <button class="btn" type="submit">Sign In</button>
+      <button class="btn" type="submit">Log In</button>
     </div>
   </form>
 </section>
