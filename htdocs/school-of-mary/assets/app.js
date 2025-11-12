@@ -322,12 +322,12 @@
     const title = btn.dataset.title || "Details";
 
     openOverlay(title);
-
+    
     try {
       const res = await fetch(`school-of-mary/public/api/get_${type}_details.php?id=${id}`);
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const data = await res.json();
-
+      
       if (type === "faculty") {
         bodyEl.innerHTML = renderFacultyDetail(data);
         titleEl.textContent = data.faculty.FULL_NAME || "Faculty Details";
