@@ -16,6 +16,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $pass = trim($_POST['password'] ?? '');
   $csrf = $_POST['csrf'] ?? '';
 
+  $user = filter_input(INPUT_POST, "username", FILTER_SANITIZE_SPECIAL_CHARS);
+  $password = filter_input(INPUT_POST, "password", FILTER_SANITIZE_SPECIAL_CHARS);
+
   if (!hash_equals($_SESSION['csrf'] ?? '', $csrf)) {
     $error = 'Invalid request. Please refresh and try again.';
   } else {
@@ -28,7 +31,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       // Use project-aware redirect to avoid /admin/ missing when app is in a subfolder
       redirect_to('/admin/dashboard.php');
     } else {
-      $error = 'Incorrect username or password.';
+      if(!($user === $ADMIN_USER)) {
+        $error = 'Incorrect username.';
+      } elseif (!(hash_equals($ADMIN_PASS, $pass))) {
+        $error = 'Incorrect password.';//shows at opening, if close tab dapat wala na
+      }
     }
   }
 }
@@ -62,7 +69,6 @@ require_once __DIR__ . '/../partials/site_header.php';
 
     <div class="field" style="grid-column: span 12; display:flex; gap:8px;">
       <button class="btn" type="submit">Sign In</button>
-      <a class="btn" href="<?php echo app_url('/public/'); ?>" >Back to Home</a>
     </div>
   </form>
 </section>
