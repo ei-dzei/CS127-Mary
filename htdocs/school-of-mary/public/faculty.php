@@ -259,7 +259,7 @@ $total = count($rows);
     ?>
 
     <?php if ($page > 1): ?>
-      <a href="<?= $baseUrl ?>page=<?= $page - 1 ?>" class="page-btn">Previous</a>
+      <a href="<?= $baseUrl ?>page=<?= $page - 1 ?>" class="page-btn"><<</a>
     <?php endif; ?>
 
     <?php for ($i = 1; $i <= $totalPages; $i++): ?>
@@ -267,7 +267,7 @@ $total = count($rows);
     <?php endfor; ?>
 
     <?php if ($page < $totalPages): ?>
-      <a href="<?= $baseUrl ?>page=<?= $page + 1 ?>" class="page-btn">Next</a>
+      <a href="<?= $baseUrl ?>page=<?= $page + 1 ?>" class="page-btn">>></a>
     <?php endif; ?>
   </div>
 </section>
