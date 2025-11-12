@@ -346,8 +346,8 @@ th {
   animation: slideIn 0.5s ease both;
 }
 @keyframes slideIn {
-  from { opacity: 0; transform: scale(2.01) translateY(6px); }
-  to   { opacity: 1; transform: scale(2)    translateY(0); }
+  from { opacity: 0; transform: scale(1.01) translateY(6px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
 }
 .hero__overlay {
   position: absolute;
@@ -381,6 +381,13 @@ th {
   font-size: clamp(2rem, 4.5vw, 3.5rem);
   line-height: 1.12;
   margin-bottom: .4rem;
+}
+.hero__subtitle {
+  font-family: 'Newsreader', serif;
+  color: #374151;
+  font-size: clamp(1rem, 2vw, 1.125rem);
+  line-height: 1.65;
+  max-width: 58ch;
 }
 .hero__subtitle {
   font-family: 'Newsreader', serif;
@@ -754,13 +761,13 @@ th {
    ======================================= */
 .pagination{
   text-align:center;
-  margin-top:32px;
-  margin-bottom:96px;        
+  margin-top:25px;
+  margin-bottom:30px;        
 }
 .page-btn{
   display:inline-flex; align-items:center; justify-content:center;
   width:30px; height:30px;   
-  margin:0 4px;
+  margin:0 5px;
   border-radius:50%;
   background:#f5f7fb;
   color:#234b7a;
@@ -773,7 +780,7 @@ th {
 .page-btn.active{ background:#234b7a; color:#fff; border-color:transparent; }
 .page-btn:first-child,
 .page-btn:last-child{
-  width:auto; padding:0 12px; border-radius:18px;
+  width:auto; padding:0 10px; border-radius:18px;
 }
 
 /* =======================================

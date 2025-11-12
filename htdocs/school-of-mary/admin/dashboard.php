@@ -171,7 +171,7 @@ require_once __DIR__ . '/../partials/site_header.php';
     border: 1px solid var(--border, #e8e8e8);
     border-radius: 14px;
     box-shadow: 0 1px 2px rgba(0,0,0,.04);
-    padding: 18px;
+    padding: 15px;
   }
   .section-header {
     display:flex; align-items:center; gap:10px; margin-bottom:10px;
@@ -188,17 +188,6 @@ require_once __DIR__ . '/../partials/site_header.php';
   }
   .list tr:last-child td { border-bottom:none; }
   .muted-small { color:#666; font-size:.9rem; }
-
-  /* Pagination */
-  .pager { display:flex; gap:8px; align-items:center; margin-top:10px; }
-  .pager a, .pager span {
-    display:inline-flex; min-width:32px; height:32px; padding:0 10px;
-    border:1px solid #d7e1ef; border-radius:18px;
-    align-items:center; justify-content:center; text-decoration:none;
-    color:#234b7a; background:#fff;
-  }
-  .pager .active { background:#234b7a; color:#fff; border-color:#234b7a; }
-  .pager .disabled { opacity:.5; pointer-events:none; }
 
   @media (max-width: 960px) {
     .kpi-col { grid-column: span 12; }
@@ -222,12 +211,7 @@ require_once __DIR__ . '/../partials/site_header.php';
   .btn-link:active { transform: translateY(1px); }
   .list tr { transition: background-color .12s ease; }
   .list tbody tr:hover { background: #f7fbff; }
-  .pager a {
-    transition: background-color .15s ease, color .15s ease, border-color .15s ease, transform .06s ease;
-  }
-  .pager a:hover { background: #e8f0fb; border-color: #c7d5ef; }
-  .pager a:active { transform: translateY(1px); }
-  .btn-link:focus, .pager a:focus {
+  .btn-link:focus, .page-btn:focus {
     outline: 2px solid #234b7a;
     outline-offset: 2px;
   }
@@ -236,7 +220,7 @@ require_once __DIR__ . '/../partials/site_header.php';
   }
   @media (prefers-reduced-motion: reduce) {
     .kpi-card, .section-card, .hero-card,
-    .btn-link, .pager a, .list tr { transition: none !important; }
+    .btn-link, .page-btn, .list tr { transition: none !important; }
   }
 </style>
 
@@ -338,16 +322,18 @@ require_once __DIR__ . '/../partials/site_header.php';
           </tbody>
         </table>
         <!-- Pagination -->
-        <div class="pager">
+        <div class="pagination">
           <?php
-            $base = app_url('/admin/dashboard.php');
-            $prev = $tr_page - 1; $next = $tr_page + 1;
+            $base  = app_url('/admin/dashboard.php');
+            $qs_tr = function($p) use ($tf_page, $log_page) {
+              return 'tr_page='.$p.'&tf_page='.$tf_page.'&log_page='.$log_page;
+            };
           ?>
-          <a class="<?= $tr_page <= 1 ? 'disabled' : '' ?>" href="<?= $tr_page <= 1 ? '#' : "{$base}?tr_page={$prev}&tf_page={$tf_page}&log_page={$log_page}" ?>">Prev</a>
+          <a class="page-btn" href="<?= $base.'?'.$qs_tr(max(1,$tr_page-1)); ?>">&laquo;</a>
           <?php for ($i=1; $i<= $tr_pages; $i++): ?>
-            <a class="<?= $i === $tr_page ? 'active' : '' ?>" href="<?= "{$base}?tr_page={$i}&tf_page={$tf_page}&log_page={$log_page}" ?>"><?= $i ?></a>
+            <a class="page-btn <?= $i === $tr_page ? 'active' : '' ?>" href="<?= $base.'?'.$qs_tr($i); ?>"><?= $i ?></a>
           <?php endfor; ?>
-          <a class="<?= $tr_page >= $tr_pages ? 'disabled' : '' ?>" href="<?= $tr_page >= $tr_pages ? '#' : "{$base}?tr_page={$next}&tf_page={$tf_page}&log_page={$log_page}" ?>">Next</a>
+          <a class="page-btn" href="<?= $base.'?'.$qs_tr(min($tr_pages,$tr_page+1)); ?>">&raquo;</a>
         </div>
       <?php endif; ?>
     </div>
@@ -388,16 +374,18 @@ require_once __DIR__ . '/../partials/site_header.php';
           </tbody>
         </table>
         <!-- Pagination -->
-        <div class="pager">
+        <div class="pagination">
           <?php
-            $base = app_url('/admin/dashboard.php');
-            $prev = $tf_page - 1; $next = $tf_page + 1;
+            $base  = app_url('/admin/dashboard.php');
+            $qs_tf = function($p) use ($tr_page, $log_page) {
+              return 'tr_page='.$tr_page.'&tf_page='.$p.'&log_page='.$log_page;
+            };
           ?>
-          <a class="<?= $tf_page <= 1 ? 'disabled' : '' ?>" href="<?= $tf_page <= 1 ? '#' : "{$base}?tr_page={$tr_page}&tf_page={$prev}&log_page={$log_page}" ?>">Prev</a>
+          <a class="page-btn" href="<?= $base.'?'.$qs_tf(max(1,$tf_page-1)); ?>">&laquo;</a>
           <?php for ($i=1; $i<= $tf_pages; $i++): ?>
-            <a class="<?= $i === $tf_page ? 'active' : '' ?>" href="<?= "{$base}?tr_page={$tr_page}&tf_page={$i}&log_page={$log_page}" ?>"><?= $i ?></a>
+            <a class="page-btn <?= $i === $tf_page ? 'active' : '' ?>" href="<?= $base.'?'.$qs_tf($i); ?>"><?= $i ?></a>
           <?php endfor; ?>
-          <a class="<?= $tf_page >= $tf_pages ? 'disabled' : '' ?>" href="<?= $tf_page >= $tf_pages ? '#' : "{$base}?tr_page={$tr_page}&tf_page={$next}&log_page={$log_page}" ?>">Next</a>
+          <a class="page-btn" href="<?= $base.'?'.$qs_tf(min($tf_pages,$tf_page+1)); ?>">&raquo;</a>
         </div>
       <?php endif; ?>
     </div>
@@ -436,16 +424,18 @@ require_once __DIR__ . '/../partials/site_header.php';
           </tbody>
         </table>
         <!-- Pagination -->
-        <div class="pager">
+        <div class="pagination">
           <?php
-            $base = app_url('/admin/dashboard.php');
-            $prev = $log_page - 1; $next = $log_page + 1;
+            $base   = app_url('/admin/dashboard.php');
+            $qs_log = function($p) use ($tr_page, $tf_page) {
+              return 'tr_page='.$tr_page.'&tf_page='.$tf_page.'&log_page='.$p;
+            };
           ?>
-          <a class="<?= $log_page <= 1 ? 'disabled' : '' ?>" href="<?= $log_page <= 1 ? '#' : "{$base}?tr_page={$tr_page}&tf_page={$tf_page}&log_page={$prev}" ?>">Prev</a>
+          <a class="page-btn" href="<?= $base.'?'.$qs_log(max(1,$log_page-1)); ?>">&laquo;</a>
           <?php for ($i=1; $i<= $log_pages; $i++): ?>
-            <a class="<?= $i === $log_page ? 'active' : '' ?>" href="<?= "{$base}?tr_page={$tr_page}&tf_page={$tf_page}&log_page={$i}" ?>"><?= $i ?></a>
+            <a class="page-btn <?= $i === $log_page ? 'active' : '' ?>" href="<?= $base.'?'.$qs_log($i); ?>"><?= $i ?></a>
           <?php endfor; ?>
-          <a class="<?= $log_page >= $log_pages ? 'disabled' : '' ?>" href="<?= $log_page >= $log_pages ? '#' : "{$base}?tr_page={$tr_page}&tf_page={$tf_page}&log_page={$next}" ?>">Next</a>
+          <a class="page-btn" href="<?= $base.'?'.$qs_log(min($log_pages,$log_page+1)); ?>">&raquo;</a>
         </div>
       <?php endif; ?>
     </div>
