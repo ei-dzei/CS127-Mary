@@ -2,7 +2,7 @@
 /**
  * Central PDO connection (XAMPP defaults). Reuse via: require_once __DIR__ . '/config/db.php';
  */
-define('BASE_URL', '/CS127-Mary/htdocs/school-of-mary');  
+define('BASE_URL', '/CS127-Mary/htdocs/school-of-mary');  // original: define('BASE_URL', '/school-of-mary');
 
 $DB_HOST = '127.0.0.1';
 $DB_NAME = 'mary127';
