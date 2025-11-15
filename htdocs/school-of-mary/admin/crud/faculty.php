@@ -169,12 +169,6 @@ $CSRF = csrf_token();
 
   <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
     <a class="btn small" href="<?= app_url('/admin/api/export.php'); ?>?table=FACULTY">Export CSV</a>
-    <form method="post" action="<?= app_url('/admin/api/import.php'); ?>" enctype="multipart/form-data" style="display:inline-flex; gap:6px;">
-      <input type="hidden" name="csrf" value="<?= $CSRF; ?>">
-      <input type="hidden" name="table" value="FACULTY">
-      <input class="input" type="file" name="file" accept=".csv" required>
-      <button class="btn small">Import CSV</button>
-    </form>
   </div>
 
   <!-- Filter / Sort -->
