@@ -3,7 +3,7 @@
 
 <footer class="footer">
   <div class="container footer__inner">
-    <div>© <?= date('Y') ?> School of Mary</div>
+    <div>	Copyright &#169; 2025 School of Mary. All Rights Reserved.</div>
   </div>
 </footer>
 
