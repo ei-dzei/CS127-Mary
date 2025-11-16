@@ -270,11 +270,11 @@ require_once __DIR__ . '/../../partials/site_header.php';
       };
       $base = app_url('/admin/crud/agency.php');
     ?>
-    <a class="page-btn" href="<?= $base.'?'.$qs(max(1,$page-1)); ?>">&#x276E;</a>
+    <a class="page-btn" href="<?= $base.'?'.$qs(max(1,$page-1)); ?>" title = "Previous Page">&#x276E;</a>
     <?php for ($i=1;$i<=$totalPages;$i++): ?>
       <a class="page-btn <?= $i===$page?'active':''; ?>" href="<?= $base.'?'.$qs($i); ?>"><?= $i; ?></a>
     <?php endfor; ?>
-    <a class="page-btn" href="<?= $base.'?'.$qs(min($totalPages,$page+1)); ?>">&#x276F;</a>
+    <a class="page-btn" href="<?= $base.'?'.$qs(min($totalPages,$page+1)); ?>" title = "Next Page">&#x276F;</a>
   </div>
 </section>
 

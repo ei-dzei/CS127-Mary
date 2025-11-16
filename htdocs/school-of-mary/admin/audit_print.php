@@ -218,7 +218,7 @@ require_once __DIR__ . '/../partials/site_header.php';
 
       <!-- Prev -->
       <a class="page-btn <?= $page <= 1 ? 'disabled' : '' ?>" 
-        href="<?= $page <= 1 ? '#' : "{$base}?{$qs}&page={$prev}" ?>">&#x276E;</a>
+        href="<?= $page <= 1 ? '#' : "{$base}?{$qs}&page={$prev}" ?>" title = "Previous Page">&#x276E;</a>
 
       <!-- Jump back by 5 -->
       <?php if ($start > 1): ?>
@@ -238,7 +238,7 @@ require_once __DIR__ . '/../partials/site_header.php';
 
       <!-- Next -->
       <a class="page-btn <?= $page >= $pages ? 'disabled' : '' ?>" 
-        href="<?= $page >= $pages ? '#' : "{$base}?{$qs}&page={$next}" ?>">&#x276F;</a>
+        href="<?= $page >= $pages ? '#' : "{$base}?{$qs}&page={$next}" ?>" title = "Next Page">&#x276F;</a>
     </div>
 
 </section>
