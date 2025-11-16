@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/init.php';
-$pageTitle = $pageTitle ?? 'School of Mary';
+$pageTitle = $pageTitle ?? 'Mary ';
 $isAdmin   = is_admin();
 $inAdmin   = in_admin_area();
 
@@ -22,7 +22,6 @@ $path = $path === '' ? '/' : $path;
 
   <!-- Styles -->
   <link rel="stylesheet" href="<?= BASE_URL ?>/assets/styles.css" />
-  <link rel="stylesheet" href="<?= BASE_URL ?>/assets/modal.css" />
 
   <!-- Scripts -->
   <script defer src="<?= BASE_URL ?>/assets/app.js"></script>
