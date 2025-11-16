@@ -329,11 +329,11 @@ require_once __DIR__ . '/../partials/site_header.php';
               return 'tr_page='.$p.'&tf_page='.$tf_page.'&log_page='.$log_page;
             };
           ?>
-          <a class="page-btn" href="<?= $base.'?'.$qs_tr(max(1,$tr_page-1)); ?>">&laquo;</a>
+          <a class="page-btn" href="<?= $base.'?'.$qs_tr(max(1,$tr_page-1)); ?>">&#x276E;</a>
           <?php for ($i=1; $i<= $tr_pages; $i++): ?>
             <a class="page-btn <?= $i === $tr_page ? 'active' : '' ?>" href="<?= $base.'?'.$qs_tr($i); ?>"><?= $i ?></a>
           <?php endfor; ?>
-          <a class="page-btn" href="<?= $base.'?'.$qs_tr(min($tr_pages,$tr_page+1)); ?>">&raquo;</a>
+          <a class="page-btn" href="<?= $base.'?'.$qs_tr(min($tr_pages,$tr_page+1)); ?>">&#x276F;</a>
         </div>
       <?php endif; ?>
     </div>
@@ -381,11 +381,11 @@ require_once __DIR__ . '/../partials/site_header.php';
               return 'tr_page='.$tr_page.'&tf_page='.$p.'&log_page='.$log_page;
             };
           ?>
-          <a class="page-btn" href="<?= $base.'?'.$qs_tf(max(1,$tf_page-1)); ?>">&laquo;</a>
+          <a class="page-btn" href="<?= $base.'?'.$qs_tf(max(1,$tf_page-1)); ?>">&#x276E;</a>
           <?php for ($i=1; $i<= $tf_pages; $i++): ?>
             <a class="page-btn <?= $i === $tf_page ? 'active' : '' ?>" href="<?= $base.'?'.$qs_tf($i); ?>"><?= $i ?></a>
           <?php endfor; ?>
-          <a class="page-btn" href="<?= $base.'?'.$qs_tf(min($tf_pages,$tf_page+1)); ?>">&raquo;</a>
+          <a class="page-btn" href="<?= $base.'?'.$qs_tf(min($tf_pages,$tf_page+1)); ?>">&#x276F;</a>
         </div>
       <?php endif; ?>
     </div>
@@ -431,11 +431,11 @@ require_once __DIR__ . '/../partials/site_header.php';
               return 'tr_page='.$tr_page.'&tf_page='.$tf_page.'&log_page='.$p;
             };
           ?>
-          <a class="page-btn" href="<?= $base.'?'.$qs_log(max(1,$log_page-1)); ?>">&laquo;</a>
+          <a class="page-btn" href="<?= $base.'?'.$qs_log(max(1,$log_page-1)); ?>">&#x276E;</a>
           <?php for ($i=1; $i<= $log_pages; $i++): ?>
             <a class="page-btn <?= $i === $log_page ? 'active' : '' ?>" href="<?= $base.'?'.$qs_log($i); ?>"><?= $i ?></a>
           <?php endfor; ?>
-          <a class="page-btn" href="<?= $base.'?'.$qs_log(min($log_pages,$log_page+1)); ?>">&raquo;</a>
+          <a class="page-btn" href="<?= $base.'?'.$qs_log(min($log_pages,$log_page+1)); ?>">&#x276F;</a>
         </div>
       <?php endif; ?>
     </div>
