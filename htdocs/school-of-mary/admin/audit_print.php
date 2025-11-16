@@ -44,7 +44,7 @@ if ($to    !== '')  { $sqlBase .= " AND DATE({$AUDIT_TIME}) <= :to";    $params[
 $stmtCnt = $pdo->prepare("SELECT COUNT(*) ".$sqlBase);
 $stmtCnt->execute($params);
 $total = (int)$stmtCnt->fetchColumn();
-$pages = max(1, (int)ceil($total / $PAGE_SIZE));
+$totalPages = max(1, (int)ceil($total / $PAGE_SIZE));
 
 /* Fetch page rows */
 $sql = "
@@ -203,42 +203,43 @@ require_once __DIR__ . '/../partials/site_header.php';
         $prev = $page - 1;
         $next = $page + 1;
 
-        // Calculate 5-page window
-        $window = 5;
-        $start = max(1, $page - floor($window / 2));
-        $end = min($pages, $start + $window - 1);
-        if ($end - $start + 1 < $window) {
-          $start = max(1, $end - $window + 1);
+        $maxPage = 5;
+        $start = max(1, $page - floor($maxPage / 2));
+        $end = min($totalPages, $start + $maxPage - 1);
+        if ($end - $start + 1 < $maxPage) {
+          $start = max(1, $end - $maxPage + 1);
         }
 
         // Calculate jump pages
-        $jumpBack = max(1, $page - $window);
-        $jumpNext = min($pages, $page + $window);
+        $jumpBack = max(1, $page - $maxPage);
+        $jumpNext = min($totalPages, $page + $maxPage);
       ?>
 
       <!-- Prev -->
-      <a class="page-btn <?= $page <= 1 ? 'disabled' : '' ?>" 
-        href="<?= $page <= 1 ? '#' : "{$base}?{$qs}&page={$prev}" ?>" title = "Previous Page">&#x276E;</a>
+      <?php if ($page > 1): ?>
+        <a class="page-btn" href="<?= "{$base}?{$qs}&page={$prev}" ?>" title = "Previous Page">&#x276E;</a>
+      <?php endif; ?>
 
       <!-- Jump back by 5 -->
       <?php if ($start > 1): ?>
-        <a class="page-btn" href="<?= "{$base}?{$qs}&page={$jumpBack}" ?>">...</a>
+        <a class="page-btn" href="<?= "{$base}?{$qs}&page={$jumpBack}" ?>" title="Jump backward 5 pages">...</a>
       <?php endif; ?>
 
       <!-- Page numbers -->
       <?php for ($i = $start; $i <= $end; $i++): ?>
-        <a class="page-btn <?= $i === $page ? 'active' : '' ?>" 
+        <a class="page-btn <?= $i == $page ? 'active' : '' ?>" 
           href="<?= "{$base}?{$qs}&page={$i}" ?>"><?= $i ?></a>
       <?php endfor; ?>
 
       <!-- Jump forward by 5 -->
-      <?php if ($end < $pages): ?>
-        <a class="page-btn" href="<?= "{$base}?{$qs}&page={$jumpNext}" ?>">...</a>
+      <?php if ($end < $totalPages): ?>
+        <a class="page-btn" href="<?= "{$base}?{$qs}&page={$jumpNext}" ?>" title="Jump forward 5 pages">...</a>
       <?php endif; ?>
 
       <!-- Next -->
-      <a class="page-btn <?= $page >= $pages ? 'disabled' : '' ?>" 
-        href="<?= $page >= $pages ? '#' : "{$base}?{$qs}&page={$next}" ?>" title = "Next Page">&#x276F;</a>
+      <?php  if ($page < $totalPages): ?>
+      <a class="page-btn" href="<?= "{$base}?{$qs}&page={$next}" ?>" title = "Next Page">&#x276F;</a>
+      <?php  endif;?>
     </div>
 
 </section>

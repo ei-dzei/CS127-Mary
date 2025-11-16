@@ -292,20 +292,53 @@ $total = count($rows);
 
   <div class="pagination">
     <?php
-      // keep current filters in pagination links
+      //keep current filters in pagination link    
       $queryParams = $_GET;
       unset($queryParams['page']);
       $baseQuery = http_build_query($queryParams);
       $baseUrl   = '?' . ($baseQuery ? $baseQuery . '&' : '');
+      $maxPage = 5;
     ?>
 
     <?php if ($page > 1): ?>
       <a href="<?= $baseUrl ?>page=<?= $page - 1 ?>" class="page-btn" title = "Previous Page">&#x276E;</a>
     <?php endif; ?>
 
-    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-      <a href="<?= $baseUrl ?>page=<?= $i ?>" class="page-btn <?= $i === $page ? 'active' : '' ?>"><?= $i ?></a>
+    <?php 
+      $start = max(1, $page - floor($maxPage / 2));
+      $end = min($totalPages, $start + $maxPage - 1);
+
+      if ($end - $start < $maxPage - 1) {
+        $start = max(1, $end - $maxPage + 1);
+      }
+     ?>
+
+    <!-- 1 + ...  -->
+    <?php if ($start > 1): ?>
+      <a href="<?= $baseUrl ?>page=1" class="page-btn" >1</a>
+      <?php if ($start > 3): ?>
+        <a href="<?= $baseUrl ?>page=<?= max(1,$page - 5) ?>" class="page-btn" title="Jump backward 5 pages">...</a>        
+      <?php endif; ?>
+      <?php if ($start == 3): ?>
+              <a href="<?= $baseUrl ?>page=<?= 2?>" class="page-btn" >2</a>       
+      <?php endif; ?>
+    <?php endif; ?>
+
+    <?php for ($i = $start; $i <= $end; $i++): ?>
+      <a href="<?= $baseUrl ?>page=<?= $i ?>" class="page-btn <?= $i == $page ? 'active' : '' ?>"><?= $i ?></a>
     <?php endfor; ?>
+
+
+    <!-- ... + lastPage -->
+    <?php if ($end < $totalPages): ?>
+      <?php if ($end == $totalPages - 2):?>
+        <a href="<?= $baseUrl ?>page=<?= $totalPages-1 ?>" class="page-btn" > <?=$totalPages - 1?></a>
+      <?php endif; ?>
+      <?php if ($end < $totalPages - 2): ?>
+        <a href="<?= $baseUrl ?>page=<?= min($totalPages,$page + 5)?>"class="page-btn" title="Jump forward 5 pages">...</a>
+      <?php endif; ?>
+        <a href="<?= $baseUrl ?>page=<?= $totalPages ?>" class="page-btn" > <?=$totalPages?></a>
+    <?php endif; ?>
 
     <?php if ($page < $totalPages): ?>
       <a href="<?= $baseUrl ?>page=<?= $page + 1 ?>" class="page-btn" title = "Next Page">&#x276F;</a>

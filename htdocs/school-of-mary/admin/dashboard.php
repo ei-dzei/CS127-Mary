@@ -329,11 +329,45 @@ require_once __DIR__ . '/../partials/site_header.php';
               return 'tr_page='.$p.'&tf_page='.$tf_page.'&log_page='.$log_page;
             };
           ?>
+          <?php if ($tr_page > 1): ?>
           <a class="page-btn" href="<?= $base.'?'.$qs_tr(max(1,$tr_page-1)); ?>" title = "Previous Page">&#x276E;</a>
-          <?php for ($i=1; $i<= $tr_pages; $i++): ?>
-            <a class="page-btn <?= $i === $tr_page ? 'active' : '' ?>" href="<?= $base.'?'.$qs_tr($i); ?>"><?= $i ?></a>
+          <?php endif; ?>
+          <?php
+            $tr_maxPage = 5;
+            $tr_start = max(1, $tr_page - floor($tr_maxPage / 2));
+            $tr_end = min($tr_pages, $tr_start + $tr_maxPage - 1);
+
+            if ($tr_end - $tr_start < $tr_maxPage - 1) {
+              $tr_start = max(1, $tr_end - $tr_maxPage + 1);
+            } 
+          ?>
+          <!-- 1 + ...  -->
+          <?php if ($tr_start > 1): ?>
+            <a href="<?= $base.'?'.$qs_tr(1); ?>" class="page-btn" >1</a>
+            <?php if ($tr_start > 3): ?>
+              <a href="<?= $base.'?'.$qs_tr(max(1,$tr_page - 5)) ?>" class="page-btn" title="Jump backward 5 pages">...</a>        
+            <?php endif; ?>
+            <?php if ($tr_start == 3): ?>
+                    <a href="<?= $base.'?'.$qs_tr(2); ?>" class="page-btn" >2</a>       
+            <?php endif; ?>
+          <?php endif; ?>
+          
+          <?php for ($i = $tr_start; $i <= $tr_end; $i++): ?>
+            <a class="page-btn <?= $i == $tr_page ? 'active' : '' ?>" href="<?= $base.'?'.$qs_tr($i); ?>"><?= $i ?></a>
           <?php endfor; ?>
-          <a class="page-btn" href="<?= $base.'?'.$qs_tr(min($tr_pages,$tr_page+1)); ?>" title = "Next Page">&#x276F;</a>
+          <!-- ... + lastPage -->
+          <?php if ($tr_end < $tr_pages): ?>
+            <?php if ($tr_end == $tr_pages - 2):?>
+              <a href="<?= $base.'?'.$qs_tr($tr_pages - 1); ?>" class="page-btn" > <?=$tr_pages - 1?></a>
+            <?php endif; ?>
+            <?php if ($tr_end < $tr_pages - 2): ?>
+              <a href="<?= $base.'?'.$qs_tr(min($tr_pages,$tr_page + 5)); ?>"class="page-btn" title="Jump forward 5 pages">...</a>
+            <?php endif; ?>
+              <a href="<?= $base.'?'.$qs_tr($tr_pages); ?>" class="page-btn" > <?=$tr_pages?></a>
+          <?php endif; ?>
+          <?php  if ($tr_page < $tr_pages): ?>
+            <a class="page-btn" href="<?= $base.'?'.$qs_tr(min($tr_pages,$tr_page+1)); ?>" title = "Next Page">&#x276F;</a>
+          <?php  endif;?>
         </div>
       <?php endif; ?>
     </div>
@@ -381,11 +415,45 @@ require_once __DIR__ . '/../partials/site_header.php';
               return 'tr_page='.$tr_page.'&tf_page='.$p.'&log_page='.$log_page;
             };
           ?>
-          <a class="page-btn" href="<?= $base.'?'.$qs_tf(max(1,$tf_page-1)); ?>" title = "Previous Page">&#x276E;</a>
-          <?php for ($i=1; $i<= $tf_pages; $i++): ?>
+          <?php if ($tf_page > 1): ?>
+            <a class="page-btn" href="<?= $base.'?'.$qs_tf(max(1,$tf_page-1)); ?>" title = "Previous Page">&#x276E;</a>
+          <?php endif; ?>
+          <?php
+            $tf_maxPage = 5;
+            $tf_start = max(1, $tf_page - floor($tf_maxPage / 2));
+            $tf_end = min($tf_pages, $tf_start + $tf_maxPage - 1);
+
+            if ($tf_end - $tf_start < $tf_maxPage - 1) {
+              $tf_start = max(1, $tf_end - $tf_maxPage + 1);
+            } 
+          ?>
+          <!-- 1 + ...  -->
+          <?php if ($tf_start > 1): ?>
+            <a href="<?= $base.'?'.$qs_tf(1); ?>" class="page-btn" >1</a>
+            <?php if ($tf_start > 3): ?>
+              <a href="<?= $base.'?'.$qs_tf(max(1,$tf_page - 5)) ?>" class="page-btn" title="Jump backward 5 pages">...</a>        
+            <?php endif; ?>
+            <?php if ($tf_start == 3): ?>
+                    <a href="<?= $base.'?'.$qs_tf(2); ?>" class="page-btn" >2</a>       
+            <?php endif; ?>
+          <?php endif; ?>
+
+          <?php for ($i = $tf_start; $i <= $tf_end; $i++): ?>
             <a class="page-btn <?= $i === $tf_page ? 'active' : '' ?>" href="<?= $base.'?'.$qs_tf($i); ?>"><?= $i ?></a>
           <?php endfor; ?>
-          <a class="page-btn" href="<?= $base.'?'.$qs_tf(min($tf_pages,$tf_page+1)); ?>" title = "Next Page">&#x276F;</a>
+          <!-- ... + lastPage -->
+          <?php if ($tf_end < $tf_pages): ?>
+            <?php if ($tf_end == $tf_pages - 2):?>
+              <a href="<?= $base.'?'.$qs_tf($tf_pages - 1); ?>" class="page-btn" > <?=$tf_pages - 1?></a>
+            <?php endif; ?>
+            <?php if ($tf_end < $tf_pages - 2): ?>
+              <a href="<?= $base.'?'.$qs_tf(min($tf_pages,$tf_page + 5)); ?>"class="page-btn" title="Jump forward 5 pages">...</a>
+            <?php endif; ?>
+              <a href="<?= $base.'?'.$qs_tf($tf_pages); ?>" class="page-btn" > <?=$tf_pages?></a>
+          <?php endif; ?>
+          <?php  if ($tf_page < $tf_pages): ?>
+            <a class="page-btn" href="<?= $base.'?'.$qs_tf(min($tf_pages,$tf_page+1)); ?>" title = "Next Page">&#x276F;</a>
+          <?php  endif;?>
         </div>
       <?php endif; ?>
     </div>
@@ -431,11 +499,45 @@ require_once __DIR__ . '/../partials/site_header.php';
               return 'tr_page='.$tr_page.'&tf_page='.$tf_page.'&log_page='.$p;
             };
           ?>
-          <a class="page-btn" href="<?= $base.'?'.$qs_log(max(1,$log_page-1)); ?>" title = "Previous Page">&#x276E;</a>
-          <?php for ($i=1; $i<= $log_pages; $i++): ?>
+          <?php if ($log_page > 1): ?>
+            <a class="page-btn" href="<?= $base.'?'.$qs_log(max(1,$log_page-1)); ?>" title = "Previous Page">&#x276E;</a>
+          <?php endif; ?>
+          <?php
+            $log_maxPage = 5;
+            $log_start = max(1, $log_page - floor($log_maxPage / 2));
+            $log_end = min($log_pages, $log_start + $log_maxPage - 1);
+
+            if ($log_end - $log_start < $log_maxPage - 1) {
+              $log_start = max(1, $log_end - $log_maxPage + 1);
+            } 
+          ?>
+          <!-- 1 + ...  -->
+          <?php if ($log_start > 1): ?>
+            <a href="<?= $base.'?'.$qs_log(1); ?>" class="page-btn" >1</a>
+            <?php if ($log_start > 3): ?>
+              <a href="<?= $base.'?'.$qs_log(max(1,$log_page - 5)) ?>" class="page-btn" title="Jump backward 5 pages">...</a>        
+            <?php endif; ?>
+            <?php if ($log_start == 3): ?>
+                    <a href="<?= $base.'?'.$qs_log(2); ?>" class="page-btn" >2</a>       
+            <?php endif; ?>
+          <?php endif; ?>
+
+          <?php for ($i = $log_start; $i <= $log_end; $i++): ?>
             <a class="page-btn <?= $i === $log_page ? 'active' : '' ?>" href="<?= $base.'?'.$qs_log($i); ?>"><?= $i ?></a>
           <?php endfor; ?>
-          <a class="page-btn" href="<?= $base.'?'.$qs_log(min($log_pages,$log_page+1)); ?>" title = "Next Page">&#x276F;</a>
+          <!-- ... + lastPage -->
+          <?php if ($log_end < $log_pages): ?>
+            <?php if ($log_end == $log_pages - 2):?>
+              <a href="<?= $base.'?'.$qs_tf($log_pages - 1); ?>" class="page-btn" > <?=$log_pages - 1?></a>
+            <?php endif; ?>
+            <?php if ($log_end < $log_pages - 2): ?>
+              <a href="<?= $base.'?'.$qs_tf(min($log_pages,$tf_page + 5)); ?>"class="page-btn" title="Jump forward 5 pages">...</a>
+            <?php endif; ?>
+              <a href="<?= $base.'?'.$qs_tf($log_pages); ?>" class="page-btn" > <?=$log_pages?></a>
+          <?php endif; ?>
+          <?php  if ($log_page < $log_pages): ?>
+            <a class="page-btn" href="<?= $base.'?'.$qs_log(min($log_pages,$log_page+1)); ?>" title = "Next Page">&#x276F;</a>
+          <?php  endif;?>
         </div>
       <?php endif; ?>
     </div>
