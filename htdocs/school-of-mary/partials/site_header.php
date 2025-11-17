@@ -21,31 +21,31 @@ $path = $path === '' ? '/' : $path;
 
   <link rel="stylesheet" href="<?= BASE_URL ?>/assets/styles.css" />
   <link rel="stylesheet" href="<?= BASE_URL ?>/assets/modal.css" />
-
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <style>
-    /* --- SIDE NAVIGATION --- */
+    /* --- SIDE NAVIGATION (Inline Styles) --- */
 
     body {
       margin: 0;
-      /* Removed display: flex on body to handle full page layout cleanly */
       font-family: Arial, sans-serif;
       background: #f8f9fa;
+      /* Removed display: flex on body to prevent layout conflicts with position: fixed */
     }
 
     /* Sidebar container */
     .sidebar {
       width: 230px;
-      height: 100vh; /* Use 100vh for full viewport height */
+      height: 100vh; /* Full viewport height */
       background: #1d3557;
       padding: 20px 0;
       display: flex;
       flex-direction: column;
-      position: fixed; /* Keep it fixed on the left */
+      position: fixed; /* CRITICAL: Keeps it locked on the left */
       left: 0;
       top: 0;
       color: #fff;
       z-index: 1000;
-      overflow-y: auto; /* Allows scrolling if menu is long */
+      overflow-y: auto;
     }
 
     .sidebar .brand {
@@ -78,49 +78,22 @@ $path = $path === '' ? '/' : $path;
       font-weight: bold;
     }
 
-    /* Dropdown Toggle Header */
-    .sidebar .dropdown__toggle {
-      padding: 12px 20px;
-      display: block;
-      text-decoration: none;
-      color: #f1f1f1;
-      font-size: 15px;
-      cursor: pointer;
-      background: none;
-      border: none;
-      text-align: left;
-      width: 100%;
+    /* Styles for the former sub-items to give them an indented look */
+    .sidebar .sub-link {
+        padding-left: 40px; 
+        background: #1f4062; /* Slightly different background for visual grouping */
+    }
+    .sidebar .sub-link:hover {
+        background: #26466d;
+    }
+    .sidebar .sub-link.active {
+        background: #457b9d;
     }
 
-    .sidebar .dropdown__toggle:hover {
-      background: #26466d;
-    }
 
-    /* Dropdown Sub-menu Container */
-    .sidebar .dropdown__menu {
-      /* display: none; will be handled by JS toggle */
-      background: #1f4062;
-      padding: 0; /* Remove top padding */
-      list-style: none; /* Remove list bullets if used */
-      transition: height 0.3s ease-out; /* Optional: smooth transition */
-      overflow: hidden;
-      height: 0; /* JS will control height when 'expanded' class is added */
-    }
-
-    /* JavaScript will add this class to expand the menu */
-    .sidebar .dropdown__menu.expanded {
-      height: auto; /* Allows content to define height */
-      /* Note: In production, using max-height is often better for transitions */
-    }
-
-    .sidebar .dropdown__menu a {
-        padding-left: 40px; /* Indent sub-menu links */
-    }
-
-    /* Main container shift */
+    /* Main container shift - CRITICAL: Pushes content over */
     main.container {
-      /* Ensure this margin matches the sidebar width (230px) + padding (20px from body/container) */
-      margin-left: 250px; 
+      margin-left: 250px !important; /* Sidebar width (230px) + margin */
       padding-top: 20px !important;
       width: calc(100% - 250px);
     }
@@ -171,20 +144,24 @@ $path = $path === '' ? '/' : $path;
        Dashboard
     </a>
 
-    <div class="dropdown">
-      <div class="dropdown__toggle">
-        Manage ▾
-      </div>
-      
-      <div class="dropdown__menu">
-        <a href="<?= BASE_URL ?>/admin/crud/faculty.php">Faculty</a>
-        <a href="<?= BASE_URL ?>/admin/crud/research.php">Research</a>
-        <a href="<?= BASE_URL ?>/admin/crud/assignment.php">Assignments</a>
-        <a href="<?= BASE_URL ?>/admin/crud/agency.php">Agencies</a>
-        <a href="<?= BASE_URL ?>/admin/crud/funding.php">Funding</a>
-        <a href="<?= BASE_URL ?>/admin/audit_print.php">Audit (Print)</a>
-      </div>
-    </div>
+    <a href="<?= BASE_URL ?>/admin/crud/faculty.php" class="sub-link <?= strpos($path, '/admin/crud/faculty.php') !== false ? 'active' : '' ?>">
+        Faculty
+    </a>
+    <a href="<?= BASE_URL ?>/admin/crud/research.php" class="sub-link <?= strpos($path, '/admin/crud/research.php') !== false ? 'active' : '' ?>">
+        Research
+    </a>
+    <a href="<?= BASE_URL ?>/admin/crud/assignment.php" class="sub-link <?= strpos($path, '/admin/crud/assignment.php') !== false ? 'active' : '' ?>">
+        Assignments
+    </a>
+    <a href="<?= BASE_URL ?>/admin/crud/agency.php" class="sub-link <?= strpos($path, '/admin/crud/agency.php') !== false ? 'active' : '' ?>">
+        Agencies
+    </a>
+    <a href="<?= BASE_URL ?>/admin/crud/funding.php" class="sub-link <?= strpos($path, '/admin/crud/funding.php') !== false ? 'active' : '' ?>">
+        Funding
+    </a>
+    <a href="<?= BASE_URL ?>/admin/audit_print.php" class="sub-link <?= strpos($path, '/admin/audit_print.php') !== false ? 'active' : '' ?>">
+        Audit (Print)
+    </a>
 
     <a class="btn small" style="margin-top:20px; padding-left:20px;"
        href="<?= BASE_URL ?>/admin/logout.php">

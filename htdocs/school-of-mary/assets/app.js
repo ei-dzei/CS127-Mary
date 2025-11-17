@@ -385,8 +385,6 @@
           <p class="kv"><b>Status:</b> ${escapeHtml(d.RESEARCH_STATUS || '')}</p>
           <p class="kv"><b>Start:</b> ${escapeHtml(d.RESEARCH_STARTDATE || '')}</p>
           <p class="kv"><b>End:</b> ${escapeHtml(d.RESEARCH_ENDDATE || '—')}</p>
-          <div class="section-title">Assigned Faculty</div>
-          <div class="badges">${people || '—'}</div>
           <div class="section-title">Funding</div>
           <ul class="list">${funds || '<li>No funding recorded.</li>'}</ul>
           <p class="kv"><b>Total Funding:</b> ₱${escapeHtml(d.total_funding || '0.00')}</p>
@@ -400,4 +398,147 @@
       '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
     }[m]));
   }
+})();
+
+
+/* -------------------------
+    ADMIN CALENDAR WIDGET
+------------------------- */
+(function() {
+    const calendarEl = document.getElementById('calendar-app');
+    if (!calendarEl) return;
+
+    const monthYearEl = document.getElementById('current-month-year');
+    const daysGridEl = document.getElementById('calendar-days');
+    const prevBtn = document.getElementById('prev-month');
+    const nextBtn = document.getElementById('next-month');
+    
+    // Comprehensive list of dummy events (Holidays, Meetings, Deadlines)
+    const DUMMY_EVENTS = {
+        // --- November 2025 ---
+        '2025-11-01': [{ title: 'All Saints Day (Holiday)', type: 'holiday' }],
+        '2025-11-20': [{ title: 'Funding Deadline A', type: 'deadline' }],
+        '2025-11-25': [{ title: 'Faculty Meeting', type: 'meeting' }],
+        '2025-11-30': [{ title: 'Bonifacio Day (Holiday)', type: 'holiday' }],
+        
+        // --- December 2025 ---
+        '2025-12-10': [{ title: 'Project Review', type: 'meeting' }],
+        '2025-12-24': [{ title: 'Christmas Eve (Special Holiday)', type: 'holiday' }],
+        '2025-12-25': [{ title: 'Christmas Day (Holiday)', type: 'holiday' }],
+        '2025-12-30': [{ title: 'Rizal Day (Holiday)', type: 'holiday' }],
+        '2025-12-31': [{ title: 'New Year\'s Eve (Special Holiday)', type: 'holiday' }],
+        
+        // --- January 2026 ---
+        '2026-01-01': [{ title: 'New Year\'s Day (Holiday)', type: 'holiday' }],
+        '2026-01-20': [{ title: 'Q1 Budget Deadline', type: 'deadline' }],
+        
+        // --- February 2026 ---
+        '2026-02-25': [{ title: 'EDSA Revolution Anniversary (Holiday)', type: 'holiday' }],
+        
+        // --- April 2026 ---
+        '2026-04-09': [{ title: 'Araw ng Kagitingan (Holiday)', type: 'holiday' }],
+        '2026-04-10': [{ title: 'Good Friday (Holiday)', type: 'holiday' }],
+        
+        // --- May 2026 ---
+        '2026-05-01': [{ title: 'Labor Day (Holiday)', type: 'holiday' }],
+        
+        // --- June 2026 ---
+        '2026-06-12': [{ title: 'Independence Day (Holiday)', type: 'holiday' }],
+        
+        // --- August 2026 ---
+        '2026-08-21': [{ title: 'Ninoy Aquino Day (Holiday)', type: 'holiday' }],
+        '2026-08-31': [{ title: 'National Heroes Day (Holiday)', type: 'holiday' }],
+        
+        // --- November 2026 ---
+        '2026-11-01': [{ title: 'All Saints Day (Holiday)', type: 'holiday' }],
+        '2026-11-30': [{ title: 'Bonifacio Day (Holiday)', type: 'holiday' }],
+    };
+
+    let currentDate = new Date();
+    currentDate.setDate(1); // Set to the 1st of the current month
+
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+    function renderCalendar() {
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+
+        // Update header
+        monthYearEl.textContent = `${monthNames[month]} ${year}`;
+        daysGridEl.innerHTML = ''; // Clear previous days
+
+        // Determine start day of the month (0=Sun, 6=Sat)
+        const firstDayOfMonth = new Date(year, month, 1).getDay();
+        // Determine number of days in the month
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        // Determine days in the previous month
+        const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+        // Check current date (used for highlighting today)
+        const today = new Date();
+        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+
+        // 1. Fill leading days from the previous month
+        for (let i = 0; i < firstDayOfMonth; i++) {
+            const dayNum = daysInPrevMonth - firstDayOfMonth + i + 1;
+            const cell = document.createElement('div');
+            cell.classList.add('calendar-day', 'calendar-day--outside');
+            cell.innerHTML = `<span class="calendar-day-number">${dayNum}</span>`;
+            daysGridEl.appendChild(cell);
+        }
+
+        // 2. Fill current month days
+        for (let i = 1; i <= daysInMonth; i++) {
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+            const cell = document.createElement('div');
+            cell.classList.add('calendar-day');
+            
+            // Highlight today
+            if (dateStr === todayStr) {
+                cell.classList.add('calendar-day--today');
+            }
+
+            cell.innerHTML = `<span class="calendar-day-number">${i}</span>`;
+            
+            // Add events for this day
+            const events = DUMMY_EVENTS[dateStr];
+            if (events) {
+                events.forEach(event => {
+                    const eventEl = document.createElement('span');
+                    eventEl.classList.add('calendar-event', `type-${event.type}`);
+                    eventEl.title = event.title; // This enables the hover/tooltip effect
+                    eventEl.textContent = event.title;
+                    cell.appendChild(eventEl);
+                });
+            }
+
+            daysGridEl.appendChild(cell);
+        }
+
+        // 3. Fill trailing days from the next month
+        const totalCells = firstDayOfMonth + daysInMonth;
+        // Check if we need a 6th row (42 cells total)
+        const totalGridCells = totalCells > 35 ? 42 : 35;
+        const remainingCells = totalGridCells - totalCells; 
+
+        for (let i = 1; i <= remainingCells; i++) {
+            const cell = document.createElement('div');
+            cell.classList.add('calendar-day', 'calendar-day--outside');
+            cell.innerHTML = `<span class="calendar-day-number">${i}</span>`;
+            daysGridEl.appendChild(cell);
+        }
+    }
+
+    function changeMonth(delta) {
+        currentDate.setMonth(currentDate.getMonth() + delta);
+        renderCalendar();
+    }
+
+    // Attach event listeners
+    prevBtn.addEventListener('click', () => changeMonth(-1));
+    nextBtn.addEventListener('click', () => changeMonth(1));
+
+    // Initial render
+    renderCalendar();
 })();
