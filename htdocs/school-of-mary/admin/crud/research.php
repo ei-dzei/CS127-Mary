@@ -30,6 +30,15 @@ if ($action === 'create') {
   if (!v_date_nullable($_POST['RESEARCH_ENDDATE'] ?? '')) guardFail('Invalid end date');
   if (!v_enum_exists($pdo, 'RESEARCH_STATUS', 'STATUS_CODE', $_POST['RESEARCH_STATUS'] ?? null)) guardFail('Invalid status');
 
+  // --- START: DATE COMPARISON CHECK (CREATE) ---
+  $startDate = $_POST['RESEARCH_STARTDATE'];
+  $endDate   = $_POST['RESEARCH_ENDDATE'] ?? '';
+
+  if (!empty($endDate) && (strtotime($endDate) < strtotime($startDate))) {
+    guardFail('The End Date cannot be earlier than the Start Date.'); 
+  }
+  // --- END: DATE COMPARISON CHECK (CREATE) ---
+
   $pdo->prepare("INSERT INTO RESEARCH (RESEARCH_TITLE, RESEARCH_STARTDATE, RESEARCH_ENDDATE, RESEARCH_STATUS) VALUES (?,?,?,?)")
       ->execute([
         $_POST['RESEARCH_TITLE'],
@@ -50,6 +59,15 @@ if ($action === 'update') {
   if (!v_date($_POST['RESEARCH_STARTDATE'] ?? ''))     guardFail('Invalid start date');
   if (!v_date_nullable($_POST['RESEARCH_ENDDATE'] ?? '')) guardFail('Invalid end date');
   if (!v_enum_exists($pdo, 'RESEARCH_STATUS', 'STATUS_CODE', $_POST['RESEARCH_STATUS'] ?? null)) guardFail('Invalid status');
+
+  // --- START: DATE COMPARISON CHECK (UPDATE) ---
+  $startDate = $_POST['RESEARCH_STARTDATE'];
+  $endDate   = $_POST['RESEARCH_ENDDATE'] ?? ''; 
+
+  if (!empty($endDate) && (strtotime($endDate) < strtotime($startDate))) {
+    guardFail('The End Date cannot be earlier than the Start Date.');
+  }
+  // --- END: DATE COMPARISON CHECK (UPDATE) ---
 
   $pdo->prepare("UPDATE RESEARCH SET RESEARCH_TITLE=?, RESEARCH_STARTDATE=?, RESEARCH_ENDDATE=?, RESEARCH_STATUS=? WHERE RESEARCH_ID=?")
       ->execute([
@@ -229,8 +247,8 @@ $CSRF = csrf_token();
     <input type="hidden" name="action" value="create">
 
     <div class="field" style="grid-column: span 8"><label>Title</label><input class="input" name="RESEARCH_TITLE" required></div>
-    <div class="field" style="grid-column: span 2"><label>Start</label><input class="input" type="date" name="RESEARCH_STARTDATE" required></div>
-    <div class="field" style="grid-column: span 2"><label>End</label><input class="input" type="date" name="RESEARCH_ENDDATE"></div>
+    <div class="field" style="grid-column: span 2"><label>Start</label><input class="input" type="date" name="RESEARCH_STARTDATE" id="research_startdate" required></div>
+    <div class="field" style="grid-column: span 2"><label>End</label><input class="input" type="date" name="RESEARCH_ENDDATE" id="research_enddate"></div>
     <div class="field" style="grid-column: span 3">
       <label>Status</label>
       <select class="input" name="RESEARCH_STATUS" required>
@@ -290,7 +308,6 @@ $CSRF = csrf_token();
     </table>
   </div>
 
-  <!-- Pagination -->
   <div class="pagination">
     <?php
       $qs = function($p) use ($q, $status, $from, $to, $sort) {
@@ -312,7 +329,6 @@ $CSRF = csrf_token();
   </div>
 </section>
 
-<!-- --------- Modal HTML --------- -->
 <div class="admin-modal" id="researchModal" hidden>
   <div class="admin-modal__backdrop" data-close="1"></div>
   <div class="admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="researchModalTitle">
@@ -359,7 +375,7 @@ $CSRF = csrf_token();
 </div>
 
 <script>
-// Modal controller
+// Modal controller (Existing JS, handles opening/closing and data transfer)
 (function(){
   const modal = document.getElementById('researchModal');
   const form  = modal.querySelector('form');
