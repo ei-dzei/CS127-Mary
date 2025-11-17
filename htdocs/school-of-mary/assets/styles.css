@@ -292,6 +292,35 @@ th {
 }
 
 /* =======================================
+   FOOTER ALIGNMENT FIX (Desktop Only)
+   ======================================= */
+
+/* 1. Ensure the footer container pushes over like the main content container. */
+body.aside\.sidebar .footer .container {
+    /* If your main content is centered, the footer container must be shifted. */
+    padding-left: calc(var(--sidebar-width) + 2%); /* 2% is for the 94% width gap */
+}
+
+/* 2. Alternatively, if the footer is set to be full width: */
+@media (min-width: 1025px) {
+    /* Target the body class that indicates desktop sidebar is active */
+    body.aside\.sidebar .footer {
+        padding-left: var(--sidebar-width);
+        /* If the footer is not full-width, you might need to adjust width */
+        width: calc(100% - var(--sidebar-width));
+        /* You may need to set position: relative to establish a context */
+        position: relative; 
+        left: var(--sidebar-width); 
+    }
+    
+    /* If the footer is inside a standard full-width element: */
+    body.aside\.sidebar .footer .container {
+        /* Set margin-left to push the content clear of the fixed sidebar */
+        margin-left: var(--sidebar-width);
+    }
+}
+
+/* =======================================
    SIDEBAR (#sidebar) & LAYOUT
    ======================================= */
 /* Sidebar default styles (Mobile-first, always fixed at top-left) */
