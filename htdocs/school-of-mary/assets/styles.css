@@ -168,19 +168,22 @@ th {
 }
 
 /* =======================================
-   FOOTER (IMPROVED STYLES - Desktop Layout)
+   FOOTER
    ======================================= */
 
 .footer {
-    background: #1d3557; 
+    background: #1d3557; /* Dark Blue Background */
     color: #f1f1f1;
     padding: 2rem 0; 
     margin-top: auto;
     font-size: 0.95rem;
-    /* FOOTER Desktop Alignment Fix */
-    width: calc(100% - var(--sidebar-width));
-    position: relative; 
-    left: var(--sidebar-width); 
+    
+    /* CRITICAL LAYOUT FIXES for Desktop Stability: */
+    /* Pushes the footer past the 230px fixed sidebar */
+    margin-left: 230px; 
+    /* Ensures the footer spans only the remaining width of the viewport */
+    width: calc(100% - 230px); 
+    position: relative; /* Useful for general stacking/positioning */
 }
 
 .footer__grid {
@@ -188,9 +191,6 @@ th {
     grid-template-columns: repeat(3, 1fr);
     gap: 20px; 
 }
-
-/* Removed responsive adjustments for 3 columns */
-
 .footer__logo {
     width: 50px; 
     height: auto;
@@ -205,7 +205,6 @@ th {
     font-size: 0.75rem;
     color: #92b8d0;
 }
-
 .footer__heading {
     color: #a8dadc;
     font-size: 1.0rem; 
@@ -213,7 +212,6 @@ th {
     margin-bottom: 10px; 
     font-family: 'Patua One', serif;
 }
-
 .footer__list {
     list-style: none;
     padding: 0;
@@ -231,17 +229,11 @@ th {
 .footer__list a:hover {
     color: #457b9d; 
 }
-
-/* Contact list specific styling */
 .footer__contact li {
     display: flex;
     align-items: center;
     gap: 8px;
 }
-
-/* ---------------------------------------
-   FOOTER QUICK LINKS ADJUSTMENTS (Horizontal)
-   --------------------------------------- */
 .footer__inline-links a {
     color: #f1f1f1; 
     text-decoration: none;
@@ -256,7 +248,6 @@ th {
     white-space: nowrap; 
     overflow-x: auto;
 }
-
 .footer__social {
     display: flex;
     gap: 10px; 
@@ -279,7 +270,6 @@ th {
     background: #a8dadc;
     color: #1d3557;
 }
-
 .footer__note {
     font-size: 0.85rem;
     color: #a8dadc;

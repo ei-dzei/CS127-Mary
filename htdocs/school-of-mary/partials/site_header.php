@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/init.php'; // Line 2: init.php contains the original current_path() definition
+require_once __DIR__ . '/init.php';
 
 $pageTitle = $pageTitle ?? 'School of Mary';
 $isAdmin   = is_admin();
@@ -10,14 +10,15 @@ $uri  = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 $path = preg_replace('#^' . preg_quote(BASE_URL, '#') . '#', '', $uri);
 $path = $path === '' ? '/' : $path;
 
-// Helper function for active links (You already have the logic for $path)
+
+// Helper function for active links
 function is_active(string $currentPath, string $targetPath) {
     return $currentPath === $targetPath ? 'active' : '';
 }
 function is_active_sub(string $currentPath, string $targetPartial) {
     return strpos($currentPath, $targetPartial) !== false ? 'active' : '';
 }
-$currentPath = current_path(); 
+$currentPath = current_path();
 ?>
 <!doctype html>
 <html lang="en">
@@ -35,8 +36,7 @@ $currentPath = current_path();
 
   <style>
     /* ----------------------------------------------------------------- */
-    /* INLINE STYLES (REQUIRED FOR TOGGLE FUNCTIONALITY)                  */
-    /* NOTE: MOST STYLES SHOULD BE MOVED TO styles.css (See Section 2)   */
+    /* INLINE STYLES (REQUIRED FOR TOGGLE FUNCTIONALITY AND LAYOUT FIXES) */
     /* ----------------------------------------------------------------- */
     
     body {
@@ -73,12 +73,13 @@ $currentPath = current_path();
     /* === 3. Main Content Shift (Desktop View) === */
     main.container {
         flex-grow: 1;
-        margin-left: 230px; /* Space for the fixed sidebar */
+        /* CRITICAL: Offset for fixed sidebar */
+        margin-left: 230px; 
         padding: 20px;
         min-height: 100vh;
     }
 
-    /* === 4. Sidebar Styles (Moved from your inline PHP) === */
+    /* === 4. Sidebar Styles === */
     .sidebar .brand {
         display: flex;
         align-items: center;
@@ -114,12 +115,12 @@ $currentPath = current_path();
         background: #457b9d;
     }
     .admin-stripe {
-      padding: 10px;
-      background: #ffd166;
-      font-weight: bold;
-      text-align: center;
-      /* Restore desktop margin for stripe */
-      margin-left: 230px;
+        padding: 10px;
+        background: #ffd166;
+        font-weight: bold;
+        text-align: center;
+        /* CRITICAL FIX: Offset stripe past the sidebar */
+        margin-left: 230px;
     }
     
     /* === 5. Mobile/Toggle Styles (CRITICAL) === */
@@ -130,7 +131,7 @@ $currentPath = current_path();
         left: 15px;
         z-index: 1001;
         padding: 8px 12px;
-        background: #457b9d; /* Use an accent color */
+        background: #457b9d; 
         color: #fff;
         border: none;
         border-radius: 8px;
@@ -139,21 +140,21 @@ $currentPath = current_path();
 
     @media (max-width: 1024px) {
         #sidebar-toggle {
-            display: block; /* Show button on small screens */
+            display: block; 
         }
         .sidebar {
-            transform: translateX(-100%); /* Hide sidebar off-screen initially */
-            box-shadow: 2px 0 5px rgba(0,0,0,0.5); /* Add shadow for overlay effect */
+            transform: translateX(-100%); 
+            box-shadow: 2px 0 5px rgba(0,0,0,0.5); 
         }
         .app-wrapper.sidebar-open .sidebar {
-            transform: translateX(0); /* Show sidebar when class is applied */
+            transform: translateX(0); 
         }
         main.container {
-            margin-left: 0; /* Content is full width on mobile */
+            margin-left: 0; 
             width: 100%;
         }
         .admin-stripe {
-          margin-left: 0; /* Stripe is full width on mobile */
+          margin-left: 0; 
         }
     }
     /* ----------------------------------------------------------------- */
@@ -198,6 +199,7 @@ $currentPath = current_path();
            class="<?= ($path==='/admin/dashboard.php' || $path==='/admin/') ? 'active' : '' ?>">
            Dashboard
         </a>
+
         <a href="<?= BASE_URL ?>/admin/crud/faculty.php" class="sub-link <?= strpos($path, '/admin/crud/faculty.php') !== false ? 'active' : '' ?>">
             Faculty
         </a>
