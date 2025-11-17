@@ -12,12 +12,12 @@
         </div>
         <div class="footer__col">
             <h4 class="footer__heading">Quick Links</h4>
-            <ul class="footer__list">
-                <li><a href="<?= BASE_URL ?>/public/">Home</a></li>
-                <li><a href="<?= BASE_URL ?>/public/faculty.php">Faculty</a></li>
-                <li><a href="<?= BASE_URL ?>/public/research.php">Research</a></li>
-                <li><a href="<?= BASE_URL ?>/admin/login.php">Admin Login</a></li>
-            </ul>
+            <div class="footer__inline-links">
+                <a href="<?= BASE_URL ?>/public/">Home</a> |
+                <a href="<?= BASE_URL ?>/public/faculty.php">Faculty</a> |
+                <a href="<?= BASE_URL ?>/public/research.php">Research</a> |
+                <a href="<?= BASE_URL ?>/admin/login.php">Admin Login</a>
+            </div>
         </div>
 
         <div class="footer__col">
@@ -28,18 +28,6 @@
                 <li><i class="icon">📍</i> 123 Research Lane, City, 1000</li>
                 <li><i class="icon">🕒</i> Mon - Fri: 8:00 AM - 5:00 PM</li>
             </ul>
-        </div>
-
-        <div class="footer__col">
-            <h4 class="footer__heading">Connect</h4>
-            <div class="footer__social">
-                <a href="#" aria-label="Facebook"><i class="icon">f</i></a>
-                <a href="#" aria-label="Twitter"><i class="icon">t</i></a>
-                <a href="#" aria-label="LinkedIn"><i class="icon">in</i></a>
-            </div>
-            <p class="footer__note">
-                Dedicated to advancing knowledge through scholarly pursuit.
-            </p>
         </div>
     </div>
 </footer>
