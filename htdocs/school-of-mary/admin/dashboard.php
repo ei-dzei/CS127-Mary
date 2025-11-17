@@ -226,13 +226,11 @@ require_once __DIR__ . '/../partials/site_header.php';
 
 <section class="container fade-in" style="margin-bottom: 16px;">
   <div class="dash-wrap">
-    <!-- Header  -->
     <div class="hero-card">
       <h1 style="margin:0 0 6px;">Admin Dashboard</h1>
       <p class="muted" style="margin:0;">Overview of your database and the latest changes in real time.</p>
     </div>
 
-    <!-- KPI cards  -->
     <div class="kpi-card kpi-col">
       <div>
         <div class="kpi-emoji">👩‍🏫</div>
@@ -287,7 +285,33 @@ require_once __DIR__ . '/../partials/site_header.php';
       <a class="btn-link" target="_blank" href="<?= app_url('/admin/audit_print.php'); ?>">Open Print View</a>
     </div>
 
-    <!-- Top Research by Total Funding -->
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-emoji">🗓️</div>
+            <h3 style="margin:0;">Research Calendar (Upcoming Deadlines & Meetings)</h3>
+        </div>
+        
+        <div id="calendar-app" class="panel" style="padding: 0; border: none; box-shadow: none;">
+            <div class="calendar-header">
+                <button id="prev-month" class="btn small">← Previous</button>
+                <h2 id="current-month-year">Loading...</h2>
+                <button id="next-month" class="btn small">Next →</button>
+            </div>
+            
+            <div class="calendar-grid-header">
+                <div>SUN</div>
+                <div>MON</div>
+                <div>TUE</div>
+                <div>WED</div>
+                <div>THU</div>
+                <div>FRI</div>
+                <div>SAT</div>
+            </div>
+
+            <div id="calendar-days" class="calendar-grid">
+                </div>
+        </div>
+    </div>
     <div class="section-card">
       <div class="section-header">
         <div class="section-emoji">🏆</div>
@@ -321,7 +345,6 @@ require_once __DIR__ . '/../partials/site_header.php';
             <?php endforeach; ?>
           </tbody>
         </table>
-        <!-- Pagination -->
         <div class="pagination">
           <?php
             $base  = app_url('/admin/dashboard.php');
@@ -338,7 +361,6 @@ require_once __DIR__ . '/../partials/site_header.php';
       <?php endif; ?>
     </div>
 
-    <!-- Top Faculty by Total Assignments -->
     <div class="section-card">
       <div class="section-header">
         <div class="section-emoji">👥</div>
@@ -373,7 +395,6 @@ require_once __DIR__ . '/../partials/site_header.php';
             <?php endforeach; ?>
           </tbody>
         </table>
-        <!-- Pagination -->
         <div class="pagination">
           <?php
             $base  = app_url('/admin/dashboard.php');
@@ -390,7 +411,6 @@ require_once __DIR__ . '/../partials/site_header.php';
       <?php endif; ?>
     </div>
 
-    <!-- Live Activity -->
     <div class="section-card">
       <div class="section-header">
         <div class="section-emoji">📜</div>
@@ -423,7 +443,6 @@ require_once __DIR__ . '/../partials/site_header.php';
             <?php endforeach; ?>
           </tbody>
         </table>
-        <!-- Pagination -->
         <div class="pagination">
           <?php
             $base   = app_url('/admin/dashboard.php');
@@ -443,7 +462,6 @@ require_once __DIR__ . '/../partials/site_header.php';
   </div>
 </section>
 
-<!-- KPI auto-refresh via /admin/api/dashboard_stats.php -->
 <script>
 (function(){
   const ENDPOINT = "<?= app_url('/admin/api/dashboard_stats.php'); ?>";
