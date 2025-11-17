@@ -1,19 +1,18 @@
 <?php
-require_once __DIR__ . '/init.php'; 
-
+require_once __DIR__ . '/init.php';
 $pageTitle = $pageTitle ?? 'School of Mary';
 $isAdmin   = is_admin();
 $inAdmin   = in_admin_area();
 
+/* Active link helper */
 $uri  = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 $path = preg_replace('#^' . preg_quote(BASE_URL, '#') . '#', '', $uri);
 $path = $path === '' ? '/' : $path;
 
-if (!function_exists('current_path')) {
-    function current_path() {
-        global $path;
-        return $path;
-    }
+// Function to check current path for active class (Assuming current_path() returns $path or similar logic)
+function current_path() {
+    global $path;
+    return $path;
 }
 ?>
 <!doctype html>
@@ -29,7 +28,7 @@ if (!function_exists('current_path')) {
   <link rel="stylesheet" href="<?= BASE_URL ?>/assets/styles.css" />
   <link rel="stylesheet" href="<?= BASE_URL ?>/assets/modal.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  
+
   <style>
     /* ----------------------------------------------------------------- */
     /* INLINE STYLES (REQUIRED FOR TOGGLE FUNCTIONALITY)                  */
@@ -41,6 +40,7 @@ if (!function_exists('current_path')) {
         font-family: Arial, sans-serif;
         background: #f8f9fa;
     }
+
     /* === 1. Layout Container === */
     .app-wrapper {
         display: flex;
@@ -114,8 +114,6 @@ if (!function_exists('current_path')) {
       background: #ffd166;
       font-weight: bold;
       text-align: center;
-      /* Ensures the stripe accounts for the sidebar shift on desktop */
-      margin-left: 230px; 
     }
     
     /* === 5. Mobile/Toggle Styles (CRITICAL) === */
@@ -172,26 +170,26 @@ if (!function_exists('current_path')) {
       </a>
 
       <a href="<?= BASE_URL ?>/public/"
-         class="<?= $path === '/public/' || $path === '/' ? 'active' : '' ?>">
+         class="<?= current_path()=== BASE_URL.'/public/' || current_path()==='/public/' ? 'active' : '' ?>">
          Home
       </a>
 
       <a href="<?= BASE_URL ?>/public/faculty.php"
-         class="<?= strpos($path, '/public/faculty.php') !== false ? 'active' : '' ?>">
+         class="<?= strpos(current_path(), '/public/faculty') !== false ? 'active' : '' ?>">
          Faculty
       </a>
 
       <a href="<?= BASE_URL ?>/public/research.php"
-         class="<?= strpos($path, '/public/research.php') !== false ? 'active' : '' ?>">
+         class="<?= strpos(current_path(), '/public/research') !== false ? 'active' : '' ?>">
          Research
       </a>
 
       <hr style="border-color:#ffffff30; margin:10px 0;" />
 
       <?php if ($isAdmin): ?>
-        
+
         <a href="<?= BASE_URL ?>/admin/dashboard.php"
-           class="<?= $path === '/admin/dashboard.php' || $path === '/admin/' ? 'active' : '' ?>">
+           class="<?= ($path==='/admin/dashboard.php' || $path==='/admin/') ? 'active' : '' ?>">
            Dashboard
         </a>
 

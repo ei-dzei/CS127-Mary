@@ -207,10 +207,6 @@ $CSRF = csrf_token();
     align-items: center;
     justify-content: center;
 }
-.actions-cell .bi {
-    font-family: "bootstrap-icons" !important; /* Ensure the correct font is used */
-    font-style: normal;
-}
 </style>
 
 <section class="panel fade-in crud-header-card">

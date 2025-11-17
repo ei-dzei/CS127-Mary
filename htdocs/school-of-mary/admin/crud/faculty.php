@@ -161,17 +161,6 @@ $CSRF = csrf_token();
 .btn-primary:hover{ filter:brightness(.94); box-shadow:0 4px 10px rgba(0,0,0,.06); }
 .btn-ghost{ background:#fff; color: var(--color-accent); border-color: rgba(11,83,148,.35); }
 .btn-ghost:hover{ background: rgba(11,83,148,.05); }
-
-/* Custom CSS for Icon buttons in the table */
-.actions-cell .btn.small {
-    padding: 6px 10px; 
-    width: 30px;      
-    height: 30px;     
-    line-height: 1;   
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
 </style>
 
 <section class="panel fade-in crud-header-card">
@@ -188,6 +177,7 @@ $CSRF = csrf_token();
     </form>
   </div>
 
+  <!-- Filter / Sort -->
   <form method="get" class="grid filter-bar" style="margin-bottom:10px;">
     <div class="field" style="grid-column: span 4">
       <label>Search (name or email)</label>
@@ -294,22 +284,13 @@ $CSRF = csrf_token();
               data-email="<?= htmlspecialchars($row['FACULTY_EMAIL'], ENT_QUOTES); ?>"
               data-rank="<?= htmlspecialchars($row['RANK_ID'], ENT_QUOTES); ?>"
               data-dept="<?= htmlspecialchars($row['DEPT_ID'], ENT_QUOTES); ?>"
-              title="Edit Record" 
-            >
-              <i class="bi bi-pencil"></i>
-            </button>
+            >Edit</button>
 
             <form method="post" onsubmit="return confirm('Delete faculty?');" style="display:inline">
               <input type="hidden" name="csrf" value="<?= $CSRF; ?>">
               <input type="hidden" name="action" value="delete">
               <input type="hidden" name="FACULTY_ID" value="<?= (int)$row['FACULTY_ID']; ?>">
-              <button 
-                  class="btn small" 
-                  style="background:#b91c1c;border-color:#b91c1c"
-                  title="Delete Record"
-              >
-                <i class="bi bi-trash"></i>
-              </button>
+              <button class="btn small" style="background:#b91c1c;border-color:#b91c1c">Delete</button>
             </form>
           </td>
         </tr>
@@ -321,6 +302,7 @@ $CSRF = csrf_token();
     </table>
   </div>
 
+  <!-- Pagination -->
   <div class="pagination">
     <?php
       $qs = function($p) use ($q, $rank, $dept, $sort) {
@@ -341,6 +323,7 @@ $CSRF = csrf_token();
   </div>
 </section>
 
+<!-- --------- Modal HTML --------- -->
 <div class="admin-modal" id="facultyModal" hidden>
   <div class="admin-modal__backdrop" data-close="1"></div>
   <div class="admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="facultyModalTitle">
