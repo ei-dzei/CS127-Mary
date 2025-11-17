@@ -1,24 +1,13 @@
 <?php
 require_once __DIR__ . '/init.php';
-
-$pageTitle = $pageTitle ?? 'School of Mary';
+$pageTitle = $pageTitle ?? 'Mary ';
 $isAdmin   = is_admin();
 $inAdmin   = in_admin_area();
 
-/* Active link helper */
+/* ----- Active link helper ----- */
 $uri  = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 $path = preg_replace('#^' . preg_quote(BASE_URL, '#') . '#', '', $uri);
-$path = $path === '' ? '/' : $path;
-
-
-// Helper function for active links
-function is_active(string $currentPath, string $targetPath) {
-    return $currentPath === $targetPath ? 'active' : '';
-}
-function is_active_sub(string $currentPath, string $targetPartial) {
-    return strpos($currentPath, $targetPartial) !== false ? 'active' : '';
-}
-$currentPath = current_path();
+$path = $path === '' ? '/' : $path; 
 ?>
 <!doctype html>
 <html lang="en">
