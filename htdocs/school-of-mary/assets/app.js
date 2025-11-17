@@ -238,34 +238,38 @@
   };
 })();
 /* -------------------------
-    SIDEBAR TOGGLE WIDGET (NEW)
+    SIDEBAR TOGGLE WIDGET
 ------------------------- */
 (function() {
     const sidebarToggle = document.querySelector("#sidebar-toggle");
-    const appWrapper = document.querySelector("#app-wrapper");
-    const sidebar = document.querySelector("#sidebar"); // Targeting the aside element
+    // CHANGE THIS LINE: Target the <body> element directly.
+    const appWrapper = document.body; 
+    const sidebar = document.querySelector("#sidebar"); 
+    const mainContainer = document.querySelector('main.container'); // Target the main content area
 
-    if (sidebarToggle && appWrapper && sidebar) {
+    // Check if the required elements exist
+    if (sidebarToggle && sidebar && mainContainer) {
         
-        // Use 'sidebar-open' class to manage the state
         const toggleSidebar = () => {
-            appWrapper.classList.toggle('sidebar-open');
+             // The class is toggled on the <body>
+             appWrapper.classList.toggle('sidebar-open');
         };
 
         // 1. Handle click events
         sidebarToggle.addEventListener("click", toggleSidebar);
 
-        // 2. Close sidebar if an item is clicked (primarily for mobile UX)
+        // 2. Close sidebar if an item is clicked (for mobile UX)
         sidebar.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', () => {
-                if (window.innerWidth <= 1024) {
+                // Assuming mobile is under 1024px based on common breakpoints
+                if (window.innerWidth <= 1024) { 
                     appWrapper.classList.remove('sidebar-open');
                 }
             });
         });
 
-        // 3. Close sidebar if the user clicks outside (e.g., on the main content)
-        document.querySelector('main.container').addEventListener('click', () => {
+        // 3. Close sidebar if the user clicks outside (on the main content)
+        mainContainer.addEventListener('click', () => {
              if (window.innerWidth <= 1024 && appWrapper.classList.contains('sidebar-open')) {
                  appWrapper.classList.remove('sidebar-open');
              }
