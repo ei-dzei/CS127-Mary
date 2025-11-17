@@ -413,21 +413,49 @@
     const prevBtn = document.getElementById('prev-month');
     const nextBtn = document.getElementById('next-month');
     
-    // Simple dummy event data (replace with API calls later)
+    // Comprehensive list of dummy events (Holidays, Meetings, Deadlines)
     const DUMMY_EVENTS = {
-        // Current month is November 2025 (11)
-        '2025-11-01': [{ title: 'All Saints Day (Holiday)', type: 'holiday' }], // Added holiday
+        // --- November 2025 ---
+        '2025-11-01': [{ title: 'All Saints Day (Holiday)', type: 'holiday' }],
         '2025-11-20': [{ title: 'Funding Deadline A', type: 'deadline' }],
         '2025-11-25': [{ title: 'Faculty Meeting', type: 'meeting' }],
-        '2025-11-30': [{ title: 'Bonifacio Day (Holiday)', type: 'holiday' }], // Added holiday
-        // Next month is December 2025 (12)
+        '2025-11-30': [{ title: 'Bonifacio Day (Holiday)', type: 'holiday' }],
+        
+        // --- December 2025 ---
         '2025-12-10': [{ title: 'Project Review', type: 'meeting' }],
-        '2025-12-25': [{ title: 'Christmas Day (Holiday)', type: 'holiday' }], // Added holiday
-        '2025-12-31': [{ title: 'End of Year Reports', type: 'deadline' }]
+        '2025-12-24': [{ title: 'Christmas Eve (Special Holiday)', type: 'holiday' }],
+        '2025-12-25': [{ title: 'Christmas Day (Holiday)', type: 'holiday' }],
+        '2025-12-30': [{ title: 'Rizal Day (Holiday)', type: 'holiday' }],
+        '2025-12-31': [{ title: 'New Year\'s Eve (Special Holiday)', type: 'holiday' }],
+        
+        // --- January 2026 ---
+        '2026-01-01': [{ title: 'New Year\'s Day (Holiday)', type: 'holiday' }],
+        '2026-01-20': [{ title: 'Q1 Budget Deadline', type: 'deadline' }],
+        
+        // --- February 2026 ---
+        '2026-02-25': [{ title: 'EDSA Revolution Anniversary (Holiday)', type: 'holiday' }],
+        
+        // --- April 2026 ---
+        '2026-04-09': [{ title: 'Araw ng Kagitingan (Holiday)', type: 'holiday' }],
+        '2026-04-10': [{ title: 'Good Friday (Holiday)', type: 'holiday' }],
+        
+        // --- May 2026 ---
+        '2026-05-01': [{ title: 'Labor Day (Holiday)', type: 'holiday' }],
+        
+        // --- June 2026 ---
+        '2026-06-12': [{ title: 'Independence Day (Holiday)', type: 'holiday' }],
+        
+        // --- August 2026 ---
+        '2026-08-21': [{ title: 'Ninoy Aquino Day (Holiday)', type: 'holiday' }],
+        '2026-08-31': [{ title: 'National Heroes Day (Holiday)', type: 'holiday' }],
+        
+        // --- November 2026 ---
+        '2026-11-01': [{ title: 'All Saints Day (Holiday)', type: 'holiday' }],
+        '2026-11-30': [{ title: 'Bonifacio Day (Holiday)', type: 'holiday' }],
     };
 
     let currentDate = new Date();
-    currentDate.setDate(1); // Set to the 1st of the current month (Nov 1, 2025)
+    currentDate.setDate(1); // Set to the 1st of the current month
 
     const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
@@ -446,6 +474,11 @@
         // Determine days in the previous month
         const daysInPrevMonth = new Date(year, month, 0).getDate();
 
+        // Check current date (used for highlighting today)
+        const today = new Date();
+        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+
         // 1. Fill leading days from the previous month
         for (let i = 0; i < firstDayOfMonth; i++) {
             const dayNum = daysInPrevMonth - firstDayOfMonth + i + 1;
@@ -462,8 +495,7 @@
             cell.classList.add('calendar-day');
             
             // Highlight today
-            const today = new Date();
-            if (i === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+            if (dateStr === todayStr) {
                 cell.classList.add('calendar-day--today');
             }
 
@@ -475,7 +507,7 @@
                 events.forEach(event => {
                     const eventEl = document.createElement('span');
                     eventEl.classList.add('calendar-event', `type-${event.type}`);
-                    eventEl.title = event.title; // for tooltip
+                    eventEl.title = event.title; // <--- This enables the hover/tooltip effect
                     eventEl.textContent = event.title;
                     cell.appendChild(eventEl);
                 });

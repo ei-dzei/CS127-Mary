@@ -231,6 +231,10 @@ require_once __DIR__ . '/../partials/site_header.php';
     font-size: 0.7rem; /* Tiny event text */
     padding: 1px 2px;
   }
+  /* Added style for today's date */
+  .calendar-day--today {
+    background-color: #e6f7ff;
+  }
 
   .kpi-card,
   .section-card,

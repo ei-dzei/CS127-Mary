@@ -913,21 +913,22 @@ th {
 
 /* ======================================= ADMIN CALENDAR STYLES ======================================= */
 
-/* --- NEW LAYOUT STYLES --- */
-/* New Dual Column Layout */
+/* ======================================= ADMIN CALENDAR STYLES ======================================= */
+
+/* --- NEW LAYOUT STYLES (If not already in your CSS) --- */
 .dual-column-layout {
     grid-column: span 12;
     display: grid;
     grid-template-columns: 2fr 1fr; /* 2 parts for content, 1 part for calendar */
     gap: 16px;
-    margin-top: 16px; /* Added separation from KPI cards */
+    margin-top: 16px;
 }
 .research-col { grid-column: span 1; }
 .calendar-col { grid-column: span 1; }
 
 @media (max-width: 960px) {
     .dual-column-layout {
-      grid-template-columns: 1fr; /* Stack on smaller screens */
+      grid-template-columns: 1fr; 
     }
     .research-col, .calendar-col { grid-column: span 1; }
 }
@@ -987,61 +988,56 @@ th {
     color: #aaa;
 }
 
+/* --- CALENDAR COMPACT OVERRIDES --- */
+.calendar-header .btn.small {
+    padding: 4px 8px; 
+}
+.calendar-header h2 {
+    font-size: 1rem; 
+}
+.calendar-grid-header > div {
+    padding: 5px 3px;
+    font-size: 0.8rem; 
+}
+.calendar-day {
+    min-height: 55px; 
+    padding: 3px;
+}
+.calendar-day--today { /* Highlight for today's date */
+    background-color: #e6f7ff;
+    border: 1px solid #cceeff;
+}
 .calendar-day-number {
     font-weight: 600;
     display: block;
-    margin-bottom: 3px;
+    margin-bottom: 2px;
     color: #333;
+    font-size: 0.9rem; /* Smaller day number */
 }
-
 .calendar-event {
-    padding: 2px 4px;
+    font-size: 0.7rem; /* Tiny event text */
+    padding: 1px 2px;
     border-radius: 4px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-/* --- CALENDAR COMPACT OVERRIDES (To make it smaller) --- */
-.calendar-header .btn.small {
-    padding: 4px 8px; /* Smaller buttons */
-}
-.calendar-header h2 {
-    font-size: 1rem; /* Smaller month name */
-}
-.calendar-grid-header > div {
-    padding: 5px 3px;
-    font-size: 0.8rem; /* Smaller day names */
-}
-.calendar-day {
-    min-height: 55px; /* Significantly smaller cells */
-    padding: 3px;
-}
-.calendar-day-number {
-    font-size: 0.9rem; /* Smaller day number */
-    margin-bottom: 2px;
-}
-.calendar-event {
-    font-size: 0.7rem; /* Tiny event text */
-    padding: 1px 2px;
-}
-
 /* --- EVENT STYLES --- */
 .calendar-event.type-deadline {
-    background-color: #f7b2b2; /* Light Red */
+    background-color: #f7b2b2; 
     color: #8c0000;
     border-left: 3px solid #d90000;
 }
 
 .calendar-event.type-meeting {
-    background-color: #b2e8f7; /* Light Blue */
+    background-color: #b2e8f7; 
     color: #00608c;
     border-left: 3px solid #0099cc;
 }
 
-/* --- NEW HOLIDAY STYLE --- */
 .calendar-event.type-holiday {
-    background-color: #f7e1b2; /* Light Gold/Yellow */
+    background-color: #f7e1b2; 
     color: #8c6a00;
     border-left: 3px solid #d99c00;
 }
