@@ -196,6 +196,17 @@ $CSRF = csrf_token();
   border-color: rgba(11,83,148,.35);
 }
 .btn-ghost:hover{ background: rgba(11,83,148,.05); }
+
+/* Custom CSS for Icon buttons in the table */
+.actions-cell .btn.small {
+    padding: 6px 10px; 
+    width: 30px;      
+    height: 30px;     
+    line-height: 1;   
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
 </style>
 
 <section class="panel fade-in crud-header-card">
@@ -296,13 +307,22 @@ $CSRF = csrf_token();
                 data-start="<?= htmlspecialchars($row['RESEARCH_STARTDATE'], ENT_QUOTES); ?>"
                 data-end="<?= htmlspecialchars((string)$row['RESEARCH_ENDDATE'], ENT_QUOTES); ?>"
                 data-status="<?= htmlspecialchars($row['RESEARCH_STATUS'], ENT_QUOTES); ?>"
-              >Edit</button>
+                title="Edit Record"
+              >
+                <i class="bi bi-pencil"></i>
+              </button>
 
               <form method="post" onsubmit="return confirm('Delete research?');" style="display:inline">
                 <input type="hidden" name="csrf" value="<?= $CSRF; ?>">
                 <input type="hidden" name="action" value="delete">
                 <input type="hidden" name="RESEARCH_ID" value="<?= (int)$row['RESEARCH_ID']; ?>">
-                <button class="btn small" style="background:#b91c1c;border-color:#b91c1c">Delete</button>
+                <button 
+                    class="btn small" 
+                    style="background:#b91c1c;border-color:#b91c1c"
+                    title="Delete Record"
+                >
+                  <i class="bi bi-trash"></i>
+                </button>
               </form>
             </td>
           </tr>
