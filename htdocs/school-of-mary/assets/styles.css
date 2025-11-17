@@ -30,7 +30,7 @@
   --transition: 0.25s ease;
 
   /* Layout Specific */
-  --sidebar-width: 230px; 
+  --sidebar-width: 230px; /* Reduced from 250px to match previous PHP file context */
 }
 
 /* =======================================
@@ -48,8 +48,7 @@ body {
   font-size: 16px;
   font-family: 'Newsreader', 'Times New Roman', serif;
   min-height: 100vh;
-  /* CRITICAL: Pushes all flow content away from the fixed sidebar */
-  padding-left: var(--sidebar-width);
+  /* Removed transition: padding-left var(--transition); as sidebar is fixed */
 }
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Patua One', serif;
@@ -74,64 +73,6 @@ a:hover {
 }
 
 /* =======================================
-   DESKTOP LAYOUT (Sidebar & Main Content)
-   ======================================= */
-
-/* Hide mobile menu toggle */
-#sidebar-toggle {
-    display: none !important;
-}
-
-/* Permanent Fixed Sidebar */
-#sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: var(--sidebar-width);
-    height: 100vh;
-    transform: translateX(0); /* Ensure it is always visible */
-    background: #fff; /* Assuming a white background for the sidebar */
-    box-shadow: 1px 0 5px rgba(0, 0, 0, 0.1);
-    z-index: 100;
-}
-
-/* Ensure the Admin Stripe starts after the sidebar */
-.admin-stripe {
-    padding: 10px;
-    background: #ffd166;
-    font-weight: bold;
-    text-align: center;
-    /* This must match the body's padding-left */
-    /* Removed margin-left: 230px; since body padding handles the offset */
-}
-
-/* Ensure main content takes up remaining width */
-main {
-    width: 100%; 
-}
-
-/* Sidebar Navigation Styling */
-.sidebar nav a {
-    display: block;
-    padding: 10px 20px;
-    color: var(--color-primary);
-    font-size: 0.95rem;
-    transition: background 0.15s ease;
-}
-
-.sidebar nav a:hover {
-    background: var(--color-light);
-    text-decoration: none;
-}
-
-.sidebar nav a.is-active {
-    background: var(--color-accent);
-    color: #fff;
-    font-weight: 600;
-}
-
-
-/* =======================================
    BUTTONS
    ======================================= */
 .btn {
@@ -148,7 +89,7 @@ main {
   background: #0a4c80;
   transform: translateY(-1px);
 }
-.btn:focus-visible { 
+.btn:focus-visible { /* Accessibility Focus State */
   outline: 3px solid rgba(11, 83, 148, 0.4);
   outline-offset: 2px;
 }
@@ -171,6 +112,7 @@ main {
 .btn--ghost:hover{ 
   background:rgba(11,83,148,.06); 
 }
+
 
 /* =======================================
    FORMS
@@ -226,7 +168,7 @@ th {
 }
 
 /* =======================================
-   FOOTER
+   FOOTER (IMPROVED STYLES - Desktop Layout)
    ======================================= */
 
 .footer {
@@ -235,8 +177,8 @@ th {
     padding: 2rem 0; 
     margin-top: auto;
     font-size: 0.95rem;
-    /* CRITICAL FIX for Stability: */
-    width: calc(100% - var(--sidebar-width)); 
+    /* FOOTER Desktop Alignment Fix */
+    width: calc(100% - var(--sidebar-width));
     position: relative; 
     left: var(--sidebar-width); 
 }
@@ -246,6 +188,9 @@ th {
     grid-template-columns: repeat(3, 1fr);
     gap: 20px; 
 }
+
+/* Removed responsive adjustments for 3 columns */
+
 .footer__logo {
     width: 50px; 
     height: auto;
@@ -260,6 +205,7 @@ th {
     font-size: 0.75rem;
     color: #92b8d0;
 }
+
 .footer__heading {
     color: #a8dadc;
     font-size: 1.0rem; 
@@ -267,6 +213,7 @@ th {
     margin-bottom: 10px; 
     font-family: 'Patua One', serif;
 }
+
 .footer__list {
     list-style: none;
     padding: 0;
@@ -284,11 +231,17 @@ th {
 .footer__list a:hover {
     color: #457b9d; 
 }
+
+/* Contact list specific styling */
 .footer__contact li {
     display: flex;
     align-items: center;
     gap: 8px;
 }
+
+/* ---------------------------------------
+   FOOTER QUICK LINKS ADJUSTMENTS (Horizontal)
+   --------------------------------------- */
 .footer__inline-links a {
     color: #f1f1f1; 
     text-decoration: none;
@@ -303,6 +256,7 @@ th {
     white-space: nowrap; 
     overflow-x: auto;
 }
+
 .footer__social {
     display: flex;
     gap: 10px; 
@@ -325,18 +279,45 @@ th {
     background: #a8dadc;
     color: #1d3557;
 }
+
 .footer__note {
     font-size: 0.85rem;
     color: #a8dadc;
 }
 
+/* =======================================
+   REMOVED MOBILE MEDIA QUERIES
+   ======================================= */
+
+/* ---------------------------------------
+   Sidebar Content
+   --------------------------------------- */
+.sidebar nav a {
+    display: block;
+    padding: 10px 20px;
+    color: var(--color-primary); 
+    font-size: 0.95rem;
+    transition: background 0.15s ease;
+}
+
+.sidebar nav a:hover {
+    background: var(--color-light);
+    text-decoration: none;
+}
+
+.sidebar nav a.is-active {
+    background: var(--color-accent);
+    color: #fff;
+    font-weight: 600;
+}
 
 /* =======================================
-   DROPDOWN & ANIMATIONS
+   DROPDOWN
    ======================================= */
 .dropdown {
   position: relative;
 }
+
 .dropdown__menu {
   position: absolute;
   top: 100%;
@@ -364,6 +345,7 @@ th {
 .dropdown__menu a:hover {
   background: var(--color-light);
 }
+
 .navbar .dropdown-menu,
 .menu.dropdown,
 .dropdown-panel {
@@ -388,6 +370,10 @@ th {
   background: #e8f0f8;        
   color: #1b2a4a !important;
 }
+
+/* =======================================
+   ANIMATIONS
+   ======================================= */
 .fade-in {
   animation: fadeIn 0.4s ease forwards;
 }
@@ -538,13 +524,13 @@ th {
   border: 1px solid rgba(11,83,148,0.25);
   box-shadow:
     0 20px 35px rgba(11,83,148,0.10),
-    0 2px 4px rgba(0, 0, 0, 0.04);
+    0 2px 4px rgba(0,0,0,0.04);
   transition: box-shadow .2s ease, transform .2s ease;
 }
 .feature-card:hover {
   box-shadow:
     0 24px 44px rgba(11,83,148,0.12),
-    0 3px 6px rgba(0, 0, 0, 0.05);
+    0 3px 6px rgba(0,0,0,0.05);
   transform: translateY(-2px);
 }
 .feature-icon {
@@ -579,7 +565,7 @@ th {
 }
 
 /* =======================================
-   OVERLAY MODAL
+   OVERLAY MODAL (Read More)
    ======================================= */
 .overlay[hidden] { 
   display: none !important; 
@@ -635,7 +621,7 @@ th {
 .overlay__close:hover {
   background: #f2f5f9;
 }
-.overlay__close:focus-visible { 
+.overlay__close:focus-visible { /* Accessibility Focus State */
   outline: 3px solid rgba(11, 83, 148, 0.4);
   outline-offset: 2px;
 }
@@ -709,11 +695,12 @@ th {
   border-radius: 14px;
   padding: 12px;
   display: flex;
-  flex-direction: row; 
+  flex-direction: row; /* Default to row layout for desktop */
   justify-content: space-between;
   align-items: center;
   gap: 1rem;                    
 }
+/* Removed @media (min-width: 860px) { .filterbar { align-items: center; } } */
 .filter-chips {
   display: flex;
   flex-wrap: wrap;
@@ -764,6 +751,8 @@ th {
 .filter-actions .clear-btn:hover {
   background: rgba(11,83,148,0.05);
 }
+/* Removed mobile media query for filter-actions */
+
 .searchbox {
   display: flex;
   align-items: center;
@@ -790,10 +779,12 @@ th {
    ======================================= */
 .cards{
   display: grid;
-  grid-template-columns: repeat(2, 1fr); 
+  grid-template-columns: repeat(2, 1fr); /* Enforced 2 columns for desktop */
   gap: 28px;
   justify-content: center;
 }
+/* Removed @media (min-width:900px) */
+
 .card{
   background:#fff;
   border:1px solid #e3e7ee;
@@ -863,6 +854,8 @@ th {
   margin: 0 auto;
   padding: 0 20px;
 }
+/* Removed @media (min-width: 1440px) */
+
 .actions-cell {
   display: flex;
   flex-wrap: wrap;
@@ -876,21 +869,9 @@ th {
   max-width: 200px;
 }
 .actions-cell form { display: inline-flex; gap: 6px; align-items: center; }
-.actions-cell .btn.small { 
-  padding: 6px 10px; 
-  /* Added/Confirmed styles for small icon buttons */
-  width: 30px;      
-  height: 30px;     
-  line-height: 1;   
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-/* CRITICAL for Icons */
-.actions-cell .bi {
-    font-family: "bootstrap-icons" !important; 
-    font-style: normal;
-}
+.actions-cell .btn.small { padding: 6px 10px; }
+/* Removed @media (max-width: 1100px) */
+
 .table-scroll { overflow-x: auto; }
 
 /* =========================================================
@@ -939,19 +920,22 @@ th {
   border-radius: 10px;
   height: 42px;
 }
+/* Removed @media (min-width: 900px) for grid gap */
 
 /* ======================================= ADMIN CALENDAR STYLES ======================================= */
 
-/* --- LAYOUT STYLES (Enforced Desktop Grid) --- */
+/* --- NEW LAYOUT STYLES (Enforced Desktop Grid) --- */
 .dual-column-layout {
     grid-column: span 12;
     display: grid;
-    grid-template-columns: 2fr 1fr; 
+    grid-template-columns: 2fr 1fr; /* Enforced desktop grid */
     gap: 16px;
     margin-top: 16px;
 }
 .research-col { grid-column: span 1; }
 .calendar-col { grid-column: span 1; }
+
+/* Removed @media (max-width: 960px) */
 
 /* --- CALENDAR BASE STYLES --- */
 #calendar-app {
@@ -959,6 +943,7 @@ th {
     max-width: 100%;
     margin: 0 auto;
 }
+
 .calendar-header {
     display: flex;
     justify-content: space-between;
@@ -967,11 +952,13 @@ th {
     background: var(--color-light); 
     border-bottom: 1px solid var(--color-border); 
 }
+
 .calendar-grid, .calendar-grid-header {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     text-align: center;
 }
+
 .calendar-grid-header > div {
     font-weight: 700;
     padding: 8px 5px;
@@ -979,6 +966,7 @@ th {
     color: #666;
     border-bottom: 1px solid var(--color-border); 
 }
+
 .calendar-day {
     padding: 5px;
     border: 1px solid #eee;
@@ -995,6 +983,7 @@ th {
 .calendar-day:hover {
     background-color: #f7fbff;
 }
+
 .calendar-day--outside {
     background-color: #f9f9f9;
     color: #aaa;
@@ -1002,6 +991,8 @@ th {
 .calendar-day--outside .calendar-day-number {
     color: #aaa;
 }
+
+/* --- CALENDAR COMPACT OVERRIDES --- */
 .calendar-header .btn.small {
     padding: 4px 8px; 
 }
@@ -1035,16 +1026,20 @@ th {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+/* --- EVENT STYLES --- */
 .calendar-event.type-deadline {
     background-color: #f7b2b2; 
     color: #8c0000;
     border-left: 3px solid #d90000;
 }
+
 .calendar-event.type-meeting {
     background-color: #b2e8f7; 
     color: #00608c;
     border-left: 3px solid #0099cc;
 }
+
 .calendar-event.type-holiday {
     background-color: #f7e1b2; 
     color: #8c6a00;

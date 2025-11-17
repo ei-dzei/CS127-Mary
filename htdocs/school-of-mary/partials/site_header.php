@@ -222,6 +222,7 @@ $currentPath = current_path();
         <a href="<?= BASE_URL ?>/admin/audit_print.php" class="sub-link <?= strpos($path, '/admin/audit_print.php') !== false ? 'active' : '' ?>">
             Audit (Print)
         </a>
+
         <a class="btn small" style="margin-top:20px; padding-left:20px;"
            href="<?= BASE_URL ?>/admin/logout.php">
            Logout
