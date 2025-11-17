@@ -152,7 +152,15 @@ require_once __DIR__ . '/../partials/site_header.php';
     justify-content: space-between;
   }
   .kpi-col { grid-column: span 4; }
-  .kpi-emoji { font-size: 28px; line-height: 1; }
+  
+  /* Bootstrap Icon Styles */
+  .kpi-emoji { 
+    font-size: 32px; /* Slightly larger for Bootstrap Icons */
+    line-height: 1;
+    color: var(--color-primary, #1e4073); /* Give icons color for visibility */
+  }
+  .kpi-emoji i { vertical-align: middle; }
+  
   .kpi-title { font-weight: 700; margin-top: 6px; }
   .kpi-value { font-size: 2rem; font-weight: 800; margin-top: 6px; }
   .btn-link {
@@ -176,7 +184,12 @@ require_once __DIR__ . '/../partials/site_header.php';
   .section-header {
     display:flex; align-items:center; gap:10px; margin-bottom:10px;
   }
-  .section-emoji { font-size: 24px; }
+  .section-emoji {
+    font-size: 24px;
+    color: #444; /* Standard icon color */
+  }
+  .section-emoji i { vertical-align: middle; }
+
   .list {
     width:100%;
     border-collapse: collapse;
@@ -231,10 +244,6 @@ require_once __DIR__ . '/../partials/site_header.php';
     font-size: 0.7rem; /* Tiny event text */
     padding: 1px 2px;
   }
-  /* Added style for today's date */
-  .calendar-day--today {
-    background-color: #e6f7ff;
-  }
 
   .kpi-card,
   .section-card,
@@ -277,7 +286,7 @@ require_once __DIR__ . '/../partials/site_header.php';
 
     <div class="kpi-card kpi-col">
       <div>
-        <div class="kpi-emoji">👩‍🏫</div>
+        <div class="kpi-emoji"><i class="bi bi-person-badge"></i></div>
         <div class="kpi-title">Faculty</div>
         <div class="kpi-value" id="kpi-faculty"><?= number_format($kpi['faculty']); ?></div>
       </div>
@@ -286,7 +295,7 @@ require_once __DIR__ . '/../partials/site_header.php';
 
     <div class="kpi-card kpi-col">
       <div>
-        <div class="kpi-emoji">📚</div>
+        <div class="kpi-emoji"><i class="bi bi-book"></i></div>
         <div class="kpi-title">Research</div>
         <div class="kpi-value" id="kpi-research"><?= number_format($kpi['research']); ?></div>
       </div>
@@ -295,7 +304,7 @@ require_once __DIR__ . '/../partials/site_header.php';
 
     <div class="kpi-card kpi-col">
       <div>
-        <div class="kpi-emoji">🏢</div>
+        <div class="kpi-emoji"><i class="bi bi-building"></i></div>
         <div class="kpi-title">Agencies</div>
         <div class="kpi-value" id="kpi-agencies"><?= number_format($kpi['agencies']); ?></div>
       </div>
@@ -304,7 +313,7 @@ require_once __DIR__ . '/../partials/site_header.php';
 
     <div class="kpi-card kpi-col">
       <div>
-        <div class="kpi-emoji">💰</div>
+        <div class="kpi-emoji"><i class="bi bi-cash-stack"></i></div>
         <div class="kpi-title">Fundings</div>
         <div class="kpi-value" id="kpi-funding"><?= number_format($kpi['funding']); ?></div>
       </div>
@@ -313,7 +322,7 @@ require_once __DIR__ . '/../partials/site_header.php';
 
     <div class="kpi-card kpi-col">
       <div>
-        <div class="kpi-emoji">✅</div>
+        <div class="kpi-emoji"><i class="bi bi-list-check"></i></div>
         <div class="kpi-title">Assignments</div>
         <div class="kpi-value" id="kpi-assignment"><?= number_format($kpi['assignment']); ?></div>
       </div>
@@ -322,7 +331,7 @@ require_once __DIR__ . '/../partials/site_header.php';
 
     <div class="kpi-card kpi-col">
       <div>
-        <div class="kpi-emoji">🖨️</div>
+        <div class="kpi-emoji"><i class="bi bi-printer"></i></div>
         <div class="kpi-title">Audit (Print)</div>
         <div class="muted-small">Formal printable log of changes</div>
       </div>
@@ -333,7 +342,7 @@ require_once __DIR__ . '/../partials/site_header.php';
 
         <div class="section-card research-col">
           <div class="section-header">
-            <div class="section-emoji">🏆</div>
+            <div class="section-emoji"><i class="bi bi-trophy"></i></div>
             <h3 style="margin:0;">Top Research by Total Funding</h3>
           </div>
           <?php if (!$topResearch): ?>
@@ -382,7 +391,7 @@ require_once __DIR__ . '/../partials/site_header.php';
 
         <div class="section-card calendar-col">
           <div class="section-header">
-              <div class="section-emoji">🗓️</div>
+              <div class="section-emoji"><i class="bi bi-calendar-check"></i></div>
               <h3 style="margin:0;">Calendar</h3>
           </div>
           
@@ -410,7 +419,7 @@ require_once __DIR__ . '/../partials/site_header.php';
     </div>
     <div class="section-card">
       <div class="section-header">
-        <div class="section-emoji">👥</div>
+        <div class="section-emoji"><i class="bi bi-people"></i></div>
         <h3 style="margin:0;">Top Faculty by Total Assignments</h3>
       </div>
       <?php if (!$topFaculty): ?>
@@ -460,7 +469,7 @@ require_once __DIR__ . '/../partials/site_header.php';
 
     <div class="section-card">
       <div class="section-header">
-        <div class="section-emoji">📜</div>
+        <div class="section-emoji"><i class="bi bi-receipt"></i></div>
         <h3 style="margin:0;">Live Activity</h3>
       </div>
       <?php if (!$audit): ?>
