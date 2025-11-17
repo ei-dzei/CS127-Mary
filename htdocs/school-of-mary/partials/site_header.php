@@ -1,5 +1,6 @@
 <?php
-require_once __DIR__ . '/init.php';
+require_once __DIR__ . '/init.php'; // Line 2: init.php contains the original current_path() definition
+
 $pageTitle = $pageTitle ?? 'School of Mary';
 $isAdmin   = is_admin();
 $inAdmin   = in_admin_area();
@@ -9,12 +10,6 @@ $uri  = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 $path = preg_replace('#^' . preg_quote(BASE_URL, '#') . '#', '', $uri);
 $path = $path === '' ? '/' : $path;
 
-if (!function_exists('current_path')) { 
-    function current_path() {
-        global $path;
-        return $path;
-    }
-}
 // Helper function for active links
 function is_active(string $currentPath, string $targetPath) {
     // Corrected logic for base path checking if needed, but keeping original structure
