@@ -132,7 +132,7 @@ th {
 }
 
 /* =======================================
-   FOOTER (IMPROVED STYLES - Final Layout)
+   FOOTER (
    ======================================= */
 
 .footer {
@@ -162,10 +162,6 @@ th {
     }
 }
 
-.footer__brand {
-    /* Styles for the logo column (now text only) */
-}
-/* Keep logo styles here just in case HTML changes again */
 .footer__logo {
     width: 50px; 
     height: auto;
@@ -218,14 +214,14 @@ th {
    FOOTER QUICK LINKS ADJUSTMENTS (Horizontal)
    --------------------------------------- */
 .footer__inline-links a {
-    color: #f1f1f1;
+    color: #a8dadc; /* CHANGED for better contrast */
     text-decoration: none;
     transition: color 0.2s ease;
     margin: 0 5px; 
     display: inline-block; 
 }
 .footer__inline-links a:hover {
-    color: #457b9d; 
+    color: #457b9d; /* Keeping the hover color */
 }
 .footer__inline-links {
     /* Ensures the links container doesn't break the layout */
