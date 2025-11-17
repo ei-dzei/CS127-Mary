@@ -507,7 +507,7 @@
                 events.forEach(event => {
                     const eventEl = document.createElement('span');
                     eventEl.classList.add('calendar-event', `type-${event.type}`);
-                    eventEl.title = event.title; // <--- This enables the hover/tooltip effect
+                    eventEl.title = event.title; // This enables the hover/tooltip effect
                     eventEl.textContent = event.title;
                     cell.appendChild(eventEl);
                 });

@@ -150,8 +150,17 @@ require_once __DIR__ . '/../partials/site_header.php';
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    /* --- RULE 1: Center items horizontally (for the button) --- */
+    align-items: center; 
   }
   .kpi-col { grid-column: span 4; }
+  
+  /* NEW RULE: Container for text content (Icon, Title, Value) */
+  .kpi-card > div:first-child { 
+    width: 100%; 
+    text-align: center; /* Center the icon, title, and value */
+    margin-bottom: 10px;
+  }
   
   /* Bootstrap Icon Styles */
   .kpi-emoji { 
@@ -163,13 +172,19 @@ require_once __DIR__ . '/../partials/site_header.php';
   
   .kpi-title { font-weight: 700; margin-top: 6px; }
   .kpi-value { font-size: 2rem; font-weight: 800; margin-top: 6px; }
+
+  /* --- UPDATED RULE 2: Make the link span full width and center its text --- */
   .btn-link {
-    align-self: flex-start;
-    display: inline-flex;
-    padding: 6px 10px;
+    align-self: stretch; /* Stretch the link button to fill the card width */
+    display: flex; /* Change to flex for content centering */
+    justify-content: center; /* Center the text inside the button */
+    padding: 8px 10px; /* Adjusted padding for a better look */
     border-radius: 8px;
     background: var(--color-primary);
-    color: #fff; text-decoration: none; font-weight: 600; font-size: .95rem;
+    color: #fff; 
+    text-decoration: none; 
+    font-weight: 600; 
+    font-size: .95rem;
   }
   .btn-link:hover { filter: brightness(0.95); }
 
