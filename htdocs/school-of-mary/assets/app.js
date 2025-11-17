@@ -78,12 +78,6 @@
   });
   
   /* ------------------------------
-     Sidebar Toggle Logic (REMOVED)
-     The code block for managing the sidebar dropdown was removed here.
-  ------------------------------ */
-
-
-  /* ------------------------------
      Toast (small inline feedback)
   ------------------------------ */
   function toast(msg = "Saved", timeout = 2200) {
