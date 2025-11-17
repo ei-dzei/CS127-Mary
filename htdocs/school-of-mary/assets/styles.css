@@ -20,17 +20,14 @@
    THEME VARIABLES
    ======================================= */
 :root {
-  --color-primary: #003366; /* Dark Blue */
-  --color-accent: #0b5394; /* Medium Blue/Active */
+  --color-primary: #003366;
+  --color-accent: #0b5394;
   --color-bg: #ffffff;
-  --color-light: #f8f9fa; /* Panel/Table header background */
+  --color-light: #f8f9fa;
   --color-border: #d9dee3;
   --color-text: #1a1a1a;
   --radius: 8px;
   --transition: 0.25s ease;
-
-  /* Layout Specific */
-  --sidebar-width: 230px; /* Reduced from 250px to match previous PHP file context */
 }
 
 /* =======================================
@@ -48,29 +45,25 @@ body {
   font-size: 16px;
   font-family: 'Newsreader', 'Times New Roman', serif;
   min-height: 100vh;
-  /* Removed transition: padding-left var(--transition); as sidebar is fixed */
-}
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Patua One', serif;
-  color: var(--color-primary);
-  line-height: 1.2;
+  /* display: flex; REMOVED to avoid layout conflict with fixed sidebar */
+  /* flex-direction: column; REMOVED */
 }
 img {
   max-width: 100%;
   height: auto;
   display: block;
 }
-a {
-  color: var(--color-accent);
-  text-decoration: none;
-}
-a:hover {
-  text-decoration: underline;
-}
 .container {
   width: min(1200px, 94%);
   margin: 0 auto;
 }
+
+/* =======================================
+   STICKY TOPBAR / NAVBAR
+   (THIS ENTIRE SECTION HAS BEEN REMOVED to resolve the layout conflict)
+   ======================================= */
+/* The .brand styles are moved/re-applied in the PHP inline CSS */
+
 
 /* =======================================
    BUTTONS
@@ -89,42 +82,22 @@ a:hover {
   background: #0a4c80;
   transform: translateY(-1px);
 }
-.btn:focus-visible { /* Accessibility Focus State */
-  outline: 3px solid rgba(11, 83, 148, 0.4);
-  outline-offset: 2px;
-}
 .btn.small {
   padding: 6px 10px;
   font-size: 0.9rem;
 }
-.btn--primary {
-  background: var(--color-accent);
-  border-color: rgba(11,83,148,0.35);
-}
-.btn--primary:hover {
-  background: #0a4c80;
-}
-.btn--ghost{ 
-  background:transparent; 
-  color:var(--color-accent); 
-  border-color:rgba(11,83,148,.35); 
-}
-.btn--ghost:hover{ 
-  background:rgba(11,83,148,.06); 
-}
-
 
 /* =======================================
    FORMS
    ======================================= */
-.input, select, textarea {
+.input,select,textarea{
   width: 100%;
   padding: 0.5rem 0.6rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   transition: border var(--transition), box-shadow var(--transition);
 }
-.input:focus, select:focus, textarea:focus {
+.input:focus,select:focus,textarea:focus{
    border-color: var(--color-accent);
   outline: none;
   box-shadow: 0 0 0 3px rgba(11, 83, 148, 0.2);
@@ -156,7 +129,7 @@ table {
   width: 100%;
   border-collapse: collapse;
 }
-th, td {
+th,td {
   padding: 8px 10px;
   border-bottom: 1px solid var(--color-border);
   text-align: left;
@@ -170,135 +143,20 @@ th {
 /* =======================================
    FOOTER
    ======================================= */
-
 .footer {
-    background: #1d3557; /* Dark Blue Background */
-    color: #f1f1f1;
-    padding: 2rem 0; 
-    margin-top: auto;
-    font-size: 0.95rem;
-    
-    /* CRITICAL LAYOUT FIXES for Desktop Stability: */
-    /* Pushes the footer past the 230px fixed sidebar */
-    margin-left: 230px; 
-    /* Ensures the footer spans only the remaining width of the viewport */
-    width: calc(100% - 230px); 
-    position: relative; /* Useful for general stacking/positioning */
+  background: var(--color-primary);
+  color: #fff;
+  padding: 1.5rem 0;
+  margin-top: auto;
+  text-align: center; 
 }
-
-.footer__grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px; 
-}
-.footer__logo {
-    width: 50px; 
-    height: auto;
-    margin-bottom: 8px;
-}
-.footer__tagline {
-    font-size: 0.85rem;
-    color: #a8dadc;
-    margin-bottom: 12px;
-}
-.footer__legal {
-    font-size: 0.75rem;
-    color: #92b8d0;
-}
-.footer__heading {
-    color: #a8dadc;
-    font-size: 1.0rem; 
-    font-weight: 600;
-    margin-bottom: 10px; 
-    font-family: 'Patua One', serif;
-}
-.footer__list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-.footer__list li {
-    margin-bottom: 6px; 
-    line-height: 1.5;
-}
-.footer__list a {
-    color: #f1f1f1;
-    text-decoration: none;
-    transition: color 0.2s ease;
-}
-.footer__list a:hover {
-    color: #457b9d; 
-}
-.footer__contact li {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-.footer__inline-links a {
-    color: #f1f1f1; 
-    text-decoration: none;
-    transition: color 0.2s ease;
-    margin: 0 5px; 
-    display: inline-block; 
-}
-.footer__inline-links a:hover {
-    color: #457b9d; 
-}
-.footer__inline-links {
-    white-space: nowrap; 
-    overflow-x: auto;
-}
-.footer__social {
-    display: flex;
-    gap: 10px; 
-    margin-bottom: 15px;
-}
-.footer__social a {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px; 
-    height: 28px;
-    border-radius: 50%;
-    background: #457b9d;
-    color: #fff;
-    font-weight: bold;
-    text-decoration: none;
-    transition: background 0.2s ease;
-}
-.footer__social a:hover {
-    background: #a8dadc;
-    color: #1d3557;
-}
-.footer__note {
-    font-size: 0.85rem;
-    color: #a8dadc;
-}
-
-/* =======================================
-   REMOVED MOBILE MEDIA QUERIES
-   ======================================= */
-
-/* ---------------------------------------
-   Sidebar Content
-   --------------------------------------- */
-.sidebar nav a {
-    display: block;
-    padding: 10px 20px;
-    color: var(--color-primary); 
-    font-size: 0.95rem;
-    transition: background 0.15s ease;
-}
-
-.sidebar nav a:hover {
-    background: var(--color-light);
-    text-decoration: none;
-}
-
-.sidebar nav a.is-active {
-    background: var(--color-accent);
-    color: #fff;
-    font-weight: 600;
+.footer__inner {
+  display: flex;
+  justify-content: center;  
+  align-items: center;       
+  width: 100%;            
+  height: 100%;             
+  text-align: center;
 }
 
 /* =======================================
@@ -307,7 +165,8 @@ th {
 .dropdown {
   position: relative;
 }
-
+/* IMPORTANT: The dropdown__menu styles here are for generic horizontal dropdowns.
+   The sidebar dropdown is controlled by the inline CSS in the PHP file. */
 .dropdown__menu {
   position: absolute;
   top: 100%;
@@ -320,9 +179,10 @@ th {
   padding: 6px 0;
   display: none;
   min-width: 160px;
-  z-index: 1000; 
 }
 .dropdown:hover .dropdown__menu {
+  /* This hover style is for NON-SIDEBAR dropdowns only. 
+     The sidebar menu is controlled by JS. */
   display: block;
 }
 .dropdown__menu a {
@@ -395,6 +255,18 @@ th {
 }
 
 /* =======================================
+   ADMIN STRIPE
+   ======================================= */
+.admin-stripe {
+  background: #ffcc00;
+  color: #222;
+  text-align: center;
+  padding: 4px 0;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* =======================================
    HERO SLIDER
    ======================================= */
 .hero {
@@ -463,6 +335,13 @@ th {
   line-height: 1.65;
   max-width: 58ch;
 }
+.hero__subtitle {
+  font-family: 'Newsreader', serif;
+  color: #374151;
+  font-size: clamp(1rem, 2vw, 1.125rem);
+  line-height: 1.65;
+  max-width: 58ch;
+}
 .hero__actions {
   display: flex;
   gap: .75rem;
@@ -482,7 +361,7 @@ th {
 .hero__dots button {
   width: 10px;
   height: 10px;
-  border-radius: 9999px;
+  border-radius: 999px;
   border: none;
   background: rgba(11,83,148,.35);
   cursor: pointer;
@@ -553,6 +432,13 @@ th {
   display: flex;
   justify-content: center;
 }
+.btn--primary {
+  background: var(--color-accent);
+  border-color: rgba(11,83,148,0.35);
+}
+.btn--primary:hover {
+  background: #0a4c80;
+}
 
 /* =======================================
    OVERLAY MODAL (Read More)
@@ -611,10 +497,6 @@ th {
 .overlay__close:hover {
   background: #f2f5f9;
 }
-.overlay__close:focus-visible { /* Accessibility Focus State */
-  outline: 3px solid rgba(11, 83, 148, 0.4);
-  outline-offset: 2px;
-}
 .overlay__body {
   padding: 18px 20px;
   overflow: auto;
@@ -657,7 +539,7 @@ th {
 }
 .badge {
   padding: 6px 10px; 
-  border-radius: 9999px;
+  border-radius: 999px;
   background: rgba(11,83,148,.10); 
   color: #0b5394;
   font-size: 12px; 
@@ -667,7 +549,6 @@ th {
   margin: 14px 0 6px; 
   font-weight: 700; 
   color: var(--color-primary);
-  font-family: 'Patua One', serif;
 }
 .list {
   margin: 0; 
@@ -685,12 +566,13 @@ th {
   border-radius: 14px;
   padding: 12px;
   display: flex;
-  flex-direction: row; /* Default to row layout for desktop */
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;        
+  align-items: flex-start;
   gap: 1rem;                    
 }
-/* Removed @media (min-width: 860px) { .filterbar { align-items: center; } } */
+@media (min-width: 860px) {
+  .filterbar { align-items: center; }
+}
 .filter-chips {
   display: flex;
   flex-wrap: wrap;
@@ -741,8 +623,17 @@ th {
 .filter-actions .clear-btn:hover {
   background: rgba(11,83,148,0.05);
 }
-/* Removed mobile media query for filter-actions */
-
+@media (max-width: 768px) {
+  .filter-actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+  .filter-actions .btn,
+  .filter-actions .clear-btn {
+    width: 100%;
+  }
+}
 .searchbox {
   display: flex;
   align-items: center;
@@ -769,12 +660,13 @@ th {
    ======================================= */
 .cards{
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* Enforced 2 columns for desktop */
+  grid-template-columns: 1fr;
   gap: 28px;
-  justify-content: center;
+  justify-content: scenter;
 }
-/* Removed @media (min-width:900px) */
-
+@media (min-width:900px){
+  .cards{ grid-template-columns:repeat(2, 1fr); } 
+}
 .card{
   background:#fff;
   border:1px solid #e3e7ee;
@@ -807,7 +699,8 @@ th {
 .card__meta{ color:#5b6675; font-size:.95rem; margin-bottom:12px; }
 .card__actions{ margin-top:auto; display:flex; justify-content:flex-start; }
 .card .btn.small{ border-radius:9999px; }
-
+.btn--ghost{ background:transparent; color:var(--color-accent); border-color:rgba(11,83,148,.35); }
+.btn--ghost:hover{ background:rgba(11,83,148,.06); }
 
 /* =======================================
    PAGINATION 
@@ -844,8 +737,9 @@ th {
   margin: 0 auto;
   padding: 0 20px;
 }
-/* Removed @media (min-width: 1440px) */
-
+@media (min-width: 1440px) {
+  .admin-wide { max-width: 1400px; }
+}
 .actions-cell {
   display: flex;
   flex-wrap: wrap;
@@ -860,8 +754,10 @@ th {
 }
 .actions-cell form { display: inline-flex; gap: 6px; align-items: center; }
 .actions-cell .btn.small { padding: 6px 10px; }
-/* Removed @media (max-width: 1100px) */
-
+@media (max-width: 1100px) {
+  .actions-cell select[style*="width:200px"] { width: 160px !important; }
+  .actions-cell select[style*="width:140px"] { width: 120px !important; }
+}
 .table-scroll { overflow-x: auto; }
 
 /* =========================================================
@@ -910,128 +806,9 @@ th {
   border-radius: 10px;
   height: 42px;
 }
-/* Removed @media (min-width: 900px) for grid gap */
-
-/* ======================================= ADMIN CALENDAR STYLES ======================================= */
-
-/* --- NEW LAYOUT STYLES (Enforced Desktop Grid) --- */
-.dual-column-layout {
-    grid-column: span 12;
-    display: grid;
-    grid-template-columns: 2fr 1fr; /* Enforced desktop grid */
-    gap: 16px;
-    margin-top: 16px;
-}
-.research-col { grid-column: span 1; }
-.calendar-col { grid-column: span 1; }
-
-/* Removed @media (max-width: 960px) */
-
-/* --- CALENDAR BASE STYLES --- */
-#calendar-app {
-    font-family: 'Newsreader', serif; 
-    max-width: 100%;
-    margin: 0 auto;
-}
-
-.calendar-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 15px;
-    background: var(--color-light); 
-    border-bottom: 1px solid var(--color-border); 
-}
-
-.calendar-grid, .calendar-grid-header {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    text-align: center;
-}
-
-.calendar-grid-header > div {
-    font-weight: 700;
-    padding: 8px 5px;
-    font-size: 0.85rem;
-    color: #666;
-    border-bottom: 1px solid var(--color-border); 
-}
-
-.calendar-day {
-    padding: 5px;
-    border: 1px solid #eee;
-    border-top: none;
-    text-align: left;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    position: relative;
-    overflow: hidden;
-    cursor: default;
-    transition: background-color 0.1s ease;
-}
-.calendar-day:hover {
-    background-color: #f7fbff;
-}
-
-.calendar-day--outside {
-    background-color: #f9f9f9;
-    color: #aaa;
-}
-.calendar-day--outside .calendar-day-number {
-    color: #aaa;
-}
-
-/* --- CALENDAR COMPACT OVERRIDES --- */
-.calendar-header .btn.small {
-    padding: 4px 8px; 
-}
-.calendar-header h2 {
-    font-size: 1rem; 
-}
-.calendar-grid-header > div {
-    padding: 5px 3px;
-    font-size: 0.8rem; 
-}
-.calendar-day {
-    min-height: 55px; 
-    padding: 3px;
-}
-.calendar-day--today { 
-    background-color: #e6f7ff;
-    border: 1px solid #cceeff;
-}
-.calendar-day-number {
-    font-weight: 600;
-    display: block;
-    margin-bottom: 2px;
-    color: #333;
-    font-size: 0.9rem; 
-}
-.calendar-event {
-    font-size: 0.7rem; 
-    padding: 1px 2px;
-    border-radius: 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* --- EVENT STYLES --- */
-.calendar-event.type-deadline {
-    background-color: #f7b2b2; 
-    color: #8c0000;
-    border-left: 3px solid #d90000;
-}
-
-.calendar-event.type-meeting {
-    background-color: #b2e8f7; 
-    color: #00608c;
-    border-left: 3px solid #0099cc;
-}
-
-.calendar-event.type-holiday {
-    background-color: #f7e1b2; 
-    color: #8c6a00;
-    border-left: 3px solid #d99c00;
+@media (min-width: 900px) {
+  .crud-header-card .grid,
+  .crud-form-card .grid {
+    gap: 14px;
+  }
 }
