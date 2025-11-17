@@ -174,7 +174,6 @@ require_once __DIR__ . '/../partials/site_header.php';
     padding: 15px;
   }
   #research-section, #faculty-section, #audit-section{ scroll-margin-top: 100px;}
-  
   .section-header {
     display:flex; align-items:center; gap:10px; margin-bottom:10px;
   }
