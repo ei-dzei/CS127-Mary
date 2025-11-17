@@ -9,11 +9,6 @@ $uri  = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 $path = preg_replace('#^' . preg_quote(BASE_URL, '#') . '#', '', $uri);
 $path = $path === '' ? '/' : $path;
 
-// Function to check current path for active class (Assuming current_path() returns $path or similar logic)
-function current_path() {
-    global $path;
-    return $path;
-}
 ?>
 <!doctype html>
 <html lang="en">
