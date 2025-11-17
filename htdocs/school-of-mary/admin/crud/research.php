@@ -35,7 +35,7 @@ if ($action === 'create') {
   $endDate   = $_POST['RESEARCH_ENDDATE'] ?? '';
 
   if (!empty($endDate) && (strtotime($endDate) < strtotime($startDate))) {
-    // 💡 MODIFIED: Use set_flash_message for toast popup display
+    // MODIFIED: Use set_flash_message for toast popup display
     set_flash_message('error', 'The End Date cannot be earlier than the Start Date.');
     redirect_to('/admin/crud/research.php');
     exit;
@@ -68,7 +68,7 @@ if ($action === 'update') {
   $endDate   = $_POST['RESEARCH_ENDDATE'] ?? ''; 
 
   if (!empty($endDate) && (strtotime($endDate) < strtotime($startDate))) {
-    // 💡 MODIFIED: Use set_flash_message for toast popup display
+    // MODIFIED: Use set_flash_message for toast popup display
     set_flash_message('error', 'The End Date cannot be earlier than the Start Date (Update Failed).');
     redirect_to('/admin/crud/research.php');
     exit;

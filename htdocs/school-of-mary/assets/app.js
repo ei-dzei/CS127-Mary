@@ -1086,13 +1086,13 @@
 
     // Initial render
     renderCalendar();
+})();
 
-    /* -------------------------
+/* -------------------------
     RESEARCH DATE VALIDATION WIDGET
 ------------------------- */
 (function() {
     // --- CREATE FORM (Static Inputs) ---
-    // IDs must match those added in the PHP file: id="research_startdate" and id="research_enddate"
     const createStartDateEl = document.getElementById('research_startdate');
     const createEndDateEl = document.getElementById('research_enddate');
 
@@ -1150,5 +1150,4 @@
             });
         }).observe(modal, { attributes: true });
     }
-})();
 })();
