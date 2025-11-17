@@ -10,15 +10,14 @@ $uri  = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 $path = preg_replace('#^' . preg_quote(BASE_URL, '#') . '#', '', $uri);
 $path = $path === '' ? '/' : $path;
 
-// Helper function for active links
+// Helper function for active links (You already have the logic for $path)
 function is_active(string $currentPath, string $targetPath) {
-    // Corrected logic for base path checking if needed, but keeping original structure
     return $currentPath === $targetPath ? 'active' : '';
 }
 function is_active_sub(string $currentPath, string $targetPartial) {
     return strpos($currentPath, $targetPartial) !== false ? 'active' : '';
 }
-$currentPath = current_path();
+$currentPath = current_path(); 
 ?>
 <!doctype html>
 <html lang="en">
