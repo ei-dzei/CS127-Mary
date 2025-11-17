@@ -3,17 +3,13 @@
 <footer class="footer">
     <div class="container footer__grid">
         
-        <div class="footer__col footer__brand">
-            <a href="<?= BASE_URL ?>/public/">
-                <img src="<?= BASE_URL ?>/public/logo.png" alt="School of Mary Logo" class="footer__logo">
-            </a>
+<div class="footer__col footer__brand">
             <p>School of Mary</p>
             <p class="footer__tagline">Excellence in Research and Innovation</p>
             <p class="footer__legal">
                 Copyright &copy; <?= date('Y'); ?> School of Mary. All Rights Reserved.
             </p>
         </div>
-
         <div class="footer__col">
             <h4 class="footer__heading">Quick Links</h4>
             <ul class="footer__list">
