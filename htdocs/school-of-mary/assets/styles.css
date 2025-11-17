@@ -66,6 +66,7 @@ img {
 
 /* =======================================
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
    STICKY TOPBAR / NAVBAR
    ======================================= */
 
@@ -140,6 +141,8 @@ img {
 }
 
 /* =======================================
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
    BUTTONS
@@ -238,6 +241,7 @@ th {
 
 .footer {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   background: var(--color-primary);
   color: #fff;
   padding: 1.5rem 0;
@@ -270,6 +274,15 @@ th {
     font-size: 0.95rem;
 }
 
+=======
+    background: #1d3557; /* Dark blue to contrast with the sidebar */
+    color: #f1f1f1;
+    padding: 2.5rem 0; /* More padding for space */
+    margin-top: auto;
+    font-size: 0.95rem;
+}
+
+>>>>>>> Stashed changes
 .footer__grid {
     display: grid;
     /* 4 columns for large screens */
@@ -367,6 +380,9 @@ th {
 .footer__note {
     font-size: 0.85rem;
     color: #a8dadc;
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 }
 
@@ -378,7 +394,12 @@ th {
   position: relative;
 }
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 
+=======
+/* The following styles are for generic horizontal dropdowns only. 
+   The sidebar dropdown logic was removed. */
+>>>>>>> Stashed changes
 =======
 /* The following styles are for generic horizontal dropdowns only. 
    The sidebar dropdown logic was removed. */
@@ -977,5 +998,9 @@ th {
   .crud-form-card .grid {
     gap: 14px;
   }
+<<<<<<< Updated upstream
+}
+>>>>>>> Stashed changes
+=======
 }
 >>>>>>> Stashed changes

@@ -2,6 +2,7 @@
 
 <footer class="footer">
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   <div class="container footer__inner">
     <div>© <?= date('Y') ?> School of Mary</div>
     <nav class="footernav">
@@ -27,6 +28,8 @@
   </div>
 </footer>
 =======
+=======
+>>>>>>> Stashed changes
     <div class="container footer__grid">
         
         <div class="footer__col footer__brand">
@@ -39,6 +42,9 @@
                 Copyright &copy; <?= date('Y'); ?> School of Mary. All Rights Reserved.
             </p>
         </div>
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
         <div class="footer__col">
