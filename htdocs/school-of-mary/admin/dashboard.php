@@ -189,9 +189,49 @@ require_once __DIR__ . '/../partials/site_header.php';
   .list tr:last-child td { border-bottom:none; }
   .muted-small { color:#666; font-size:.9rem; }
 
+  /* New Dual Column Layout */
+  .dual-column-layout {
+    grid-column: span 12;
+    display: grid;
+    grid-template-columns: 2fr 1fr; /* 2 parts for content, 1 part for calendar */
+    gap: 16px;
+    margin-top: 16px; /* Added separation from KPI cards */
+  }
+  .research-col { grid-column: span 1; }
+  .calendar-col { grid-column: span 1; }
+
   @media (max-width: 960px) {
     .kpi-col { grid-column: span 12; }
+    .dual-column-layout {
+      grid-template-columns: 1fr; /* Stack on smaller screens */
+    }
+    .research-col, .calendar-col { grid-column: span 1; }
   }
+  
+  /* Calendar Compact Overrides */
+  .calendar-header .btn.small {
+    padding: 4px 8px; /* Smaller buttons */
+  }
+  .calendar-header h2 {
+    font-size: 1rem; /* Smaller month name */
+  }
+  .calendar-grid-header > div {
+    padding: 5px 3px;
+    font-size: 0.8rem; /* Smaller day names */
+  }
+  .calendar-day {
+    min-height: 55px; /* Significantly smaller cells */
+    padding: 3px;
+  }
+  .calendar-day-number {
+    font-size: 0.9rem; /* Smaller day number */
+    margin-bottom: 2px;
+  }
+  .calendar-event {
+    font-size: 0.7rem; /* Tiny event text */
+    padding: 1px 2px;
+  }
+
   .kpi-card,
   .section-card,
   .hero-card {
@@ -285,82 +325,85 @@ require_once __DIR__ . '/../partials/site_header.php';
       <a class="btn-link" target="_blank" href="<?= app_url('/admin/audit_print.php'); ?>">Open Print View</a>
     </div>
 
-    <div class="section-card">
-        <div class="section-header">
-            <div class="section-emoji">🗓️</div>
-            <h3 style="margin:0;">Research Calendar (Upcoming Deadlines & Meetings)</h3>
-        </div>
-        
-        <div id="calendar-app" class="panel" style="padding: 0; border: none; box-shadow: none;">
-            <div class="calendar-header">
-                <button id="prev-month" class="btn small">← Previous</button>
-                <h2 id="current-month-year">Loading...</h2>
-                <button id="next-month" class="btn small">Next →</button>
-            </div>
-            
-            <div class="calendar-grid-header">
-                <div>SUN</div>
-                <div>MON</div>
-                <div>TUE</div>
-                <div>WED</div>
-                <div>THU</div>
-                <div>FRI</div>
-                <div>SAT</div>
-            </div>
+    <div class="dual-column-layout">
 
-            <div id="calendar-days" class="calendar-grid">
-                </div>
+        <div class="section-card research-col">
+          <div class="section-header">
+            <div class="section-emoji">🏆</div>
+            <h3 style="margin:0;">Top Research by Total Funding</h3>
+          </div>
+          <?php if (!$topResearch): ?>
+            <div class="muted">No data.</div>
+          <?php else: ?>
+            <table class="list">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Research</th>
+                  <th>Total Funding</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php
+                  $rankStart = $tr_offset + 1;
+                  foreach ($topResearch as $idx => $tr):
+                ?>
+                  <tr>
+                    <td><?= $rankStart + $idx; ?></td>
+                    <td>
+                      <a href="<?= app_url('/public/research.php'); ?>?id=<?= (int)$tr['RESEARCH_ID']; ?>">
+                        <?= htmlspecialchars($tr['RESEARCH_TITLE']); ?>
+                      </a>
+                    </td>
+                    <td><?= '₱' . number_format((float)$tr['total'], 2); ?></td>
+                  </tr>
+                <?php endforeach; ?>
+              </tbody>
+            </table>
+            <div class="pagination">
+              <?php
+                $base  = app_url('/admin/dashboard.php');
+                $qs_tr = function($p) use ($tf_page, $log_page) {
+                  return 'tr_page='.$p.'&tf_page='.$tf_page.'&log_page='.$log_page;
+                };
+              ?>
+              <a class="page-btn" href="<?= $base.'?'.$qs_tr(max(1,$tr_page-1)); ?>">&laquo;</a>
+              <?php for ($i=1; $i<= $tr_pages; $i++): ?>
+                <a class="page-btn <?= $i === $tr_page ? 'active' : '' ?>" href="<?= $base.'?'.$qs_tr($i); ?>"><?= $i ?></a>
+              <?php endfor; ?>
+              <a class="page-btn" href="<?= $base.'?'.$qs_tr(min($tr_pages,$tr_page+1)); ?>">&raquo;</a>
+            </div>
+            <?php endif; ?>
+        </div>
+
+        <div class="section-card calendar-col">
+          <div class="section-header">
+              <div class="section-emoji">🗓️</div>
+              <h3 style="margin:0;">Calendar</h3>
+          </div>
+          
+          <div id="calendar-app" class="panel" style="padding: 0; border: none; box-shadow: none;">
+              <div class="calendar-header">
+                  <button id="prev-month" class="btn small">←</button>
+                  <h2 id="current-month-year">Loading...</h2>
+                  <button id="next-month" class="btn small">→</button>
+              </div>
+              
+              <div class="calendar-grid-header">
+                  <div>S</div>
+                  <div>M</div>
+                  <div>T</div>
+                  <div>W</div>
+                  <div>T</div>
+                  <div>F</div>
+                  <div>S</div>
+              </div>
+
+              <div id="calendar-days" class="calendar-grid">
+                  </div>
+          </div>
         </div>
     </div>
-    <div class="section-card">
-      <div class="section-header">
-        <div class="section-emoji">🏆</div>
-        <h3 style="margin:0;">Top Research by Total Funding</h3>
-      </div>
-      <?php if (!$topResearch): ?>
-        <div class="muted">No data.</div>
-      <?php else: ?>
-        <table class="list">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Research</th>
-              <th>Total Funding</th>
-            </tr>
-          </thead>
-          <tbody>
-            <?php
-              $rankStart = $tr_offset + 1;
-              foreach ($topResearch as $idx => $tr):
-            ?>
-              <tr>
-                <td><?= $rankStart + $idx; ?></td>
-                <td>
-                  <a href="<?= app_url('/public/research.php'); ?>?id=<?= (int)$tr['RESEARCH_ID']; ?>">
-                    <?= htmlspecialchars($tr['RESEARCH_TITLE']); ?>
-                  </a>
-                </td>
-                <td><?= '₱' . number_format((float)$tr['total'], 2); ?></td>
-              </tr>
-            <?php endforeach; ?>
-          </tbody>
-        </table>
-        <div class="pagination">
-          <?php
-            $base  = app_url('/admin/dashboard.php');
-            $qs_tr = function($p) use ($tf_page, $log_page) {
-              return 'tr_page='.$p.'&tf_page='.$tf_page.'&log_page='.$log_page;
-            };
-          ?>
-          <a class="page-btn" href="<?= $base.'?'.$qs_tr(max(1,$tr_page-1)); ?>">&laquo;</a>
-          <?php for ($i=1; $i<= $tr_pages; $i++): ?>
-            <a class="page-btn <?= $i === $tr_page ? 'active' : '' ?>" href="<?= $base.'?'.$qs_tr($i); ?>"><?= $i ?></a>
-          <?php endfor; ?>
-          <a class="page-btn" href="<?= $base.'?'.$qs_tr(min($tr_pages,$tr_page+1)); ?>">&raquo;</a>
-        </div>
-      <?php endif; ?>
-    </div>
-
     <div class="section-card">
       <div class="section-header">
         <div class="section-emoji">👥</div>

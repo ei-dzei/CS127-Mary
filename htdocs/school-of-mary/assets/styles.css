@@ -911,81 +911,137 @@ th {
   }
 }
 
-/* =======================================
-   ADMIN CALENDAR STYLES
-   ======================================= */
+/* ======================================= ADMIN CALENDAR STYLES ======================================= */
+
+/* --- NEW LAYOUT STYLES --- */
+/* New Dual Column Layout */
+.dual-column-layout {
+    grid-column: span 12;
+    display: grid;
+    grid-template-columns: 2fr 1fr; /* 2 parts for content, 1 part for calendar */
+    gap: 16px;
+    margin-top: 16px; /* Added separation from KPI cards */
+}
+.research-col { grid-column: span 1; }
+.calendar-col { grid-column: span 1; }
+
+@media (max-width: 960px) {
+    .dual-column-layout {
+      grid-template-columns: 1fr; /* Stack on smaller screens */
+    }
+    .research-col, .calendar-col { grid-column: span 1; }
+}
+
+/* --- CALENDAR BASE STYLES --- */
+#calendar-app {
+    font-family: var(--font-stack, sans-serif);
+    max-width: 100%;
+    margin: 0 auto;
+}
+
 .calendar-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 20px;
-    border-bottom: 1px solid var(--color-border);
-    background: #f0f3f6;
+    padding: 10px 15px;
+    background: var(--color-light); 
+    border-bottom: 1px solid var(--border);
 }
-.calendar-header h2 {
-    margin: 0;
-    font-size: 1.5rem;
-    color: var(--color-primary);
-}
-.calendar-grid-header {
+
+.calendar-grid, .calendar-grid-header {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     text-align: center;
-    font-weight: 600;
-    padding: 10px 0;
-    background: var(--color-light);
-    color: #444;
-    border-bottom: 1px solid var(--color-border);
 }
-.calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    border-left: 1px solid var(--color-border);
-    border-top: 1px solid var(--color-border);
-    /* Ensures 6 rows for maximum month days */
-    grid-auto-rows: minmax(100px, auto); 
+
+.calendar-grid-header > div {
+    font-weight: 700;
+    padding: 8px 5px;
+    font-size: 0.85rem;
+    color: #666;
+    border-bottom: 1px solid var(--border);
 }
+
 .calendar-day {
-    min-height: 100px;
     padding: 5px;
-    border-right: 1px solid var(--color-border);
-    border-bottom: 1px solid var(--color-border);
-    cursor: pointer;
-    background: var(--color-bg);
-    transition: background 0.1s ease;
+    border: 1px solid #eee;
+    border-top: none;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
     position: relative;
+    overflow: hidden;
+    cursor: default;
+    transition: background-color 0.1s ease;
 }
 .calendar-day:hover {
-    background: var(--color-light);
+    background-color: #f7fbff;
 }
+
 .calendar-day--outside {
-    background: #f7f7f7;
-    color: #999;
+    background-color: #f9f9f9;
+    color: #aaa;
+}
+.calendar-day--outside .calendar-day-number {
+    color: #aaa;
+}
+
+.calendar-day-number {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 3px;
+    color: #333;
+}
+
+.calendar-event {
+    padding: 2px 4px;
+    border-radius: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* --- CALENDAR COMPACT OVERRIDES (To make it smaller) --- */
+.calendar-header .btn.small {
+    padding: 4px 8px; /* Smaller buttons */
+}
+.calendar-header h2 {
+    font-size: 1rem; /* Smaller month name */
+}
+.calendar-grid-header > div {
+    padding: 5px 3px;
+    font-size: 0.8rem; /* Smaller day names */
+}
+.calendar-day {
+    min-height: 55px; /* Significantly smaller cells */
+    padding: 3px;
 }
 .calendar-day-number {
-    font-size: 1.1rem;
-    font-weight: 700;
-    display: block;
-    margin-bottom: 5px;
-    text-align: right;
-    padding-right: 5px;
+    font-size: 0.9rem; /* Smaller day number */
+    margin-bottom: 2px;
 }
 .calendar-event {
-    font-size: 0.75rem;
-    padding: 3px 5px;
-    margin-bottom: 2px;
-    border-radius: 4px;
-    background: rgba(11, 83, 148, 0.75); /* var(--color-accent) with opacity */
-    color: white;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    display: block;
-    cursor: help; /* Indicates more info available */
+    font-size: 0.7rem; /* Tiny event text */
+    padding: 1px 2px;
 }
+
+/* --- EVENT STYLES --- */
 .calendar-event.type-deadline {
-    background: #b00020; /* Red for deadlines */
+    background-color: #f7b2b2; /* Light Red */
+    color: #8c0000;
+    border-left: 3px solid #d90000;
 }
+
 .calendar-event.type-meeting {
-    background: #2e7d32; /* Green for meetings */
+    background-color: #b2e8f7; /* Light Blue */
+    color: #00608c;
+    border-left: 3px solid #0099cc;
+}
+
+/* --- NEW HOLIDAY STYLE --- */
+.calendar-event.type-holiday {
+    background-color: #f7e1b2; /* Light Gold/Yellow */
+    color: #8c6a00;
+    border-left: 3px solid #d99c00;
 }
