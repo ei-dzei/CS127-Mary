@@ -78,42 +78,16 @@ $path = $path === '' ? '/' : $path;
       font-weight: bold;
     }
 
-    /* Dropdown Toggle Header */
-    .sidebar .dropdown__toggle {
-      padding: 12px 20px;
-      display: block;
-      text-decoration: none;
-      color: #f1f1f1;
-      font-size: 15px;
-      cursor: pointer;
-      background: none;
-      border: none;
-      text-align: left;
-      width: 100%;
+    /* Styles for the former sub-items to give them an indented look */
+    .sidebar .sub-link {
+        padding-left: 40px; 
+        background: #1f4062; /* Slightly different background for visual grouping */
     }
-
-    .sidebar .dropdown__toggle:hover {
-      background: #26466d;
+    .sidebar .sub-link:hover {
+        background: #26466d;
     }
-
-    /* Dropdown Sub-menu Container */
-    .sidebar .dropdown__menu {
-      display: none; /* Controlled by JS */
-      background: #1f4062;
-      padding: 0;
-      overflow: hidden;
-      height: 0;
-    }
-
-    /* JavaScript adds this class to expand the menu */
-    .sidebar .dropdown__menu.expanded {
-      display: flex; 
-      flex-direction: column;
-      height: auto; 
-    }
-
-    .sidebar .dropdown__menu a {
-        padding-left: 40px; /* Indent sub-menu links */
+    .sidebar .sub-link.active {
+        background: #457b9d;
     }
 
 
@@ -170,20 +144,24 @@ $path = $path === '' ? '/' : $path;
        Dashboard
     </a>
 
-    <div class="dropdown">
-      <div class="dropdown__toggle">
-        Manage ▾
-      </div>
-      
-      <div class="dropdown__menu">
-        <a href="<?= BASE_URL ?>/admin/crud/faculty.php">Faculty</a>
-        <a href="<?= BASE_URL ?>/admin/crud/research.php">Research</a>
-        <a href="<?= BASE_URL ?>/admin/crud/assignment.php">Assignments</a>
-        <a href="<?= BASE_URL ?>/admin/crud/agency.php">Agencies</a>
-        <a href="<?= BASE_URL ?>/admin/crud/funding.php">Funding</a>
-        <a href="<?= BASE_URL ?>/admin/audit_print.php">Audit (Print)</a>
-      </div>
-    </div>
+    <a href="<?= BASE_URL ?>/admin/crud/faculty.php" class="sub-link <?= strpos($path, '/admin/crud/faculty.php') !== false ? 'active' : '' ?>">
+        Faculty
+    </a>
+    <a href="<?= BASE_URL ?>/admin/crud/research.php" class="sub-link <?= strpos($path, '/admin/crud/research.php') !== false ? 'active' : '' ?>">
+        Research
+    </a>
+    <a href="<?= BASE_URL ?>/admin/crud/assignment.php" class="sub-link <?= strpos($path, '/admin/crud/assignment.php') !== false ? 'active' : '' ?>">
+        Assignments
+    </a>
+    <a href="<?= BASE_URL ?>/admin/crud/agency.php" class="sub-link <?= strpos($path, '/admin/crud/agency.php') !== false ? 'active' : '' ?>">
+        Agencies
+    </a>
+    <a href="<?= BASE_URL ?>/admin/crud/funding.php" class="sub-link <?= strpos($path, '/admin/crud/funding.php') !== false ? 'active' : '' ?>">
+        Funding
+    </a>
+    <a href="<?= BASE_URL ?>/admin/audit_print.php" class="sub-link <?= strpos($path, '/admin/audit_print.php') !== false ? 'active' : '' ?>">
+        Audit (Print)
+    </a>
 
     <a class="btn small" style="margin-top:20px; padding-left:20px;"
        href="<?= BASE_URL ?>/admin/logout.php">
