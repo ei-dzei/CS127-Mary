@@ -1,6 +1,5 @@
 <?php
 require_once __DIR__ . '/init.php';
-
 $pageTitle = $pageTitle ?? 'School of Mary';
 $isAdmin   = is_admin();
 $inAdmin   = in_admin_area();
@@ -36,7 +35,7 @@ $currentPath = current_path();
 
   <style>
     /* ----------------------------------------------------------------- */
-    /* INLINE STYLES (REQUIRED FOR TOGGLE FUNCTIONALITY AND LAYOUT FIXES) */
+    /* INLINE STYLES (RESTORED TO ORIGINAL CONTENT)                       */
     /* ----------------------------------------------------------------- */
     
     body {
@@ -73,8 +72,7 @@ $currentPath = current_path();
     /* === 3. Main Content Shift (Desktop View) === */
     main.container {
         flex-grow: 1;
-        /* CRITICAL: Offset for fixed sidebar */
-        margin-left: 230px; 
+        margin-left: 230px; /* Space for the fixed sidebar */
         padding: 20px;
         min-height: 100vh;
     }
@@ -115,12 +113,12 @@ $currentPath = current_path();
         background: #457b9d;
     }
     .admin-stripe {
-        padding: 10px;
-        background: #ffd166;
-        font-weight: bold;
-        text-align: center;
-        /* CRITICAL FIX: Offset stripe past the sidebar */
-        margin-left: 230px;
+      padding: 10px;
+      background: #ffd166;
+      font-weight: bold;
+      text-align: center;
+      /* RESTORED: This was key to your original offset */
+      margin-left: 230px; 
     }
     
     /* === 5. Mobile/Toggle Styles (CRITICAL) === */
@@ -175,49 +173,20 @@ $currentPath = current_path();
         <img class="brand__logo" src="<?= BASE_URL ?>/public/logo.png" alt="School of Mary">
         <span>School of Mary</span>
       </a>
-
-      <a href="<?= BASE_URL ?>/public/"
-         class="<?= current_path()=== BASE_URL.'/public/' || current_path()==='/public/' ? 'active' : '' ?>">
-         Home
-      </a>
-
-      <a href="<?= BASE_URL ?>/public/faculty.php"
-         class="<?= strpos(current_path(), '/public/faculty') !== false ? 'active' : '' ?>">
-         Faculty
-      </a>
-
-      <a href="<?= BASE_URL ?>/public/research.php"
-         class="<?= strpos(current_path(), '/public/research') !== false ? 'active' : '' ?>">
-         Research
-      </a>
-
+      
       <hr style="border-color:#ffffff30; margin:10px 0;" />
 
       <?php if ($isAdmin): ?>
-
         <a href="<?= BASE_URL ?>/admin/dashboard.php"
            class="<?= ($path==='/admin/dashboard.php' || $path==='/admin/') ? 'active' : '' ?>">
            Dashboard
         </a>
-
-        <a href="<?= BASE_URL ?>/admin/crud/faculty.php" class="sub-link <?= strpos($path, '/admin/crud/faculty.php') !== false ? 'active' : '' ?>">
-            Faculty
-        </a>
-        <a href="<?= BASE_URL ?>/admin/crud/research.php" class="sub-link <?= strpos($path, '/admin/crud/research.php') !== false ? 'active' : '' ?>">
-            Research
-        </a>
-        <a href="<?= BASE_URL ?>/admin/crud/assignment.php" class="sub-link <?= strpos($path, '/admin/crud/assignment.php') !== false ? 'active' : '' ?>">
-            Assignments
-        </a>
-        <a href="<?= BASE_URL ?>/admin/crud/agency.php" class="sub-link <?= strpos($path, '/admin/crud/agency.php') !== false ? 'active' : '' ?>">
-            Agencies
-        </a>
-        <a href="<?= BASE_URL ?>/admin/crud/funding.php" class="sub-link <?= strpos($path, '/admin/crud/funding.php') !== false ? 'active' : '' ?>">
-            Funding
-        </a>
-        <a href="<?= BASE_URL ?>/admin/audit_print.php" class="sub-link <?= strpos($path, '/admin/audit_print.php') !== false ? 'active' : '' ?>">
-            Audit (Print)
-        </a>
+        <a href="<?= BASE_URL ?>/admin/crud/faculty.php" class="sub-link <?= strpos($path, '/admin/crud/faculty.php') !== false ? 'active' : '' ?>">Faculty</a>
+        <a href="<?= BASE_URL ?>/admin/crud/research.php" class="sub-link <?= strpos($path, '/admin/crud/research.php') !== false ? 'active' : '' ?>">Research</a>
+        <a href="<?= BASE_URL ?>/admin/crud/assignment.php" class="sub-link <?= strpos($path, '/admin/crud/assignment.php') !== false ? 'active' : '' ?>">Assignments</a>
+        <a href="<?= BASE_URL ?>/admin/crud/agency.php" class="sub-link <?= strpos($path, '/admin/crud/agency.php') !== false ? 'active' : '' ?>">Agencies</a>
+        <a href="<?= BASE_URL ?>/admin/crud/funding.php" class="sub-link <?= strpos($path, '/admin/crud/funding.php') !== false ? 'active' : '' ?>">Funding</a>
+        <a href="<?= BASE_URL ?>/admin/audit_print.php" class="sub-link <?= strpos($path, '/admin/audit_print.php') !== false ? 'active' : '' ?>">Audit (Print)</a>
 
         <a class="btn small" style="margin-top:20px; padding-left:20px;"
            href="<?= BASE_URL ?>/admin/logout.php">
@@ -239,3 +208,6 @@ $currentPath = current_path();
     <?php endif; ?>
 
     <main class="container">
+      </main>
+
+    </div>
