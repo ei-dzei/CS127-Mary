@@ -132,13 +132,13 @@ th {
 }
 
 /* =======================================
-   FOOTER (IMPROVED STYLES)
+   FOOTER (IMPROVED STYLES - Adjusted for compactness)
    ======================================= */
 
 .footer {
-    background: #1d3557; /* Dark blue to contrast with the sidebar */
+    background: #1d3557; 
     color: #f1f1f1;
-    padding: 2.5rem 0; /* More padding for space */
+    padding: 2rem 0; /* Reduced padding */
     margin-top: auto;
     font-size: 0.95rem;
 }
@@ -147,11 +147,11 @@ th {
     display: grid;
     /* 4 columns for large screens */
     grid-template-columns: repeat(4, 1fr);
-    gap: 30px;
+    gap: 20px; /* Reduced gap */
 }
 
 /* Responsive adjustments */
-@media (max-width: 900px) {
+@media (max-width: 1000px) { /* Adjust breakpoint for earlier collapse */
     .footer__grid {
         grid-template-columns: repeat(2, 1fr);
     }
@@ -162,11 +162,8 @@ th {
     }
 }
 
-.footer__brand {
-    /* Styles for the logo column */
-}
 .footer__logo {
-    width: 60px;
+    width: 50px; /* Slight reduction in logo size */
     height: auto;
     margin-bottom: 8px;
 }
@@ -182,9 +179,9 @@ th {
 
 .footer__heading {
     color: #a8dadc;
-    font-size: 1.1rem;
+    font-size: 1.0rem; /* Slight reduction in heading size */
     font-weight: 600;
-    margin-bottom: 12px;
+    margin-bottom: 10px; /* Reduced margin */
     font-family: 'Patua One', serif;
 }
 
@@ -194,7 +191,7 @@ th {
     margin: 0;
 }
 .footer__list li {
-    margin-bottom: 8px;
+    margin-bottom: 6px; /* Reduced list item spacing */
     line-height: 1.5;
 }
 .footer__list a {
@@ -203,7 +200,7 @@ th {
     transition: color 0.2s ease;
 }
 .footer__list a:hover {
-    color: #457b9d; /* Lighter blue on hover */
+    color: #457b9d; 
 }
 
 /* Contact list specific styling */
@@ -216,15 +213,15 @@ th {
 /* Social icons */
 .footer__social {
     display: flex;
-    gap: 12px;
+    gap: 10px; /* Reduced social gap */
     margin-bottom: 15px;
 }
 .footer__social a {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 30px;
-    height: 30px;
+    width: 28px; /* Reduced social icon size */
+    height: 28px;
     border-radius: 50%;
     background: #457b9d;
     color: #fff;
