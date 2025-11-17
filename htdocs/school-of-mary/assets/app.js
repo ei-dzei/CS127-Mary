@@ -403,6 +403,7 @@
 
 /* -------------------------
     ADMIN CALENDAR WIDGET
+    (This is the code that fixes the layout issue)
 ------------------------- */
 (function() {
     const calendarEl = document.getElementById('calendar-app');
@@ -415,14 +416,16 @@
     
     // Simple dummy event data (replace with API calls later)
     const DUMMY_EVENTS = {
+        // Current month is November 2025 (11)
         '2025-11-20': [{ title: 'Funding Deadline A', type: 'deadline' }],
         '2025-11-25': [{ title: 'Faculty Meeting', type: 'meeting' }, { title: 'Q4 Report Due', type: 'deadline' }],
+        // Next month is December 2025 (12)
         '2025-12-10': [{ title: 'Project Review', type: 'meeting' }],
         '2025-12-31': [{ title: 'End of Year Reports', type: 'deadline' }]
     };
 
     let currentDate = new Date();
-    currentDate.setDate(1); // Set to the 1st of the current month
+    currentDate.setDate(1); // Set to the 1st of the current month (Nov 1, 2025)
 
     const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
@@ -434,14 +437,14 @@
         monthYearEl.textContent = `${monthNames[month]} ${year}`;
         daysGridEl.innerHTML = ''; // Clear previous days
 
-        // Determine start day of the month (0=Sun, 6=Sat)
+        // Determine start day of the month (0=Sun, 6=Sat). Nov 1, 2025 is a Saturday (6)
         const firstDayOfMonth = new Date(year, month, 1).getDay();
         // Determine number of days in the month
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         // Determine days in the previous month
         const daysInPrevMonth = new Date(year, month, 0).getDate();
 
-        // 1. Fill leading days from the previous month
+        // 1. Fill leading days from the previous month (October 2025)
         for (let i = 0; i < firstDayOfMonth; i++) {
             const dayNum = daysInPrevMonth - firstDayOfMonth + i + 1;
             const cell = document.createElement('div');
@@ -472,7 +475,7 @@
             daysGridEl.appendChild(cell);
         }
 
-        // 3. Fill trailing days from the next month
+        // 3. Fill trailing days from the next month (December 2025)
         const totalCells = firstDayOfMonth + daysInMonth;
         // Check if we need a 6th row (42 cells total)
         const totalGridCells = totalCells > 35 ? 42 : 35;
