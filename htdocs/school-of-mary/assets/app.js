@@ -542,3 +542,67 @@
     // Initial render
     renderCalendar();
 })();
+
+/* -------------------------
+    RESEARCH DATE VALIDATION WIDGET (STANDALONE)
+------------------------- */
+(function() {
+    // --- CREATE FORM (Static Inputs) ---
+    const createStartDateEl = document.getElementById('research_startdate');
+    const createEndDateEl = document.getElementById('research_enddate');
+
+    // --- EDIT MODAL (Dynamic Inputs) ---
+    const editStartDateEl = document.getElementById('m_start');
+    const editEndDateEl = document.getElementById('m_end');
+
+    // ----------------------------------------------------
+    // Generic validation logic function
+    // ----------------------------------------------------
+    function enforceDateConstraint(startEl, endEl) {
+        if (!startEl || !endEl) return;
+
+        function validateAndSetMin() {
+            const startDateValue = startEl.value;
+            
+            // 1. Set the minimum selectable date for the end date to the start date
+            endEl.min = startDateValue;
+
+            // 2. If the current end date is now earlier than the new start date, clear it.
+            if (endEl.value && startDateValue && endEl.value < startDateValue) {
+                // Clear value to force re-selection and prevent submission of invalid data
+                endEl.value = ''; 
+            }
+        }
+        
+        // Run validation whenever the start date changes
+        startEl.addEventListener('change', validateAndSetMin);
+        
+        // This is important for the modal's input fields (which might be pre-filled)
+        endEl.addEventListener('focus', validateAndSetMin, { once: true });
+        
+        // Run immediately for the Create form inputs on load
+        if (startEl === createStartDateEl) {
+            validateAndSetMin();
+        }
+    }
+    
+    // ----------------------------------------------------
+    // Apply logic to both sets of inputs
+    // ----------------------------------------------------
+    enforceDateConstraint(createStartDateEl, createEndDateEl);
+    enforceDateConstraint(editStartDateEl, editEndDateEl);
+
+    // Re-run the modal's validation when it opens to apply constraints to the pre-filled data
+    const modal = document.getElementById('researchModal');
+    if (modal) {
+        // Observer to watch when the 'hidden' attribute is removed (i.e., modal opens)
+        new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'hidden' && !modal.hidden) {
+                    // Modal opened, run validation logic for the edit fields
+                    enforceDateConstraint(editStartDateEl, editEndDateEl);
+                }
+            });
+        }).observe(modal, { attributes: true });
+    }
+})();
