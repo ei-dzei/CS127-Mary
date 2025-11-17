@@ -20,14 +20,17 @@
    THEME VARIABLES
    ======================================= */
 :root {
-  --color-primary: #003366;
-  --color-accent: #0b5394;
+  --color-primary: #003366; /* Dark Blue */
+  --color-accent: #0b5394; /* Medium Blue/Active */
   --color-bg: #ffffff;
-  --color-light: #f8f9fa;
+  --color-light: #f8f9fa; /* Panel/Table header background */
   --color-border: #d9dee3;
   --color-text: #1a1a1a;
   --radius: 8px;
   --transition: 0.25s ease;
+
+  /* Layout Specific */
+  --sidebar-width: 250px;
 }
 
 /* =======================================
@@ -45,11 +48,25 @@ body {
   font-size: 16px;
   font-family: 'Newsreader', 'Times New Roman', serif;
   min-height: 100vh;
+  /* Added transition for desktop sidebar push effect */
+  transition: padding-left var(--transition);
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Patua One', serif;
+  color: var(--color-primary);
+  line-height: 1.2;
 }
 img {
   max-width: 100%;
   height: auto;
   display: block;
+}
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
 }
 .container {
   width: min(1200px, 94%);
@@ -73,22 +90,42 @@ img {
   background: #0a4c80;
   transform: translateY(-1px);
 }
+.btn:focus-visible { /* Accessibility Focus State */
+  outline: 3px solid rgba(11, 83, 148, 0.4);
+  outline-offset: 2px;
+}
 .btn.small {
   padding: 6px 10px;
   font-size: 0.9rem;
 }
+.btn--primary {
+  background: var(--color-accent);
+  border-color: rgba(11,83,148,0.35);
+}
+.btn--primary:hover {
+  background: #0a4c80;
+}
+.btn--ghost{ 
+  background:transparent; 
+  color:var(--color-accent); 
+  border-color:rgba(11,83,148,.35); 
+}
+.btn--ghost:hover{ 
+  background:rgba(11,83,148,.06); 
+}
+
 
 /* =======================================
    FORMS
    ======================================= */
-.input,select,textarea{
+.input, select, textarea {
   width: 100%;
   padding: 0.5rem 0.6rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   transition: border var(--transition), box-shadow var(--transition);
 }
-.input:focus,select:focus,textarea:focus{
+.input:focus, select:focus, textarea:focus {
    border-color: var(--color-accent);
   outline: none;
   box-shadow: 0 0 0 3px rgba(11, 83, 148, 0.2);
@@ -120,7 +157,7 @@ table {
   width: 100%;
   border-collapse: collapse;
 }
-th,td {
+th, td {
   padding: 8px 10px;
   border-bottom: 1px solid var(--color-border);
   text-align: left;
@@ -136,7 +173,7 @@ th {
    ======================================= */
 
 .footer {
-    background: #1d3557; 
+    background: #1d3557; /* Darker blue from the screenshot */
     color: #f1f1f1;
     padding: 2rem 0; 
     margin-top: auto;
@@ -212,7 +249,6 @@ th {
    FOOTER QUICK LINKS ADJUSTMENTS (Horizontal)
    --------------------------------------- */
 .footer__inline-links a {
-    /* FIX: Changed color to white/light gray for contrast */
     color: #f1f1f1; 
     text-decoration: none;
     transition: color 0.2s ease;
@@ -255,53 +291,103 @@ th {
     color: #a8dadc;
 }
 
-/* -------------------------------------
-   SIDEBAR VISUAL RULES (FOR MOBILE/TABLET)
-   ------------------------------------- */
+/* =======================================
+   SIDEBAR (#sidebar) & LAYOUT
+   ======================================= */
+/* Sidebar default styles (Mobile-first, always fixed at top-left) */
+#sidebar {
+    width: var(--sidebar-width);
+    height: 100vh;
+    background: #fff; /* Ensure a clear background */
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    position: fixed; 
+    left: 0;
+    top: 0;
+    z-index: 1000;
+    overflow-y: auto;
+    box-shadow: none; /* Mobile default */
+    
+    /* KEY MOBILE RULE: Hidden off-screen by default */
+    transform: translateX(calc(-1 * var(--sidebar-width))); 
+    transition: transform var(--transition);
+}
 
+/* Mobile Toggle State */
 @media (max-width: 1024px) {
-    /* * 1. Default Sidebar State (Hidden)
-     * We assume #sidebar is the <aside> element.
-     */
-    #sidebar {
-        /* Fix its position relative to the viewport */
-        position: fixed;
-        left: 0;
-        top: 0;
-        height: 100vh;
-        width: 250px; /* Or whatever width your sidebar is */
-        z-index: 1000;
-        background: #fff; /* Ensure it has a background */
-        
-        /* This is the key: push it off the left side of the screen */
-        transform: translateX(-100%); 
-        transition: transform 0.3s ease-out; /* Smooth transition */
-        box-shadow: none; /* Remove desktop shadow */
+    #sidebar-toggle {
+        display: block; /* Show the button on mobile */
     }
-
-    /* * 2. Active State (Open Sidebar)
-     * When the <body> gets the 'sidebar-open' class, slide the sidebar in.
-     */
+    
+    /* Open Sidebar State */
     body.sidebar-open #sidebar {
-        transform: translateX(0); /* Slide it fully into view */
-        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2); /* Add a visual lift */
+        transform: translateX(0); /* Slide it into view */
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2); 
     }
 
-    /* * 3. Backdrop/Overlay (Optional but Recommended)
-     * Dim the main content when the sidebar is open on mobile.
-     */
+    /* Backdrop/Overlay for Mobile */
     body.sidebar-open main.container::after {
         content: '';
-        position: fixed; /* Must be fixed to cover the screen */
+        position: fixed;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
-        z-index: 999; /* Below the sidebar (1000) but above content */
-        cursor: pointer;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
     }
 }
+
+/* Desktop Styles (>= 1025px) */
+@media (min-width: 1025px) {
+    /* Hide the Toggle Button */
+    #sidebar-toggle {
+        display: none;
+    }
+
+    /* Permanent Sidebar State */
+    #sidebar {
+        /* Override mobile transform */
+        transform: translateX(0); 
+        box-shadow: 1px 0 5px rgba(0, 0, 0, 0.1);
+        /* Ensure it's not hidden if default desktop view uses ID styles */
+    }
+
+    /* Push the entire body content to the right when sidebar is visible */
+    body.aside-sidebar {
+        padding-left: var(--sidebar-width);
+    }
+    
+    /* Ensure no overlay is applied on desktop */
+    body.sidebar-open main.container::after {
+        content: none;
+    }
+}
+
+/* ---------------------------------------
+   Sidebar Content (Styling as per previous context)
+   --------------------------------------- */
+/* Assuming .sidebar is the navigation container inside #sidebar */
+.sidebar nav a {
+    display: block;
+    padding: 10px 20px;
+    color: var(--color-primary); /* Use a darker color for links in the light sidebar */
+    font-size: 0.95rem;
+    transition: background 0.15s ease;
+}
+
+.sidebar nav a:hover {
+    background: var(--color-light);
+    text-decoration: none;
+}
+
+.sidebar nav a.is-active {
+    background: var(--color-accent);
+    color: #fff;
+    font-weight: 600;
+}
+
 /* =======================================
    DROPDOWN
    ======================================= */
@@ -321,6 +407,7 @@ th {
   padding: 6px 0;
   display: none;
   min-width: 160px;
+  z-index: 1000; /* Ensure it stays on top */
 }
 .dropdown:hover .dropdown__menu {
   display: block;
@@ -395,11 +482,6 @@ th {
 }
 
 /* =======================================
-   ADMIN STRIPE
-   ======================================= */
-/* The base styles were moved to the inline block in site_header.php */
-
-/* =======================================
    HERO SLIDER
    ======================================= */
 .hero {
@@ -460,13 +542,6 @@ th {
   font-size: clamp(2rem, 4.5vw, 3.5rem);
   line-height: 1.12;
   margin-bottom: .4rem;
-}
-.hero__subtitle {
-  font-family: 'Newsreader', serif;
-  color: #374151;
-  font-size: clamp(1rem, 2vw, 1.125rem);
-  line-height: 1.65;
-  max-width: 58ch;
 }
 .hero__subtitle {
   font-family: 'Newsreader', serif;
@@ -565,13 +640,6 @@ th {
   display: flex;
   justify-content: center;
 }
-.btn--primary {
-  background: var(--color-accent);
-  border-color: rgba(11,83,148,0.35);
-}
-.btn--primary:hover {
-  background: #0a4c80;
-}
 
 /* =======================================
    OVERLAY MODAL (Read More)
@@ -630,6 +698,10 @@ th {
 .overlay__close:hover {
   background: #f2f5f9;
 }
+.overlay__close:focus-visible { /* Accessibility Focus State */
+  outline: 3px solid rgba(11, 83, 148, 0.4);
+  outline-offset: 2px;
+}
 .overlay__body {
   padding: 18px 20px;
   overflow: auto;
@@ -682,6 +754,7 @@ th {
   margin: 14px 0 6px; 
   font-weight: 700; 
   color: var(--color-primary);
+  font-family: 'Patua One', serif;
 }
 .list {
   margin: 0; 
@@ -832,8 +905,7 @@ th {
 .card__meta{ color:#5b6675; font-size:.95rem; margin-bottom:12px; }
 .card__actions{ margin-top:auto; display:flex; justify-content:flex-start; }
 .card .btn.small{ border-radius:9999px; }
-.btn--ghost{ background:transparent; color:var(--color-accent); border-color:rgba(11,83,148,.35); }
-.btn--ghost:hover{ background:rgba(11,83,148,.06); }
+
 
 /* =======================================
    PAGINATION 
@@ -968,7 +1040,7 @@ th {
 
 /* --- CALENDAR BASE STYLES --- */
 #calendar-app {
-    font-family: var(--font-stack, sans-serif);
+    font-family: 'Newsreader', serif; /* Use defined font */
     max-width: 100%;
     margin: 0 auto;
 }
@@ -979,7 +1051,7 @@ th {
     align-items: center;
     padding: 10px 15px;
     background: var(--color-light); 
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--color-border); /* Use var for border */
 }
 
 .calendar-grid, .calendar-grid-header {
@@ -993,7 +1065,7 @@ th {
     padding: 8px 5px;
     font-size: 0.85rem;
     color: #666;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--color-border); /* Use var for border */
 }
 
 .calendar-day {
