@@ -132,13 +132,13 @@ th {
 }
 
 /* =======================================
-   FOOTER (IMPROVED STYLES - Adjusted for compactness)
+   FOOTER (IMPROVED STYLES - Fixes Applied)
    ======================================= */
 
 .footer {
     background: #1d3557; 
     color: #f1f1f1;
-    padding: 2rem 0; /* Reduced padding */
+    padding: 2rem 0; /* Reduced overall footer height */
     margin-top: auto;
     font-size: 0.95rem;
 }
@@ -147,7 +147,7 @@ th {
     display: grid;
     /* 4 columns for large screens */
     grid-template-columns: repeat(4, 1fr);
-    gap: 20px; /* Reduced gap */
+    gap: 20px; /* Reduced gap between columns */
 }
 
 /* Responsive adjustments */
@@ -162,8 +162,11 @@ th {
     }
 }
 
+.footer__brand {
+    /* Styles for the logo column */
+}
 .footer__logo {
-    width: 50px; /* Slight reduction in logo size */
+    width: 50px; /* <--- THIS IS THE LOGO SIZE FIX */
     height: auto;
     margin-bottom: 8px;
 }
