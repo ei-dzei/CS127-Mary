@@ -169,12 +169,6 @@ $CSRF = csrf_token();
 
   <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
     <a class="btn small" href="<?= app_url('/admin/api/export.php'); ?>?table=FACULTY">Export CSV</a>
-    <form method="post" action="<?= app_url('/admin/api/import.php'); ?>" enctype="multipart/form-data" style="display:inline-flex; gap:6px;">
-      <input type="hidden" name="csrf" value="<?= $CSRF; ?>">
-      <input type="hidden" name="table" value="FACULTY">
-      <input class="input" type="file" name="file" accept=".csv" required>
-      <button class="btn small">Import CSV</button>
-    </form>
   </div>
 
   <!-- Filter / Sort -->
@@ -315,11 +309,48 @@ $CSRF = csrf_token();
       };
       $base = app_url('/admin/crud/faculty.php');
     ?>
-    <a class="page-btn" href="<?= $base.'?'.$qs(max(1,$page-1)); ?>">&laquo;</a>
-    <?php for ($i=1;$i<=$totalPages;$i++): ?>
-      <a class="page-btn <?= $i===$page?'active':''; ?>" href="<?= $base.'?'.$qs($i); ?>"><?= $i; ?></a>
+    <?php if ($page > 1): ?>
+      <a class="page-btn" href="<?= $base.'?'.$qs(max(1,$page-1)); ?>" title = "Previous Page">&#x276E;</a>
+    <?php endif; ?>
+
+    <?php
+      $maxPage = 5;
+      $start = max(1, $page - floor($maxPage / 2));
+      $end = min($totalPages, $start + $maxPage - 1);
+
+      if ($end - $start < $maxPage - 1) {
+        $start = max(1, $end - $maxPage + 1);
+      } 
+    ?>
+    <!-- 1 + ...  -->
+    <?php if ($start > 1): ?>
+      <a href="<?= $base.'?'.$qs(1); ?>" class="page-btn" >1</a>
+      <?php if ($start > 3): ?>
+        <a href="<?= $base.'?'.$qs(max(1,$page - 5)) ?>" class="page-btn" title="Jump backward 5 pages">...</a>        
+      <?php endif; ?>
+      <?php if ($start == 3): ?>
+              <a href="<?= $base.'?'.$qs(2); ?>" class="page-btn" >2</a>       
+      <?php endif; ?>
+    <?php endif; ?>
+
+    <?php for ($i = $start;$i <= $end;$i++): ?>
+      <a class="page-btn <?= $i== $page?'active':''; ?>" href="<?= $base.'?'.$qs($i); ?>"><?= $i; ?></a>
     <?php endfor; ?>
-    <a class="page-btn" href="<?= $base.'?'.$qs(min($totalPages,$page+1)); ?>">&raquo;</a>
+    
+    <!-- ... + lastPage -->
+    <?php if ($end < $totalPages): ?>
+      <?php if ($end == $totalPages - 2):?>
+        <a href="<?= $base.'?'.$qs($totalPages - 1); ?>" class="page-btn" > <?=$totalPages - 1?></a>
+      <?php endif; ?>
+      <?php if ($end < $totalPages - 2): ?>
+        <a href="<?= $base.'?'.$qs(min($totalPages,$page + 5)); ?>"class="page-btn" title="Jump forward 5 pages">...</a>
+      <?php endif; ?>
+        <a href="<?= $base.'?'.$qs($totalPages); ?>" class="page-btn" > <?=$totalPages?></a>
+    <?php endif; ?>
+
+    <?php  if ($page < $totalPages): ?>
+    <a class="page-btn" href="<?= $base.'?'.$qs(min($totalPages,$page+1)); ?>" title = "Next Page">&#x276F;</a>
+    <?php  endif;?>
   </div>
 </section>
 

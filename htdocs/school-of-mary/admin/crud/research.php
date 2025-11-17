@@ -30,18 +30,6 @@ if ($action === 'create') {
   if (!v_date_nullable($_POST['RESEARCH_ENDDATE'] ?? '')) guardFail('Invalid end date');
   if (!v_enum_exists($pdo, 'RESEARCH_STATUS', 'STATUS_CODE', $_POST['RESEARCH_STATUS'] ?? null)) guardFail('Invalid status');
 
-  // --- START: DATE COMPARISON CHECK (CREATE) ---
-  $startDate = $_POST['RESEARCH_STARTDATE'];
-  $endDate   = $_POST['RESEARCH_ENDDATE'] ?? '';
-
-  if (!empty($endDate) && (strtotime($endDate) < strtotime($startDate))) {
-    // MODIFIED: Use set_flash_message for toast popup display
-    set_flash_message('error', 'The End Date cannot be earlier than the Start Date.');
-    redirect_to('/admin/crud/research.php');
-    exit;
-  }
-  // --- END: DATE COMPARISON CHECK (CREATE) ---
-
   $pdo->prepare("INSERT INTO RESEARCH (RESEARCH_TITLE, RESEARCH_STARTDATE, RESEARCH_ENDDATE, RESEARCH_STATUS) VALUES (?,?,?,?)")
       ->execute([
         $_POST['RESEARCH_TITLE'],
@@ -62,18 +50,6 @@ if ($action === 'update') {
   if (!v_date($_POST['RESEARCH_STARTDATE'] ?? ''))     guardFail('Invalid start date');
   if (!v_date_nullable($_POST['RESEARCH_ENDDATE'] ?? '')) guardFail('Invalid end date');
   if (!v_enum_exists($pdo, 'RESEARCH_STATUS', 'STATUS_CODE', $_POST['RESEARCH_STATUS'] ?? null)) guardFail('Invalid status');
-
-  // --- START: DATE COMPARISON CHECK (UPDATE) ---
-  $startDate = $_POST['RESEARCH_STARTDATE'];
-  $endDate   = $_POST['RESEARCH_ENDDATE'] ?? ''; 
-
-  if (!empty($endDate) && (strtotime($endDate) < strtotime($startDate))) {
-    // MODIFIED: Use set_flash_message for toast popup display
-    set_flash_message('error', 'The End Date cannot be earlier than the Start Date (Update Failed).');
-    redirect_to('/admin/crud/research.php');
-    exit;
-  }
-  // --- END: DATE COMPARISON CHECK (UPDATE) ---
 
   $pdo->prepare("UPDATE RESEARCH SET RESEARCH_TITLE=?, RESEARCH_STARTDATE=?, RESEARCH_ENDDATE=?, RESEARCH_STATUS=? WHERE RESEARCH_ID=?")
       ->execute([
@@ -196,17 +172,6 @@ $CSRF = csrf_token();
   border-color: rgba(11,83,148,.35);
 }
 .btn-ghost:hover{ background: rgba(11,83,148,.05); }
-
-/* Custom CSS for Icon buttons in the table */
-.actions-cell .btn.small {
-    padding: 6px 10px; 
-    width: 30px;      
-    height: 30px;     
-    line-height: 1;   
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
 </style>
 
 <section class="panel fade-in crud-header-card">
@@ -215,12 +180,6 @@ $CSRF = csrf_token();
 
   <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
     <a class="btn small" href="<?= app_url('/admin/api/export.php'); ?>?table=RESEARCH">Export CSV</a>
-    <form method="post" action="<?= app_url('/admin/api/import.php'); ?>" enctype="multipart/form-data" style="display:inline-flex; gap:6px;">
-      <input type="hidden" name="csrf" value="<?= $CSRF; ?>">
-      <input type="hidden" name="table" value="RESEARCH">
-      <input class="input" type="file" name="file" accept=".csv" required>
-      <button class="btn small">Import CSV</button>
-    </form>
   </div>
 
   <form method="get" class="grid filter-bar" style="margin-bottom:10px;">
@@ -264,8 +223,8 @@ $CSRF = csrf_token();
     <input type="hidden" name="action" value="create">
 
     <div class="field" style="grid-column: span 8"><label>Title</label><input class="input" name="RESEARCH_TITLE" required></div>
-    <div class="field" style="grid-column: span 2"><label>Start</label><input class="input" type="date" name="RESEARCH_STARTDATE" id="research_startdate" required></div>
-    <div class="field" style="grid-column: span 2"><label>End</label><input class="input" type="date" name="RESEARCH_ENDDATE" id="research_enddate"></div>
+    <div class="field" style="grid-column: span 2"><label>Start</label><input class="input" type="date" name="RESEARCH_STARTDATE" required></div>
+    <div class="field" style="grid-column: span 2"><label>End</label><input class="input" type="date" name="RESEARCH_ENDDATE"></div>
     <div class="field" style="grid-column: span 3">
       <label>Status</label>
       <select class="input" name="RESEARCH_STATUS" required>
@@ -307,22 +266,13 @@ $CSRF = csrf_token();
                 data-start="<?= htmlspecialchars($row['RESEARCH_STARTDATE'], ENT_QUOTES); ?>"
                 data-end="<?= htmlspecialchars((string)$row['RESEARCH_ENDDATE'], ENT_QUOTES); ?>"
                 data-status="<?= htmlspecialchars($row['RESEARCH_STATUS'], ENT_QUOTES); ?>"
-                title="Edit Record"
-              >
-                <i class="bi bi-pencil"></i>
-              </button>
+              >Edit</button>
 
               <form method="post" onsubmit="return confirm('Delete research?');" style="display:inline">
                 <input type="hidden" name="csrf" value="<?= $CSRF; ?>">
                 <input type="hidden" name="action" value="delete">
                 <input type="hidden" name="RESEARCH_ID" value="<?= (int)$row['RESEARCH_ID']; ?>">
-                <button 
-                    class="btn small" 
-                    style="background:#b91c1c;border-color:#b91c1c"
-                    title="Delete Record"
-                >
-                  <i class="bi bi-trash"></i>
-                </button>
+                <button class="btn small" style="background:#b91c1c;border-color:#b91c1c">Delete</button>
               </form>
             </td>
           </tr>
@@ -334,6 +284,7 @@ $CSRF = csrf_token();
     </table>
   </div>
 
+  <!-- Pagination -->
   <div class="pagination">
     <?php
       $qs = function($p) use ($q, $status, $from, $to, $sort) {
@@ -347,14 +298,52 @@ $CSRF = csrf_token();
       };
       $base = app_url('/admin/crud/research.php');
     ?>
-    <a class="page-btn" href="<?= $base.'?'.$qs(max(1,$page-1)); ?>">&laquo;</a>
-    <?php for ($i=1;$i<=$totalPages;$i++): ?>
-      <a class="page-btn <?= $i===$page?'active':''; ?>" href="<?= $base.'?'.$qs($i); ?>"><?= $i; ?></a>
+    <?php if ($page > 1): ?>
+      <a class="page-btn" href="<?= $base.'?'.$qs(max(1,$page-1)); ?>" title = "Previous Page">&#x276E;</a>
+    <?php endif; ?>
+
+    <?php
+      $maxPage = 5;
+      $start = max(1, $page - floor($maxPage / 2));
+      $end = min($totalPages, $start + $maxPage - 1);
+
+      if ($end - $start < $maxPage - 1) {
+        $start = max(1, $end - $maxPage + 1);
+      } 
+    ?>
+    <!-- 1 + ...  -->
+    <?php if ($start > 1): ?>
+      <a href="<?= $base.'?'.$qs(1); ?>" class="page-btn" >1</a>
+      <?php if ($start > 3): ?>
+        <a href="<?= $base.'?'.$qs(max(1,$page - 5)) ?>" class="page-btn" title="Jump backward 5 pages">...</a>        
+      <?php endif; ?>
+      <?php if ($start == 3): ?>
+              <a href="<?= $base.'?'.$qs(2); ?>" class="page-btn" >2</a>       
+      <?php endif; ?>
+    <?php endif; ?>
+
+    <?php for ($i = $start;$i <= $end;$i++): ?>
+      <a class="page-btn <?= $i== $page?'active':''; ?>" href="<?= $base.'?'.$qs($i); ?>"><?= $i; ?></a>
     <?php endfor; ?>
-    <a class="page-btn" href="<?= $base.'?'.$qs(min($totalPages,$page+1)); ?>">&raquo;</a>
+    
+    <!-- ... + lastPage -->
+    <?php if ($end < $totalPages): ?>
+      <?php if ($end == $totalPages - 2):?>
+        <a href="<?= $base.'?'.$qs($totalPages - 1); ?>" class="page-btn" > <?=$totalPages - 1?></a>
+      <?php endif; ?>
+      <?php if ($end < $totalPages - 2): ?>
+        <a href="<?= $base.'?'.$qs(min($totalPages,$page + 5)); ?>"class="page-btn" title="Jump forward 5 pages">...</a>
+      <?php endif; ?>
+        <a href="<?= $base.'?'.$qs($totalPages); ?>" class="page-btn" > <?=$totalPages?></a>
+    <?php endif; ?>
+
+    <?php  if ($page < $totalPages): ?>
+    <a class="page-btn" href="<?= $base.'?'.$qs(min($totalPages,$page+1)); ?>" title = "Next Page">&#x276F;</a>
+    <?php  endif;?>
   </div>
 </section>
 
+<!-- --------- Modal HTML --------- -->
 <div class="admin-modal" id="researchModal" hidden>
   <div class="admin-modal__backdrop" data-close="1"></div>
   <div class="admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="researchModalTitle">
@@ -401,7 +390,7 @@ $CSRF = csrf_token();
 </div>
 
 <script>
-// Modal controller (Existing JS, handles opening/closing and data transfer)
+// Modal controller
 (function(){
   const modal = document.getElementById('researchModal');
   const form  = modal.querySelector('form');
