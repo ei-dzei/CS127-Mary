@@ -385,8 +385,6 @@
           <p class="kv"><b>Status:</b> ${escapeHtml(d.RESEARCH_STATUS || '')}</p>
           <p class="kv"><b>Start:</b> ${escapeHtml(d.RESEARCH_STARTDATE || '')}</p>
           <p class="kv"><b>End:</b> ${escapeHtml(d.RESEARCH_ENDDATE || '—')}</p>
-          <div class="section-title">Assigned Faculty</div>
-          <div class="badges">${people || '—'}</div>
           <div class="section-title">Funding</div>
           <ul class="list">${funds || '<li>No funding recorded.</li>'}</ul>
           <p class="kv"><b>Total Funding:</b> ₱${escapeHtml(d.total_funding || '0.00')}</p>
@@ -400,4 +398,103 @@
       '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
     }[m]));
   }
+})();
+
+
+/* -------------------------
+    ADMIN CALENDAR WIDGET
+------------------------- */
+(function() {
+    const calendarEl = document.getElementById('calendar-app');
+    if (!calendarEl) return;
+
+    const monthYearEl = document.getElementById('current-month-year');
+    const daysGridEl = document.getElementById('calendar-days');
+    const prevBtn = document.getElementById('prev-month');
+    const nextBtn = document.getElementById('next-month');
+    
+    // Simple dummy event data (replace with API calls later)
+    const DUMMY_EVENTS = {
+        '2025-11-20': [{ title: 'Funding Deadline A', type: 'deadline' }],
+        '2025-11-25': [{ title: 'Faculty Meeting', type: 'meeting' }, { title: 'Q4 Report Due', type: 'deadline' }],
+        '2025-12-10': [{ title: 'Project Review', type: 'meeting' }],
+        '2025-12-31': [{ title: 'End of Year Reports', type: 'deadline' }]
+    };
+
+    let currentDate = new Date();
+    currentDate.setDate(1); // Set to the 1st of the current month
+
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+    function renderCalendar() {
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+
+        // Update header
+        monthYearEl.textContent = `${monthNames[month]} ${year}`;
+        daysGridEl.innerHTML = ''; // Clear previous days
+
+        // Determine start day of the month (0=Sun, 6=Sat)
+        const firstDayOfMonth = new Date(year, month, 1).getDay();
+        // Determine number of days in the month
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        // Determine days in the previous month
+        const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+        // 1. Fill leading days from the previous month
+        for (let i = 0; i < firstDayOfMonth; i++) {
+            const dayNum = daysInPrevMonth - firstDayOfMonth + i + 1;
+            const cell = document.createElement('div');
+            cell.classList.add('calendar-day', 'calendar-day--outside');
+            cell.innerHTML = `<span class="calendar-day-number">${dayNum}</span>`;
+            daysGridEl.appendChild(cell);
+        }
+
+        // 2. Fill current month days
+        for (let i = 1; i <= daysInMonth; i++) {
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+            const cell = document.createElement('div');
+            cell.classList.add('calendar-day');
+            cell.innerHTML = `<span class="calendar-day-number">${i}</span>`;
+            
+            // Add events for this day
+            const events = DUMMY_EVENTS[dateStr];
+            if (events) {
+                events.forEach(event => {
+                    const eventEl = document.createElement('span');
+                    eventEl.classList.add('calendar-event', `type-${event.type}`);
+                    eventEl.title = event.title; // for tooltip
+                    eventEl.textContent = event.title;
+                    cell.appendChild(eventEl);
+                });
+            }
+
+            daysGridEl.appendChild(cell);
+        }
+
+        // 3. Fill trailing days from the next month
+        const totalCells = firstDayOfMonth + daysInMonth;
+        // Check if we need a 6th row (42 cells total)
+        const totalGridCells = totalCells > 35 ? 42 : 35;
+        const remainingCells = totalGridCells - totalCells; 
+
+        for (let i = 1; i <= remainingCells; i++) {
+            const cell = document.createElement('div');
+            cell.classList.add('calendar-day', 'calendar-day--outside');
+            cell.innerHTML = `<span class="calendar-day-number">${i}</span>`;
+            daysGridEl.appendChild(cell);
+        }
+    }
+
+    function changeMonth(delta) {
+        currentDate.setMonth(currentDate.getMonth() + delta);
+        renderCalendar();
+    }
+
+    // Attach event listeners
+    prevBtn.addEventListener('click', () => changeMonth(-1));
+    nextBtn.addEventListener('click', () => changeMonth(1));
+
+    // Initial render
+    renderCalendar();
 })();
