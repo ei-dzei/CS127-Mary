@@ -4,10 +4,10 @@ $pageTitle = $pageTitle ?? 'School of Mary';
 $isAdmin   = is_admin();
 $inAdmin   = in_admin_area();
 
-/* ----- Active link helper ----- */
+/* Active link helper */
 $uri  = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 $path = preg_replace('#^' . preg_quote(BASE_URL, '#') . '#', '', $uri);
-$path = $path === '' ? '/' : $path; 
+$path = $path === '' ? '/' : $path;
 ?>
 <!doctype html>
 <html lang="en">
@@ -16,63 +16,192 @@ $path = $path === '' ? '/' : $path;
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title><?= htmlspecialchars($pageTitle) ?> · School of Mary</title>
 
-  <!-- Favicon -->
   <link rel="icon" type="image/x-icon" href="<?= BASE_URL ?>/public/smlogo.ico">
   <link rel="shortcut icon" href="<?= BASE_URL ?>/public/smlogo.ico" />
 
-  <!-- Styles -->
   <link rel="stylesheet" href="<?= BASE_URL ?>/assets/styles.css" />
   <link rel="stylesheet" href="<?= BASE_URL ?>/assets/modal.css" />
 
-  <!-- Scripts -->
+  <style>
+    /* --- SIDE NAVIGATION (Inline Styles) --- */
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f8f9fa;
+      /* Removed display: flex on body to prevent layout conflicts with position: fixed */
+    }
+
+    /* Sidebar container */
+    .sidebar {
+      width: 230px;
+      height: 100vh; /* Full viewport height */
+      background: #1d3557;
+      padding: 20px 0;
+      display: flex;
+      flex-direction: column;
+      position: fixed; /* CRITICAL: Keeps it locked on the left */
+      left: 0;
+      top: 0;
+      color: #fff;
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .sidebar .brand {
+      display: flex;
+      align-items: center;
+      padding: 0 20px 20px;
+      gap: 10px;
+    }
+
+    .sidebar .brand__logo {
+      width: 40px;
+      height: auto;
+    }
+
+    /* Navigation links */
+    .sidebar a {
+      padding: 12px 20px;
+      display: block;
+      text-decoration: none;
+      color: #f1f1f1;
+      font-size: 15px;
+    }
+
+    .sidebar a:hover {
+      background: #26466d;
+    }
+
+    .sidebar .active {
+      background: #457b9d;
+      font-weight: bold;
+    }
+
+    /* Dropdown Toggle Header */
+    .sidebar .dropdown__toggle {
+      padding: 12px 20px;
+      display: block;
+      text-decoration: none;
+      color: #f1f1f1;
+      font-size: 15px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      text-align: left;
+      width: 100%;
+    }
+
+    .sidebar .dropdown__toggle:hover {
+      background: #26466d;
+    }
+
+    /* Dropdown Sub-menu Container */
+    .sidebar .dropdown__menu {
+      display: none; /* Controlled by JS */
+      background: #1f4062;
+      padding: 0;
+      overflow: hidden;
+      height: 0;
+    }
+
+    /* JavaScript adds this class to expand the menu */
+    .sidebar .dropdown__menu.expanded {
+      display: flex; 
+      flex-direction: column;
+      height: auto; 
+    }
+
+    .sidebar .dropdown__menu a {
+        padding-left: 40px; /* Indent sub-menu links */
+    }
+
+
+    /* Main container shift - CRITICAL: Pushes content over */
+    main.container {
+      margin-left: 250px !important; /* Sidebar width (230px) + margin */
+      padding-top: 20px !important;
+      width: calc(100% - 250px);
+    }
+
+    .admin-stripe {
+      margin-left: 250px; /* Shift stripe over too */
+      padding: 10px;
+      background: #ffd166;
+      font-weight: bold;
+      text-align: center;
+    }
+
+  </style>
+
   <script defer src="<?= BASE_URL ?>/assets/app.js"></script>
 </head>
 
 <body>
-<header id="topbar" class="topbar">
-  <div class="container topbar__inner">
 
-    <a class="brand" href="<?= BASE_URL ?>/public/">
-      <img class="brand__logo" src="<?= BASE_URL ?>/public/logo.png" alt="School of Mary">
-      <span>School of Mary</span>
+<aside class="sidebar">
+
+  <a class="brand" href="<?= BASE_URL ?>/public/">
+    <img class="brand__logo" src="<?= BASE_URL ?>/public/logo.png" alt="School of Mary">
+    <span>School of Mary</span>
+  </a>
+
+  <a href="<?= BASE_URL ?>/public/"
+     class="<?= current_path()=== BASE_URL.'/public/' || current_path()==='/public/' ? 'active' : '' ?>">
+     Home
+  </a>
+
+  <a href="<?= BASE_URL ?>/public/faculty.php"
+     class="<?= strpos(current_path(), '/public/faculty') !== false ? 'active' : '' ?>">
+     Faculty
+  </a>
+
+  <a href="<?= BASE_URL ?>/public/research.php"
+     class="<?= strpos(current_path(), '/public/research') !== false ? 'active' : '' ?>">
+     Research
+  </a>
+
+  <hr style="border-color:#ffffff30; margin:10px 0;" />
+
+  <?php if ($isAdmin): ?>
+
+    <a href="<?= BASE_URL ?>/admin/dashboard.php"
+       class="<?= ($path==='/admin/dashboard.php' || $path==='/admin/') ? 'active' : '' ?>">
+       Dashboard
     </a>
 
-    <nav class="mainnav">
-      <!-- Public nav -->
-      <a href="<?= BASE_URL ?>/public/" class="<?= current_path()=== BASE_URL.'/public/' || current_path()==='/public/' ? 'active' : '' ?>">Home</a>
-      <a href="<?= BASE_URL ?>/public/faculty.php"   class="<?= strpos(current_path(), '/public/faculty') !== false ? 'active' : '' ?>">Faculty</a>
-      <a href="<?= BASE_URL ?>/public/research.php"  class="<?= strpos(current_path(), '/public/research') !== false ? 'active' : '' ?>">Research</a>
+    <div class="dropdown">
+      <div class="dropdown__toggle">
+        Manage ▾
+      </div>
+      
+      <div class="dropdown__menu">
+        <a href="<?= BASE_URL ?>/admin/crud/faculty.php">Faculty</a>
+        <a href="<?= BASE_URL ?>/admin/crud/research.php">Research</a>
+        <a href="<?= BASE_URL ?>/admin/crud/assignment.php">Assignments</a>
+        <a href="<?= BASE_URL ?>/admin/crud/agency.php">Agencies</a>
+        <a href="<?= BASE_URL ?>/admin/crud/funding.php">Funding</a>
+        <a href="<?= BASE_URL ?>/admin/audit_print.php">Audit (Print)</a>
+      </div>
+    </div>
 
-      <?php if ($isAdmin): ?>
-        <span class="divider" aria-hidden="true"></span>
+    <a class="btn small" style="margin-top:20px; padding-left:20px;"
+       href="<?= BASE_URL ?>/admin/logout.php">
+       Logout
+    </a>
 
-        <!-- Admin dashboard -->
-        <a href="<?= BASE_URL ?>/admin/dashboard.php" class="<?= ($path==='/admin/dashboard.php' || $path==='/admin/' ) ? 'active' : '' ?>">Dashboard</a>
+  <?php else: ?>
 
-        <!-- Admin manage dropdown -->
-        <div class="dropdown">
-          <button class="btn small" type="button" aria-haspopup="true" aria-expanded="false">Manage ▾</button>
-          <div class="dropdown__menu" role="menu">
-            <a href="<?= BASE_URL ?>/admin/crud/faculty.php">Faculty</a>
-            <a href="<?= BASE_URL ?>/admin/crud/research.php">Research</a>
-            <a href="<?= BASE_URL ?>/admin/crud/assignment.php">Assignments</a>
-            <a href="<?= BASE_URL ?>/admin/crud/agency.php">Agencies</a>
-            <a href="<?= BASE_URL ?>/admin/crud/funding.php">Funding</a>
-            <a href="<?= BASE_URL ?>/admin/audit_print.php">Audit (Print)</a>
-          </div>
-        </div>
+    <a class="btn small" href="<?= BASE_URL ?>/admin/login.php" style="padding-left:20px;">
+      Admin Login
+    </a>
 
-        <a class="btn small" href="<?= BASE_URL ?>/admin/logout.php">Logout</a>
-      <?php else: ?>
-        <span class="divider" aria-hidden="true"></span>
-        <a class="btn small" href="<?= BASE_URL ?>/admin/login.php">Admin Login</a>
-      <?php endif; ?>
-    </nav>
-  </div>
-</header>
+  <?php endif; ?>
+
+</aside>
 
 <?php if ($inAdmin): ?>
   <div class="admin-stripe">Admin Area</div>
 <?php endif; ?>
 
-<main class="container" style="padding-top:18px">
+<main class="container">

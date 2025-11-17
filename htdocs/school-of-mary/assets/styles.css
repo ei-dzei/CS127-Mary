@@ -45,8 +45,8 @@ body {
   font-size: 16px;
   font-family: 'Newsreader', 'Times New Roman', serif;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  /* display: flex; REMOVED to avoid layout conflict with fixed sidebar */
+  /* flex-direction: column; REMOVED */
 }
 img {
   max-width: 100%;
@@ -60,68 +60,10 @@ img {
 
 /* =======================================
    STICKY TOPBAR / NAVBAR
+   (THIS ENTIRE SECTION HAS BEEN REMOVED to resolve the layout conflict)
    ======================================= */
-.topbar {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  background: var(--color-primary);
-  color: #fff;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
-  transition: background var(--transition), transform var(--transition);
-}
-.topbar__inner {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem 0;
-}
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #fff;
-  font-family: 'Patua One', serif;
-  font-weight: 600;
-  text-decoration: none;
-  font-size: 1.15rem; 
-}
-.brand__logo {
-  width: 40px;
-  height: 40px;
-  object-fit: contain;
-  display: block;
-}
-.mainnav {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-}
-.mainnav a {
-  color: #fff;
-  text-decoration: none;
-  font-weight: 500;
-  position: relative;
-  transition: color var(--transition);
-}
-.mainnav a:hover {
-  color: #e6e6e6;
-}
-.mainnav a.active::after {
-  content: "";
-  position: absolute;
-  bottom: -6px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: #ffcc00;
-  border-radius: 1px;
-}
-.divider {
-  width: 1px;
-  height: 24px;
-  background: rgba(255, 255, 255, 0.3);
-}
+/* The .brand styles are moved/re-applied in the PHP inline CSS */
+
 
 /* =======================================
    BUTTONS
@@ -223,6 +165,8 @@ th {
 .dropdown {
   position: relative;
 }
+/* IMPORTANT: The dropdown__menu styles here are for generic horizontal dropdowns.
+   The sidebar dropdown is controlled by the inline CSS in the PHP file. */
 .dropdown__menu {
   position: absolute;
   top: 100%;
@@ -237,6 +181,8 @@ th {
   min-width: 160px;
 }
 .dropdown:hover .dropdown__menu {
+  /* This hover style is for NON-SIDEBAR dropdowns only. 
+     The sidebar menu is controlled by JS. */
   display: block;
 }
 .dropdown__menu a {
@@ -271,7 +217,7 @@ th {
 .navbar .dropdown-menu a:hover,
 .menu.dropdown a:hover,
 .dropdown-panel a:hover {
-  background: #e8f0fb;        
+  background: #e8f0f8;        
   color: #1b2a4a !important;
 }
 

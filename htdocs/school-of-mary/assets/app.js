@@ -29,6 +29,8 @@
 
   /* ------------------------------
      Sticky topbar
+     NOTE: This logic is now redundant since the topbar is removed, 
+     but keeping it won't harm the sidebar.
   ------------------------------ */
   const topbar = qs("#topbar");
   const addScrolledClass = () => {
@@ -48,6 +50,7 @@
      Dropdown keyboard support
   ------------------------------ */
   qsa(".dropdown").forEach((dd) => {
+    // This supports any non-sidebar dropdowns you might have
     const btn = qs("button, .btn", dd);
     const menu = qs(".dropdown__menu", dd);
     if (!btn || !menu) return;
@@ -76,6 +79,21 @@
       }
     });
   });
+  
+  /* ------------------------------
+     Sidebar Toggle Logic (For Manage Menu)
+     CRITICAL: This adds the click functionality to the new sidebar menu.
+  ------------------------------ */
+  const manageToggle = qs('.dropdown__toggle');
+  const manageMenu = qs('.dropdown__menu');
+
+  if (manageToggle && manageMenu) {
+    on(manageToggle, 'click', function() {
+      // Toggles the 'expanded' class which shows/hides the submenu via CSS
+      manageMenu.classList.toggle('expanded');
+    });
+  }
+
 
   /* ------------------------------
      Toast (small inline feedback)
@@ -401,4 +419,3 @@
     }[m]));
   }
 })();
-
