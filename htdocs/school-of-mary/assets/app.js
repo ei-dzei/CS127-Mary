@@ -237,6 +237,41 @@
     utils: { qs, qsa, serializeForm }
   };
 })();
+/* -------------------------
+    SIDEBAR TOGGLE WIDGET (NEW)
+------------------------- */
+(function() {
+    const sidebarToggle = document.querySelector("#sidebar-toggle");
+    const appWrapper = document.querySelector("#app-wrapper");
+    const sidebar = document.querySelector("#sidebar"); // Targeting the aside element
+
+    if (sidebarToggle && appWrapper && sidebar) {
+        
+        // Use 'sidebar-open' class to manage the state
+        const toggleSidebar = () => {
+            appWrapper.classList.toggle('sidebar-open');
+        };
+
+        // 1. Handle click events
+        sidebarToggle.addEventListener("click", toggleSidebar);
+
+        // 2. Close sidebar if an item is clicked (primarily for mobile UX)
+        sidebar.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 1024) {
+                    appWrapper.classList.remove('sidebar-open');
+                }
+            });
+        });
+
+        // 3. Close sidebar if the user clicks outside (e.g., on the main content)
+        document.querySelector('main.container').addEventListener('click', () => {
+             if (window.innerWidth <= 1024 && appWrapper.classList.contains('sidebar-open')) {
+                 appWrapper.classList.remove('sidebar-open');
+             }
+        });
+    }
+})();
 
 /* -------------------------
     HERO SLIDER 

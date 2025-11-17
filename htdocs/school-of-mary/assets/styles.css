@@ -212,7 +212,8 @@ th {
    FOOTER QUICK LINKS ADJUSTMENTS (Horizontal)
    --------------------------------------- */
 .footer__inline-links a {
-    color: #a8dadc; /* CHANGED for better contrast */
+    /* FIX: Changed color to white/light gray for contrast */
+    color: #f1f1f1; 
     text-decoration: none;
     transition: color 0.2s ease;
     margin: 0 5px; 
@@ -253,6 +254,55 @@ th {
     font-size: 0.85rem;
     color: #a8dadc;
 }
+
+/* =======================================
+   SIDEBAR TOGGLE (NEW ADDITION)
+   ======================================= */
+/* Hide button by default */
+#sidebar-toggle {
+    display: none; 
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1001; /* Must be above the sidebar */
+    padding: 8px 12px;
+    background: var(--color-accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,.2);
+}
+
+/* Mobile/Tablet View */
+@media (max-width: 1024px) {
+    /* Show the button */
+    #sidebar-toggle {
+        display: block;
+    }
+    
+    /* Initially hide the sidebar off-screen */
+    .sidebar {
+        transform: translateX(-100%);
+        box-shadow: 2px 0 5px rgba(0,0,0,0.5); 
+    }
+    
+    /* When the toggle button is clicked */
+    .app-wrapper.sidebar-open .sidebar {
+        transform: translateX(0);
+    }
+    
+    /* Main content should not have desktop margin */
+    main.container {
+        margin-left: 0 !important;
+        width: 100%;
+    }
+    
+    .admin-stripe {
+        margin-left: 0 !important;
+    }
+}
+
 
 /* =======================================
    DROPDOWN
@@ -349,14 +399,7 @@ th {
 /* =======================================
    ADMIN STRIPE
    ======================================= */
-.admin-stripe {
-  background: #ffcc00;
-  color: #222;
-  text-align: center;
-  padding: 4px 0;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-}
+/* The base styles were moved to the inline block in site_header.php */
 
 /* =======================================
    HERO SLIDER
@@ -904,8 +947,6 @@ th {
     gap: 14px;
   }
 }
-
-/* ======================================= ADMIN CALENDAR STYLES ======================================= */
 
 /* ======================================= ADMIN CALENDAR STYLES ======================================= */
 
