@@ -255,55 +255,53 @@ th {
     color: #a8dadc;
 }
 
-/* =======================================
-   SIDEBAR TOGGLE (NEW ADDITION)
-   ======================================= */
-/* Hide button by default */
-#sidebar-toggle {
-    display: none; 
-    position: fixed;
-    top: 15px;
-    left: 15px;
-    z-index: 1001; /* Must be above the sidebar */
-    padding: 8px 12px;
-    background: var(--color-accent);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0,0,0,.2);
-}
+/* -------------------------------------
+   SIDEBAR VISUAL RULES (FOR MOBILE/TABLET)
+   ------------------------------------- */
 
-/* Mobile/Tablet View */
 @media (max-width: 1024px) {
-    /* Show the button */
-    #sidebar-toggle {
-        display: block;
+    /* * 1. Default Sidebar State (Hidden)
+     * We assume #sidebar is the <aside> element.
+     */
+    #sidebar {
+        /* Fix its position relative to the viewport */
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        width: 250px; /* Or whatever width your sidebar is */
+        z-index: 1000;
+        background: #fff; /* Ensure it has a background */
+        
+        /* This is the key: push it off the left side of the screen */
+        transform: translateX(-100%); 
+        transition: transform 0.3s ease-out; /* Smooth transition */
+        box-shadow: none; /* Remove desktop shadow */
     }
-    
-    /* Initially hide the sidebar off-screen */
-    .sidebar {
-        transform: translateX(-100%);
-        box-shadow: 2px 0 5px rgba(0,0,0,0.5); 
+
+    /* * 2. Active State (Open Sidebar)
+     * When the <body> gets the 'sidebar-open' class, slide the sidebar in.
+     */
+    body.sidebar-open #sidebar {
+        transform: translateX(0); /* Slide it fully into view */
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2); /* Add a visual lift */
     }
-    
-    /* When the toggle button is clicked */
-    .app-wrapper.sidebar-open .sidebar {
-        transform: translateX(0);
-    }
-    
-    /* Main content should not have desktop margin */
-    main.container {
-        margin-left: 0 !important;
-        width: 100%;
-    }
-    
-    .admin-stripe {
-        margin-left: 0 !important;
+
+    /* * 3. Backdrop/Overlay (Optional but Recommended)
+     * Dim the main content when the sidebar is open on mobile.
+     */
+    body.sidebar-open main.container::after {
+        content: '';
+        position: fixed; /* Must be fixed to cover the screen */
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+        z-index: 999; /* Below the sidebar (1000) but above content */
+        cursor: pointer;
     }
 }
-
-
 /* =======================================
    DROPDOWN
    ======================================= */

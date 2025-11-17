@@ -238,37 +238,29 @@
   };
 })();
 /* -------------------------
-    SIDEBAR TOGGLE WIDGET
+    SIDEBAR TOGGLE WIDGET (UPDATED)
 ------------------------- */
 (function() {
     const sidebarToggle = document.querySelector("#sidebar-toggle");
-    // CHANGE THIS LINE: Target the <body> element directly.
+    // This line MUST be document.body
     const appWrapper = document.body; 
     const sidebar = document.querySelector("#sidebar"); 
-    const mainContainer = document.querySelector('main.container'); // Target the main content area
+    const mainContainer = document.querySelector('main.container'); 
 
-    // Check if the required elements exist
     if (sidebarToggle && sidebar && mainContainer) {
-        
-        const toggleSidebar = () => {
-             // The class is toggled on the <body>
-             appWrapper.classList.toggle('sidebar-open');
-        };
+        // Toggle the class on the <body>
+        const toggleSidebar = () => { appWrapper.classList.toggle('sidebar-open'); };
 
-        // 1. Handle click events
         sidebarToggle.addEventListener("click", toggleSidebar);
 
-        // 2. Close sidebar if an item is clicked (for mobile UX)
+        // Close when clicking a link (mobile only)
         sidebar.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', () => {
-                // Assuming mobile is under 1024px based on common breakpoints
-                if (window.innerWidth <= 1024) { 
-                    appWrapper.classList.remove('sidebar-open');
-                }
+                if (window.innerWidth <= 1024) { appWrapper.classList.remove('sidebar-open'); }
             });
         });
 
-        // 3. Close sidebar if the user clicks outside (on the main content)
+        // Close when clicking outside on the main content (mobile only)
         mainContainer.addEventListener('click', () => {
              if (window.innerWidth <= 1024 && appWrapper.classList.contains('sidebar-open')) {
                  appWrapper.classList.remove('sidebar-open');
