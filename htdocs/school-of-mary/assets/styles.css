@@ -51,8 +51,6 @@ body {
   font-size: 16px;
   font-family: 'Newsreader', 'Times New Roman', serif;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
 }
 
 img {
@@ -67,6 +65,7 @@ img {
 }
 
 /* =======================================
+<<<<<<< Updated upstream
    STICKY TOPBAR / NAVBAR
    ======================================= */
 
@@ -141,6 +140,8 @@ img {
 }
 
 /* =======================================
+=======
+>>>>>>> Stashed changes
    BUTTONS
    ======================================= */
 
@@ -232,10 +233,11 @@ th {
 }
 
 /* =======================================
-   FOOTER
+   FOOTER (IMPROVED STYLES)
    ======================================= */
 
 .footer {
+<<<<<<< Updated upstream
   background: var(--color-primary);
   color: #fff;
   padding: 1.5rem 0;
@@ -260,6 +262,112 @@ th {
 
 .footernav a:hover {
   color: #ffcc00;
+=======
+    background: #1d3557; /* Dark blue to contrast with the sidebar */
+    color: #f1f1f1;
+    padding: 2.5rem 0; /* More padding for space */
+    margin-top: auto;
+    font-size: 0.95rem;
+}
+
+.footer__grid {
+    display: grid;
+    /* 4 columns for large screens */
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+    .footer__grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 550px) {
+    .footer__grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.footer__brand {
+    /* Styles for the logo column */
+}
+.footer__logo {
+    width: 60px;
+    height: auto;
+    margin-bottom: 8px;
+}
+.footer__tagline {
+    font-size: 0.85rem;
+    color: #a8dadc;
+    margin-bottom: 12px;
+}
+.footer__legal {
+    font-size: 0.75rem;
+    color: #92b8d0;
+}
+
+.footer__heading {
+    color: #a8dadc;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    font-family: 'Patua One', serif;
+}
+
+.footer__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.footer__list li {
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+.footer__list a {
+    color: #f1f1f1;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+.footer__list a:hover {
+    color: #457b9d; /* Lighter blue on hover */
+}
+
+/* Contact list specific styling */
+.footer__contact li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Social icons */
+.footer__social {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+.footer__social a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #457b9d;
+    color: #fff;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background 0.2s ease;
+}
+.footer__social a:hover {
+    background: #a8dadc;
+    color: #1d3557;
+}
+
+.footer__note {
+    font-size: 0.85rem;
+    color: #a8dadc;
+>>>>>>> Stashed changes
 }
 
 /* =======================================
@@ -269,7 +377,12 @@ th {
 .dropdown {
   position: relative;
 }
+<<<<<<< Updated upstream
 
+=======
+/* The following styles are for generic horizontal dropdowns only. 
+   The sidebar dropdown logic was removed. */
+>>>>>>> Stashed changes
 .dropdown__menu {
   position: absolute;
   top: 100%;
@@ -285,6 +398,7 @@ th {
 }
 
 .dropdown:hover .dropdown__menu {
+  /* This hover style is for NON-SIDEBAR dropdowns only. */
   display: block;
 }
 
@@ -300,6 +414,34 @@ th {
   background: var(--color-light);
 }
 
+<<<<<<< Updated upstream
+=======
+.navbar .dropdown-menu,
+.menu.dropdown,
+.dropdown-panel {
+  background: #fff;
+  color: #1b2a4a;
+  border: 1px solid #e5ecf8;
+  border-radius: 10px;
+  box-shadow: 0 10px 24px rgba(0,0,0,.08);
+  z-index: 1000;
+}
+.navbar .dropdown-menu a,
+.menu.dropdown a,
+.dropdown-panel a {
+  display: block;
+  padding: 10px 12px;
+  color: #1b2a4a !important;
+  text-decoration: none;
+}
+.navbar .dropdown-menu a:hover,
+.menu.dropdown a:hover,
+.dropdown-panel a:hover {
+  background: #e8f0f8;        
+  color: #1b2a4a !important;
+}
+
+>>>>>>> Stashed changes
 /* =======================================
    ANIMATIONS
    ======================================= */
@@ -453,7 +595,7 @@ th {
 .hero__dots button {
   width: 10px;
   height: 10px;
-  border-radius: 999px;
+  border-radius: 9999px;
   border: none;
   background: rgba(11,83,148,.35);
   cursor: pointer;
@@ -659,7 +801,7 @@ th {
 
 .badge {
   padding: 6px 10px; 
-  border-radius: 999px;
+  border-radius: 9999px;
   background: rgba(11,83,148,.10); 
   color: #0b5394;
   font-size: 12px; 
@@ -806,7 +948,34 @@ th {
   color: var(--color-accent);
   border-color: rgba(11,83,148,.35);
 }
+<<<<<<< Updated upstream
 
 .btn--ghost:hover { 
   background: rgba(11,83,148,.06); 
 }
+=======
+.crud-form-card {
+  background: #fff !important;
+  border: 1px solid rgba(11,83,148,0.20) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 20px 35px rgba(11,83,148,0.08), 0 2px 4px rgba(0,0,0,0.04) !important;
+  padding: 22px 20px !important;
+}
+.crud-form-card h3 {
+  margin: 0 0 12px;
+  font-family: 'Patua One', serif;
+  color: var(--color-primary);
+}
+.crud-form-card .input,
+.crud-form-card select,
+.crud-form-card input[type="date"] {
+  border-radius: 10px;
+  height: 42px;
+}
+@media (min-width: 900px) {
+  .crud-header-card .grid,
+  .crud-form-card .grid {
+    gap: 14px;
+  }
+}
+>>>>>>> Stashed changes
