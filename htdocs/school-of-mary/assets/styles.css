@@ -161,7 +161,6 @@ th {
         grid-template-columns: 1fr;
     }
 }
-
 /* Keep logo styles here just in case HTML changes again */
 .footer__logo {
     width: 50px; 
