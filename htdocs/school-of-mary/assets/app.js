@@ -238,38 +238,6 @@
   };
 })();
 /* -------------------------
-    SIDEBAR TOGGLE WIDGET (UPDATED)
-------------------------- */
-(function() {
-    const sidebarToggle = document.querySelector("#sidebar-toggle");
-    // This line MUST be document.body
-    const appWrapper = document.body; 
-    const sidebar = document.querySelector("#sidebar"); 
-    const mainContainer = document.querySelector('main.container'); 
-
-    if (sidebarToggle && sidebar && mainContainer) {
-        // Toggle the class on the <body>
-        const toggleSidebar = () => { appWrapper.classList.toggle('sidebar-open'); };
-
-        sidebarToggle.addEventListener("click", toggleSidebar);
-
-        // Close when clicking a link (mobile only)
-        sidebar.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                if (window.innerWidth <= 1024) { appWrapper.classList.remove('sidebar-open'); }
-            });
-        });
-
-        // Close when clicking outside on the main content (mobile only)
-        mainContainer.addEventListener('click', () => {
-             if (window.innerWidth <= 1024 && appWrapper.classList.contains('sidebar-open')) {
-                 appWrapper.classList.remove('sidebar-open');
-             }
-        });
-    }
-})();
-
-/* -------------------------
     HERO SLIDER 
 ------------------------- */
 (function () {
