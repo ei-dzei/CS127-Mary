@@ -45,8 +45,6 @@ body {
   font-size: 16px;
   font-family: 'Newsreader', 'Times New Roman', serif;
   min-height: 100vh;
-  /* display: flex; REMOVED to avoid layout conflict with fixed sidebar */
-  /* flex-direction: column; REMOVED */
 }
 img {
   max-width: 100%;
@@ -57,13 +55,6 @@ img {
   width: min(1200px, 94%);
   margin: 0 auto;
 }
-
-/* =======================================
-   STICKY TOPBAR / NAVBAR
-   (THIS ENTIRE SECTION HAS BEEN REMOVED to resolve the layout conflict)
-   ======================================= */
-/* The .brand styles are moved/re-applied in the PHP inline CSS */
-
 
 /* =======================================
    BUTTONS
@@ -141,22 +132,137 @@ th {
 }
 
 /* =======================================
-   FOOTER
+   FOOTER (IMPROVED STYLES - Final Layout)
    ======================================= */
+
 .footer {
-  background: var(--color-primary);
-  color: #fff;
-  padding: 1.5rem 0;
-  margin-top: auto;
-  text-align: center; 
+    background: #1d3557; 
+    color: #f1f1f1;
+    padding: 2rem 0; 
+    margin-top: auto;
+    font-size: 0.95rem;
 }
-.footer__inner {
-  display: flex;
-  justify-content: center;  
-  align-items: center;       
-  width: 100%;            
-  height: 100%;             
-  text-align: center;
+
+.footer__grid {
+    display: grid;
+    /* Adjusted to 3 columns: Brand, Links, Contact */
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px; 
+}
+
+/* Responsive adjustments for 3 columns */
+@media (max-width: 1000px) { 
+    .footer__grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 550px) {
+    .footer__grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.footer__brand {
+    /* Styles for the logo column (now text only) */
+}
+/* Keep logo styles here just in case HTML changes again */
+.footer__logo {
+    width: 50px; 
+    height: auto;
+    margin-bottom: 8px;
+}
+.footer__tagline {
+    font-size: 0.85rem;
+    color: #a8dadc;
+    margin-bottom: 12px;
+}
+.footer__legal {
+    font-size: 0.75rem;
+    color: #92b8d0;
+}
+
+.footer__heading {
+    color: #a8dadc;
+    font-size: 1.0rem; 
+    font-weight: 600;
+    margin-bottom: 10px; 
+    font-family: 'Patua One', serif;
+}
+
+.footer__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.footer__list li {
+    margin-bottom: 6px; 
+    line-height: 1.5;
+}
+.footer__list a {
+    color: #f1f1f1;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+.footer__list a:hover {
+    color: #457b9d; 
+}
+
+/* Contact list specific styling */
+.footer__contact li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ---------------------------------------
+   FOOTER QUICK LINKS ADJUSTMENTS (Horizontal)
+   --------------------------------------- */
+.footer__inline-links a {
+    color: #a8dadc; /* CHANGED for better contrast */
+    text-decoration: none;
+    transition: color 0.2s ease;
+    margin: 0 5px; 
+    display: inline-block; 
+}
+.footer__inline-links a:hover {
+    color: #457b9d; /* Keeping the hover color */
+}
+.footer__inline-links a:hover {
+    color: #457b9d; 
+}
+.footer__inline-links {
+    /* Ensures the links container doesn't break the layout */
+    white-space: nowrap; 
+    overflow-x: auto;
+}
+
+/* --- Social icons (kept for reference, but should be removed in HTML) --- */
+.footer__social {
+    display: flex;
+    gap: 10px; 
+    margin-bottom: 15px;
+}
+.footer__social a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px; 
+    height: 28px;
+    border-radius: 50%;
+    background: #457b9d;
+    color: #fff;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background 0.2s ease;
+}
+.footer__social a:hover {
+    background: #a8dadc;
+    color: #1d3557;
+}
+
+.footer__note {
+    font-size: 0.85rem;
+    color: #a8dadc;
 }
 
 /* =======================================
@@ -165,8 +271,8 @@ th {
 .dropdown {
   position: relative;
 }
-/* IMPORTANT: The dropdown__menu styles here are for generic horizontal dropdowns.
-   The sidebar dropdown is controlled by the inline CSS in the PHP file. */
+/* The following styles are for generic horizontal dropdowns only. 
+   The sidebar dropdown logic was removed. */
 .dropdown__menu {
   position: absolute;
   top: 100%;
@@ -181,8 +287,7 @@ th {
   min-width: 160px;
 }
 .dropdown:hover .dropdown__menu {
-  /* This hover style is for NON-SIDEBAR dropdowns only. 
-     The sidebar menu is controlled by JS. */
+  /* This hover style is for NON-SIDEBAR dropdowns only. */
   display: block;
 }
 .dropdown__menu a {
@@ -361,7 +466,7 @@ th {
 .hero__dots button {
   width: 10px;
   height: 10px;
-  border-radius: 999px;
+  border-radius: 9999px;
   border: none;
   background: rgba(11,83,148,.35);
   cursor: pointer;
@@ -539,7 +644,7 @@ th {
 }
 .badge {
   padding: 6px 10px; 
-  border-radius: 999px;
+  border-radius: 9999px;
   background: rgba(11,83,148,.10); 
   color: #0b5394;
   font-size: 12px; 

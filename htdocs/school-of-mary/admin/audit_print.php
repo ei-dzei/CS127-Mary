@@ -93,6 +93,9 @@ require_once __DIR__ . '/../partials/site_header.php';
 
 <section class="panel fade-in">
   <h1 style="margin-bottom:8px;">Audit Log — Print View</h1>
+  <p class="muted" style="margin-bottom:10px;">
+    Use filters then press <strong>Ctrl/Cmd + P</strong> to print. This page uses formal print styles automatically.
+  </p>
   <form method="get" class="grid filter-bar">
     <div class="field" style="grid-column:span 2;">
       <label>Actor</label>

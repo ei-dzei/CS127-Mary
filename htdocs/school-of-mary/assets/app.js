@@ -78,12 +78,6 @@
   });
   
   /* ------------------------------
-     Sidebar Toggle Logic (REMOVED)
-     This is no longer needed since the items are now direct links.
-  ------------------------------ */
-
-
-  /* ------------------------------
      Toast (small inline feedback)
   ------------------------------ */
   function toast(msg = "Saved", timeout = 2200) {
