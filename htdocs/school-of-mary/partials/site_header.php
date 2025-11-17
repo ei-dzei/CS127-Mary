@@ -15,6 +15,15 @@ if (!function_exists('current_path')) {
         return $path;
     }
 }
+// Helper function for active links
+function is_active(string $currentPath, string $targetPath) {
+    // Corrected logic for base path checking if needed, but keeping original structure
+    return $currentPath === $targetPath ? 'active' : '';
+}
+function is_active_sub(string $currentPath, string $targetPartial) {
+    return strpos($currentPath, $targetPartial) !== false ? 'active' : '';
+}
+$currentPath = current_path();
 ?>
 <!doctype html>
 <html lang="en">
@@ -115,6 +124,8 @@ if (!function_exists('current_path')) {
       background: #ffd166;
       font-weight: bold;
       text-align: center;
+      /* Restore desktop margin for stripe */
+      margin-left: 230px;
     }
     
     /* === 5. Mobile/Toggle Styles (CRITICAL) === */
@@ -193,7 +204,6 @@ if (!function_exists('current_path')) {
            class="<?= ($path==='/admin/dashboard.php' || $path==='/admin/') ? 'active' : '' ?>">
            Dashboard
         </a>
-
         <a href="<?= BASE_URL ?>/admin/crud/faculty.php" class="sub-link <?= strpos($path, '/admin/crud/faculty.php') !== false ? 'active' : '' ?>">
             Faculty
         </a>
@@ -212,7 +222,6 @@ if (!function_exists('current_path')) {
         <a href="<?= BASE_URL ?>/admin/audit_print.php" class="sub-link <?= strpos($path, '/admin/audit_print.php') !== false ? 'active' : '' ?>">
             Audit (Print)
         </a>
-
         <a class="btn small" style="margin-top:20px; padding-left:20px;"
            href="<?= BASE_URL ?>/admin/logout.php">
            Logout
