@@ -166,7 +166,7 @@ th {
   position: relative;
 }
 /* IMPORTANT: The dropdown__menu styles here are for generic horizontal dropdowns.
-   The sidebar dropdown is controlled by the inline CSS in the PHP file. */
+   The sidebar dropdown logic has been removed. */
 .dropdown__menu {
   position: absolute;
   top: 100%;
@@ -181,8 +181,7 @@ th {
   min-width: 160px;
 }
 .dropdown:hover .dropdown__menu {
-  /* This hover style is for NON-SIDEBAR dropdowns only. 
-     The sidebar menu is controlled by JS. */
+  /* This hover style is for NON-SIDEBAR dropdowns only. */
   display: block;
 }
 .dropdown__menu a {

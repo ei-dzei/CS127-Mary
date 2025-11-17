@@ -79,7 +79,7 @@
   
   /* ------------------------------
      Sidebar Toggle Logic (REMOVED)
-     This is no longer needed since the items are now direct links.
+     The code block for managing the sidebar dropdown was removed here.
   ------------------------------ */
 
 
