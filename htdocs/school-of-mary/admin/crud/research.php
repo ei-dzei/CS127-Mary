@@ -27,6 +27,7 @@ $action = $_POST['action'] ?? '';
 if ($action === 'create') {
   if (!v_varchar($_POST['RESEARCH_TITLE'] ?? '', 255)) guardFail('Invalid title');
   if (!v_date($_POST['RESEARCH_STARTDATE'] ?? ''))     guardFail('Invalid start date');
+  // NOTE: Server-side validation still allows nullable end dates for all statuses.
   if (!v_date_nullable($_POST['RESEARCH_ENDDATE'] ?? '')) guardFail('Invalid end date');
   if (!v_enum_exists($pdo, 'RESEARCH_STATUS', 'STATUS_CODE', $_POST['RESEARCH_STATUS'] ?? null)) guardFail('Invalid status');
 
@@ -35,7 +36,6 @@ if ($action === 'create') {
   $endDate   = $_POST['RESEARCH_ENDDATE'] ?? '';
 
   if (!empty($endDate) && (strtotime($endDate) < strtotime($startDate))) {
-    // MODIFIED: Use set_flash_message for toast popup display
     set_flash_message('error', 'The End Date cannot be earlier than the Start Date.');
     redirect_to('/admin/crud/research.php');
     exit;
@@ -68,7 +68,6 @@ if ($action === 'update') {
   $endDate   = $_POST['RESEARCH_ENDDATE'] ?? ''; 
 
   if (!empty($endDate) && (strtotime($endDate) < strtotime($startDate))) {
-    // MODIFIED: Use set_flash_message for toast popup display
     set_flash_message('error', 'The End Date cannot be earlier than the Start Date (Update Failed).');
     redirect_to('/admin/crud/research.php');
     exit;
@@ -252,18 +251,18 @@ $CSRF = csrf_token();
     <input type="hidden" name="csrf" value="<?= $CSRF; ?>">
     <input type="hidden" name="action" value="create">
 
-    <div class="field" style="grid-column: span 8"><label>Title</label><input class="input" name="RESEARCH_TITLE" required maxlength="255"></div>
-    <div class="field" style="grid-column: span 2"><label>Start</label><input class="input" type="date" name="RESEARCH_STARTDATE" id="research_startdate" required></div>
-    <div class="field" style="grid-column: span 2"><label>End</label><input class="input" type="date" name="RESEARCH_ENDDATE" id="research_enddate"></div>
+    <div class="field" style="grid-column: span 6"><label>Title</label><input class="input" name="RESEARCH_TITLE" required maxlength="255"></div>
     <div class="field" style="grid-column: span 3">
       <label>Status</label>
-      <select class="input" name="RESEARCH_STATUS" required>
+      <select class="input" name="RESEARCH_STATUS" id="create_status" required>
         <?php foreach ($statuses as $s): ?>
           <option value="<?= htmlspecialchars($s['STATUS_CODE'], ENT_QUOTES); ?>"><?= htmlspecialchars($s['STATUS_LABEL']); ?></option>
         <?php endforeach; ?>
       </select>
     </div>
-
+    <div class="field" style="grid-column: span 2"><label>Start</label><input class="input" type="date" name="RESEARCH_STARTDATE" id="create_startdate" required></div>
+    <div class="field" style="grid-column: span 1"><label>End</label><input class="input" type="date" name="RESEARCH_ENDDATE" id="create_enddate"></div>
+    
     <div class="field" style="grid-column: span 12; display:flex; justify-content:flex-end;">
       <button class="btn wide">Add</button>
     </div>
@@ -381,7 +380,53 @@ $CSRF = csrf_token();
 </div>
 
 <script>
+// Helper to get today's date in YYYY-MM-DD format
+function getTodayDate() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+// -------------------------------------------------------------
+// Logic for Create Form (New requirement: status dictates end date)
+// -------------------------------------------------------------
+(function() {
+    const statusSelect = document.getElementById('create_status');
+    const endDateInput = document.getElementById('create_enddate');
+
+    const COMPLETED_CODE = 'COMPLETED'; // <-- ADJUST IF YOUR CODE IS DIFFERENT
+    const ONGOING_CODE   = 'ONGOING';   // <-- ADJUST IF YOUR CODE IS DIFFERENT
+
+    function handleStatusChange() {
+        const selectedStatus = statusSelect.value;
+        const today = getTodayDate();
+
+        if (selectedStatus === COMPLETED_CODE) {
+            // Completed status: Automatically populate end date with today's date
+            endDateInput.value = today;
+            endDateInput.removeAttribute('required'); // Should not be needed if not present
+        } else if (selectedStatus === ONGOING_CODE) {
+            // Ongoing status: Clear the end date
+            endDateInput.value = '';
+            endDateInput.removeAttribute('required');
+        } else {
+            // Default/Other status: Do nothing, allow manual input
+            endDateInput.removeAttribute('required');
+        }
+    }
+
+    if (statusSelect && endDateInput) {
+        statusSelect.addEventListener('change', handleStatusChange);
+        // Run once on load in case a default status is pre-selected
+        handleStatusChange();
+    }
+})();
+
+// -------------------------------------------------------------
 // Modal controller (Existing JS, handles opening/closing and data transfer)
+// -------------------------------------------------------------
 (function(){
   const modal = document.getElementById('researchModal');
   const form  = modal.querySelector('form');
@@ -391,6 +436,24 @@ $CSRF = csrf_token();
   const eI    = document.getElementById('m_end');
   const stI   = document.getElementById('m_status');
 
+  const COMPLETED_CODE = 'COMPLETED'; // <-- ADJUST IF YOUR CODE IS DIFFERENT
+  const ONGOING_CODE   = 'ONGOING';   // <-- ADJUST IF YOUR CODE IS DIFFERENT
+
+  function handleModalStatusChange() {
+    const selectedStatus = stI.value;
+    const today = getTodayDate();
+
+    if (selectedStatus === COMPLETED_CODE) {
+        // If status is changed to Completed, set end date to today if empty
+        if (!eI.value) {
+            eI.value = today;
+        }
+    } else if (selectedStatus === ONGOING_CODE) {
+        // If status is changed to Ongoing, clear end date
+        eI.value = '';
+    }
+  }
+
   function open(payload){
     idI.value = payload.id;
     tI.value  = payload.title || '';
@@ -398,12 +461,18 @@ $CSRF = csrf_token();
     eI.value  = payload.end || '';
     stI.value = payload.status || '';
     
-    // Clear any previous error states (best practice)
-    tI.classList.remove('input-error');
+    // Attach change listener when modal is opened
+    stI.addEventListener('change', handleModalStatusChange);
+    // Initial check on load
+    handleModalStatusChange();
     
     modal.hidden = false;
   }
-  function close(){ modal.hidden = true; }
+  function close(){ 
+    // Remove listener when closing to avoid multiple listeners
+    stI.removeEventListener('change', handleModalStatusChange);
+    modal.hidden = true; 
+  }
 
   document.querySelectorAll('.js-edit').forEach(btn=>{
     btn.addEventListener('click', ()=>{
