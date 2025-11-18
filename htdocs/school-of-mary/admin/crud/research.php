@@ -252,7 +252,7 @@ $CSRF = csrf_token();
     <input type="hidden" name="csrf" value="<?= $CSRF; ?>">
     <input type="hidden" name="action" value="create">
 
-    <div class="field" style="grid-column: span 8"><label>Title</label><input class="input" name="RESEARCH_TITLE" required></div>
+    <div class="field" style="grid-column: span 8"><label>Title</label><input class="input" name="RESEARCH_TITLE" required maxlength="255"></div>
     <div class="field" style="grid-column: span 2"><label>Start</label><input class="input" type="date" name="RESEARCH_STARTDATE" id="research_startdate" required></div>
     <div class="field" style="grid-column: span 2"><label>End</label><input class="input" type="date" name="RESEARCH_ENDDATE" id="research_enddate"></div>
     <div class="field" style="grid-column: span 3">
@@ -350,7 +350,7 @@ $CSRF = csrf_token();
       <div class="modal-grid">
         <div class="field">
           <label for="m_title">Title</label>
-          <input class="input" id="m_title" name="RESEARCH_TITLE" required>
+          <input class="input" id="m_title" name="RESEARCH_TITLE" required maxlength="255">
         </div>
         <div class="field">
           <label for="m_start">Start</label>
@@ -397,6 +397,10 @@ $CSRF = csrf_token();
     sI.value  = payload.start || '';
     eI.value  = payload.end || '';
     stI.value = payload.status || '';
+    
+    // Clear any previous error states (best practice)
+    tI.classList.remove('input-error');
+    
     modal.hidden = false;
   }
   function close(){ modal.hidden = true; }
