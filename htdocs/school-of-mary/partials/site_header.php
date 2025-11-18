@@ -9,6 +9,7 @@ $uri  = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 $path = preg_replace('#^' . preg_quote(BASE_URL, '#') . '#', '', $uri);
 $path = $path === '' ? '/' : $path;
 
+// Assuming you have a function to get the current path for active links
 if (!function_exists('current_path')) {
     function current_path() {
         return parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
@@ -30,94 +31,67 @@ if (!function_exists('current_path')) {
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
   <style>
-    /* =======================================
-       THEME VARIABLES
-       ======================================= */
-    :root {
-      /* Layout Specific */
-      --sidebar-width: 230px; 
-      --sidebar-collapsed-width: 0px; 
-      
-      /* Sidebar Colors (FIXED/UPDATED) */
-      --color-sidebar-bg: #1d3557; 
-      --color-sidebar-text: #f1f1f1; 
-      --color-sidebar-hover: #26466d; 
-      --color-sidebar-active: #457b9d; 
-      --color-sidebar-sub-bg: #1f4062; 
-    }
-
-    /* =======================================
-       RESET & BASE 
-       ======================================= */
+    /* ---------------------------------------------------------------- */
+    /* INLINE STYLES (MODIFIED FOR CORRECT MAXIMIZED LAYOUT)            */
+    /* ---------------------------------------------------------------- */
+    
     body {
         margin: 0;
         font-family: Arial, sans-serif;
         background: #f8f9fa;
-        min-height: 100vh;
+        /* Ensures the viewport height is used */
+        min-height: 100vh; 
         position: relative;
     }
 
-    /* =======================================
-       APP LAYOUT (Fixed for Maximized Content)
-       ======================================= */
+    /* === 1. Layout Container === */
     .app-wrapper {
+        /* This Flex container holds the fixed sidebar and the growing content area */
         display: flex; 
         min-height: 100vh;
-        position: relative;
     }
+
+    /* === 2. Sidebar (Desktop View) === */
     .sidebar {
-        width: var(--sidebar-width);
+        width: 230px;
         flex-shrink: 0;
         height: 100vh;
-        background: var(--color-sidebar-bg);
+        background: #1d3557;
         padding: 20px 0;
         display: flex;
         flex-direction: column;
-        position: fixed; 
+        position: fixed; /* Lock sidebar position */
         left: 0;
         top: 0;
-        color: var(--color-sidebar-text);
+        color: #fff;
         z-index: 1000;
         overflow-y: auto;
-        transition: transform 0.3s ease-in-out, width 0.3s ease-in-out;
+        transition: transform 0.3s ease-in-out;
     }
+
+    /* === 3. Main Content Area (NEW/FIXED) === */
     .main-content-area {
-        flex-grow: 1; 
-        margin-left: var(--sidebar-width); 
+        /* The key to shifting and maximizing the height */
+        flex-grow: 1; /* Occupy remaining horizontal space */
+        margin-left: 230px; /* Shift content area over by sidebar width */
         min-height: 100vh;
         display: flex;
-        flex-direction: column;
-        transition: margin-left 0.3s ease-in-out;
+        flex-direction: column; /* Allows main content and footer to stack and stretch */
     }
+
+    /* === 4. Main Content Container (inside the new area) === */
     main.container {
-        flex-grow: 1; 
+        flex-grow: 1; /* Content area takes available vertical space */
         padding: 20px;
         width: 100%; 
     }
-    .admin-stripe {
-      padding: 10px;
-      background: #ffd166;
-      font-weight: bold;
-      text-align: center;
-    }
 
-    /* =======================================
-       SIDEBAR STYLING (Color Fixed)
-       ======================================= */
-    /* New Wrapper for Button and Logo */
-    .sidebar .brand-wrapper {
+    /* === 5. Sidebar Styles (Keep as originally defined) === */
+    .sidebar .brand {
         display: flex;
         align-items: center;
         padding: 0 20px 20px;
         gap: 10px;
-    }
-    .sidebar .brand {
-        display: flex;
-        align-items: center;
-        padding: 0; /* Removed padding */
-        gap: 10px;
-        text-decoration: none; /* Ensure link decoration is off for the brand */
-        color: var(--color-sidebar-text);
     }
     .sidebar .brand__logo {
         width: 40px;
@@ -127,149 +101,83 @@ if (!function_exists('current_path')) {
         padding: 12px 20px;
         display: block;
         text-decoration: none;
-        color: var(--color-sidebar-text);
+        color: #f1f1f1;
         font-size: 15px;
     }
     .sidebar a:hover {
-        background: var(--color-sidebar-hover);
+        background: #26466d;
     }
     .sidebar .active {
-        background: var(--color-sidebar-active);
+        background: #457b9d;
         font-weight: bold;
     }
     .sidebar .sub-link {
         padding-left: 40px; 
-        background: var(--color-sidebar-sub-bg);
+        background: #1f4062;
     }
     .sidebar .sub-link:hover {
-        background: var(--color-sidebar-hover);
+        background: #26466d;
     }
     .sidebar .sub-link.active {
-        background: var(--color-sidebar-active);
+        background: #457b9d;
     }
-    .sidebar hr {
-        border-color: rgba(255, 255, 255, 0.18);
-        margin: 10px 0;
-    }
-    .sidebar .btn.small {
-        background: var(--color-sidebar-active); 
-        color: #fff;
-        border: none;
-        padding: 8px 20px;
-        margin-top: 20px;
-        margin-left: 20px;
-        margin-right: 20px;
-        display: block;
-        text-align: center;
-        border-radius: 4px;
-        font-weight: bold;
-        font-size: 15px;
-    }
-    .sidebar .btn.small:hover {
-        background: #3e7099; 
-    }
-    .sidebar .btn.small a {
-        display: inline;
-        padding: 0;
-        background: none;
-    }
-
-    /* =======================================
-       TOGGLE BUTTON AND COLLAPSE LOGIC
-       ======================================= */
-    /* Styling the new internal toggle button (Hamburger icon) */
-    #sidebar-toggle-internal {
-        background: none;
-        border: none;
-        color: var(--color-sidebar-text); 
-        font-size: 24px; 
-        cursor: pointer;
-        padding: 0; 
-        margin-right: 10px; 
-        transition: opacity 0.2s ease;
-        line-height: 1; /* Ensure 3 lines show correctly */
-    }
-    #sidebar-toggle-internal:hover {
-        opacity: 0.7;
-    }
-
-    /* Desktop Collapsed State */
-    .app-wrapper.sidebar-closed .sidebar {
-        width: var(--sidebar-collapsed-width);
-        transform: translateX(-100%); 
-    }
-    .app-wrapper.sidebar-closed .main-content-area {
-        margin-left: var(--sidebar-collapsed-width); 
+    .admin-stripe {
+      padding: 10px;
+      background: #ffd166;
+      font-weight: bold;
+      text-align: center;
     }
     
-    /* Hide the external placeholder button */
+    /* === 6. Mobile/Toggle Styles (CRITICAL) === */
     #sidebar-toggle {
-        display: none !important;
+        display: none; /* Hidden by default */
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        z-index: 1001;
+        padding: 8px 12px;
+        background: #457b9d; /* Use an accent color */
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
     }
 
-
-    /* Mobile/Tablet View */
     @media (max-width: 1024px) {
-        /* Hide the internal button on mobile, as it conflicts with the overlay logic */
-        #sidebar-toggle-internal {
-            display: none; 
+        #sidebar-toggle {
+            display: block; /* Show button on small screens */
         }
-        
-        /* Add a mobile-specific external toggle button (required for mobile users to open the menu) */
-        /* Use the old ID for this external button */
-        #sidebar-toggle-mobile {
-            display: block;
-            position: fixed;
-            top: 15px;
-            left: 15px;
-            z-index: 1001;
-            padding: 8px 12px;
-            background: var(--color-sidebar-active);
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
         .sidebar {
-            transform: translateX(-100%); 
-            box-shadow: 2px 0 5px rgba(0,0,0,0.5);
-            width: var(--sidebar-width); 
+            transform: translateX(-100%); /* Hide sidebar off-screen initially */
+            box-shadow: 2px 0 5px rgba(0,0,0,0.5); /* Add shadow for overlay effect */
         }
         .app-wrapper.sidebar-open .sidebar {
-            transform: translateX(0); 
+            transform: translateX(0); /* Show sidebar when class is applied */
         }
+        /* Remove margin shift on mobile */
         .main-content-area {
             margin-left: 0; 
         }
-        .app-wrapper.sidebar-closed .sidebar {
-            transform: translateX(-100%); 
-        }
     }
+    /* ----------------------------------------------------------------- */
   </style>
 
+  <script defer src="<?= BASE_URL ?>/assets/app.js"></script>
 </head>
 
 <body>
 
-<button id="sidebar-toggle-mobile" class="sidebar-toggle-mobile">☰ Menu</button>
-
+<button id="sidebar-toggle">☰ Menu</button>
 
 <div class="app-wrapper" id="app-wrapper">
 
     <aside class="sidebar" id="sidebar">
 
-      <div class="brand-wrapper">
-        <button id="sidebar-toggle-internal" aria-label="Toggle Menu">
-            <span class="hamburger-icon">☰</span>
-        </button>
+      <a class="brand" href="<?= BASE_URL ?>/public/">
+        <img class="brand__logo" src="<?= BASE_URL ?>/public/logo.png" alt="School of Mary">
+        <span>School of Mary</span>
+      </a>
 
-        <a class="brand" href="<?= BASE_URL ?>/public/">
-          <img class="brand__logo" src="<?= BASE_URL ?>/public/logo.png" alt="School of Mary">
-          <span>School of Mary</span>
-        </a>
-      </div>
-      
       <a href="<?= BASE_URL ?>/public/"
          class="<?= current_path()=== BASE_URL.'/public/' || current_path()==='/public/' ? 'active' : '' ?>">
          Home
