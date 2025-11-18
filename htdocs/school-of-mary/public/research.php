@@ -260,9 +260,8 @@ $total = count($rows);
     <div class="cards">
       <?php foreach ($rows as $row): ?>
         <div class="card">
-          <div class="card__icon" 
-               style="background: none; border: none; padding: 0; display: flex; align-items: center; justify-content: center; width: 48px; height: 48px;">
-            <i class="bi bi-flask-fill text-primary fs-3"></i> 
+          <div class="card__icon" style="background: none; border: none; padding: 0;">
+            <i class="bi bi-flask-fill text-primary fs-1"></i>
           </div>
           <div class="card__content">
             <h3 class="card__title"><?= htmlspecialchars($row['RESEARCH_TITLE']); ?></h3>
