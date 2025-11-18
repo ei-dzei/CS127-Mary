@@ -30,11 +30,11 @@
   --transition: 0.25s ease;
 
   /* Layout Specific */
-  --sidebar-width: 250px;
+  --sidebar-width: 230px; 
 }
 
 /* =======================================
-   RESET & BASE
+   RESET & BASE (LAYOUT FIXES HERE)
    ======================================= */
 * {
   box-sizing: border-box;
@@ -50,6 +50,12 @@ body {
   min-height: 100vh;
   /* Added transition for desktop sidebar push effect */
   transition: padding-left var(--transition);
+
+  /* === LAYOUT FIX: Enable Flexbox to stretch content vertically === */
+  display: flex;
+  flex-direction: column;
+  position: relative; 
+  /* ============================================================= */
 }
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Patua One', serif;
@@ -71,6 +77,17 @@ a:hover {
 .container {
   width: min(1200px, 94%);
   margin: 0 auto;
+}
+
+/* =======================================
+   MAIN CONTENT WRAPPER (NEW RULE)
+   This class must wrap all content AFTER the sidebar, 
+   allowing it to fill the remaining vertical space.
+   ======================================= */
+.content-wrapper {
+    flex-grow: 1; 
+    display: flex;
+    flex-direction: column;
 }
 
 /* =======================================
@@ -169,14 +186,13 @@ th {
 }
 
 /* =======================================
-   FOOTER (IMPROVED STYLES - Final Layout)
+   FOOTER
    ======================================= */
-
 .footer {
-    background: #1d3557; /* Darker blue from the screenshot */
+    background: #1d3557; 
     color: #f1f1f1;
     padding: 2rem 0; 
-    margin-top: auto;
+    /* Removed margin-top: auto; because .content-wrapper handles footer pushing */
     font-size: 0.95rem;
 }
 
@@ -245,9 +261,7 @@ th {
     gap: 8px;
 }
 
-/* ---------------------------------------
-   FOOTER QUICK LINKS ADJUSTMENTS (Horizontal)
-   --------------------------------------- */
+/* FOOTER QUICK LINKS ADJUSTMENTS (Horizontal) */
 .footer__inline-links a {
     color: #f1f1f1; 
     text-decoration: none;
@@ -292,71 +306,34 @@ th {
 }
 
 /* =======================================
-   FOOTER ALIGNMENT FIX (Desktop Only)
+   LAYOUT FIXES (Desktop Only)
    ======================================= */
 
-body.aside\.sidebar .footer .container {
-    padding-left: calc(var(--sidebar-width) + 2%); 
-}
-
-@media (min-width: 1025px) {
-    body.aside\.sidebar .footer {
-        padding-left: var(--sidebar-width);
-        width: calc(100% - var(--sidebar-width));
-        position: relative; 
-        left: var(--sidebar-width); 
-    }
-    
-    body.aside\.sidebar .footer .container {
-        margin-left: var(--sidebar-width);
-    }
-}
 
 /* =======================================
-   SIDEBAR (#sidebar) & LAYOUT
+   SIDEBAR (#sidebar) & LAYOUT (MODIFIED)
    ======================================= */
 #sidebar {
     width: var(--sidebar-width);
     height: 100vh;
-    background: #fff; /* Ensure a clear background */
+    background: #fff;
     padding: 20px 0;
-    display: flex;
-    flex-direction: column;
-    position: fixed; 
-    left: 0;
-    top: 0;
     z-index: 1000;
-    overflow-y: auto;
-    box-shadow: none; /* Mobile default */
     
-    /* KEY MOBILE RULE: Hidden off-screen by default */
-    transform: translateX(calc(-1 * var(--sidebar-width))); 
-    transition: transform var(--transition);
+    /* === LAYOUT FIX: Make sidebar fixed for desktop layout === */
+    position: fixed; 
+    top: 0;
+    left: 0;
+    /* ======================================================= */
 }
 
 /* Mobile Toggle State */
 @media (max-width: 1024px) {
     #sidebar-toggle {
-        display: block; /* Show the button on mobile */
+        display: block; 
     }
     
-    /* Open Sidebar State */
-    body.sidebar-open #sidebar {
-        transform: translateX(0); /* Slide it into view */
-        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2); 
-    }
-
-    /* Backdrop/Overlay for Mobile */
-    body.sidebar-open main.container::after {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 999;
-    }
+    /* Removed redundant backdrop rule, relying on JS/inline CSS */
 }
 
 /* Desktop Styles (>= 1025px) */
@@ -366,33 +343,17 @@ body.aside\.sidebar .footer .container {
         display: none;
     }
 
-    /* Permanent Sidebar State */
-    #sidebar {
-        /* Override mobile transform */
-        transform: translateX(0); 
-        box-shadow: 1px 0 5px rgba(0, 0, 0, 0.1);
-        /* Ensure it's not hidden if default desktop view uses ID styles */
-    }
-
-    /* Push the entire body content to the right when sidebar is visible */
+    /* Rule to push content over for the fixed sidebar */
     body.aside-sidebar {
         padding-left: var(--sidebar-width);
     }
-    
-    /* Ensure no overlay is applied on desktop */
-    body.sidebar-open main.container::after {
-        content: none;
-    }
 }
 
-/* ---------------------------------------
-   Sidebar Content (Styling as per previous context)
-   --------------------------------------- */
-/* Assuming .sidebar is the navigation container inside #sidebar */
+/* Sidebar Content */
 .sidebar nav a {
     display: block;
     padding: 10px 20px;
-    color: var(--color-primary); /* Use a darker color for links in the light sidebar */
+    color: var(--color-primary);
     font-size: 0.95rem;
     transition: background 0.15s ease;
 }
@@ -410,63 +371,51 @@ body.aside\.sidebar .footer .container {
 
 /* =======================================
    DROPDOWN
+   Consolidated redundant/conflicting dropdown rules
    ======================================= */
 .dropdown {
   position: relative;
 }
 
-.dropdown__menu {
+.dropdown__menu,
+.navbar .dropdown-menu,
+.menu.dropdown,
+.dropdown-panel {
   position: absolute;
   top: 100%;
   right: 0;
   background: #fff;
-  color: #000;
+  color: #1b2a4a;
   border-radius: var(--radius);
   border: 1px solid var(--color-border);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   padding: 6px 0;
   display: none;
   min-width: 160px;
-  z-index: 1000; /* Ensure it stays on top */
+  z-index: 1000;
 }
 .dropdown:hover .dropdown__menu {
   display: block;
 }
-.dropdown__menu a {
-  display: block;
-  padding: 8px 14px;
-  color: #000;
-  text-decoration: none;
-  transition: background var(--transition);
-}
-.dropdown__menu a:hover {
-  background: var(--color-light);
-}
-
-.navbar .dropdown-menu,
-.menu.dropdown,
-.dropdown-panel {
-  background: #fff;
-  color: #1b2a4a;
-  border: 1px solid #e5ecf8;
-  border-radius: 10px;
-  box-shadow: 0 10px 24px rgba(0,0,0,.08);
-  z-index: 1000;
-}
+/* Unified link styles for all dropdown/menu types */
+.dropdown__menu a,
 .navbar .dropdown-menu a,
 .menu.dropdown a,
 .dropdown-panel a {
   display: block;
-  padding: 10px 12px;
+  padding: 8px 14px; /* Used 8px 14px for consistency */
   color: #1b2a4a !important;
   text-decoration: none;
+  transition: background var(--transition);
 }
+.dropdown__menu a:hover,
 .navbar .dropdown-menu a:hover,
 .menu.dropdown a:hover,
 .dropdown-panel a:hover {
-  background: #e8f0f8;        
+  background: var(--color-light); /* Use variable for consistency */        
   color: #1b2a4a !important;
 }
+
 
 /* =======================================
    ANIMATIONS
