@@ -4,7 +4,6 @@ $pageTitle = 'Faculty (Admin)';
 require_once __DIR__ . '/../../partials/init.php';
 require_once __DIR__ . '/../../validators.php';
 
-/* ------- Auth & CSRF ------- */
 if (!is_admin()) { redirect_to('/admin/login.php'); }
 if ($_SERVER['REQUEST_METHOD'] === 'POST') { csrf_check(); }
 
@@ -171,7 +170,6 @@ $CSRF = csrf_token();
     <a class="btn small" href="<?= app_url('/admin/api/export.php'); ?>?table=FACULTY">Export CSV</a>
   </div>
 
-  <!-- Filter / Sort -->
   <form method="get" class="grid filter-bar" style="margin-bottom:10px;">
     <div class="field" style="grid-column: span 4">
       <label>Search (name or email)</label>
@@ -223,10 +221,13 @@ $CSRF = csrf_token();
     <input type="hidden" name="csrf" value="<?= $CSRF; ?>">
     <input type="hidden" name="action" value="create">
 
-    <div class="field" style="grid-column: span 3"><label>First name</label><input class="input" name="FACULTY_FNAME" required></div>
+    <div class="field" style="grid-column: span 3"><label>First name</label><input class="input" name="FACULTY_FNAME" required maxlength="50"></div>
+    
     <div class="field" style="grid-column: span 2"><label>Initial</label><input class="input" name="FACULTY_INITIAL" maxlength="2"></div>
-    <div class="field" style="grid-column: span 3"><label>Last name</label><input class="input" name="FACULTY_LNAME" required></div>
-    <div class="field" style="grid-column: span 4"><label>Email</label><input class="input" type="email" name="FACULTY_EMAIL" required></div>
+    
+    <div class="field" style="grid-column: span 3"><label>Last name</label><input class="input" name="FACULTY_LNAME" required maxlength="50"></div>
+    
+    <div class="field" style="grid-column: span 4"><label>Email</label><input class="input" type="email" name="FACULTY_EMAIL" required maxlength="255"></div>
     <div class="field" style="grid-column: span 3">
       <label>Rank</label>
       <select class="input" name="RANK_ID" required>
@@ -296,7 +297,6 @@ $CSRF = csrf_token();
     </table>
   </div>
 
-  <!-- Pagination -->
   <div class="pagination">
     <?php
       $qs = function($p) use ($q, $rank, $dept, $sort) {
@@ -322,7 +322,6 @@ $CSRF = csrf_token();
         $start = max(1, $end - $maxPage + 1);
       } 
     ?>
-    <!-- 1 + ...  -->
     <?php if ($start > 1): ?>
       <a href="<?= $base.'?'.$qs(1); ?>" class="page-btn" >1</a>
       <?php if ($start > 3): ?>
@@ -337,7 +336,6 @@ $CSRF = csrf_token();
       <a class="page-btn <?= $i== $page?'active':''; ?>" href="<?= $base.'?'.$qs($i); ?>"><?= $i; ?></a>
     <?php endfor; ?>
     
-    <!-- ... + lastPage -->
     <?php if ($end < $totalPages): ?>
       <?php if ($end == $totalPages - 2):?>
         <a href="<?= $base.'?'.$qs($totalPages - 1); ?>" class="page-btn" > <?=$totalPages - 1?></a>
@@ -354,7 +352,6 @@ $CSRF = csrf_token();
   </div>
 </section>
 
-<!-- --------- Modal HTML --------- -->
 <div class="admin-modal" id="facultyModal" hidden>
   <div class="admin-modal__backdrop" data-close="1"></div>
   <div class="admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="facultyModalTitle">
@@ -370,7 +367,7 @@ $CSRF = csrf_token();
       <div class="modal-grid">
         <div class="field">
           <label for="m_fname">First name</label>
-          <input class="input" id="m_fname" name="FACULTY_FNAME" required>
+          <input class="input" id="m_fname" name="FACULTY_FNAME" required maxlength="50">
         </div>
         <div class="field">
           <label for="m_initial">Initial</label>
@@ -378,11 +375,11 @@ $CSRF = csrf_token();
         </div>
         <div class="field">
           <label for="m_lname">Last name</label>
-          <input class="input" id="m_lname" name="FACULTY_LNAME" required>
+          <input class="input" id="m_lname" name="FACULTY_LNAME" required maxlength="50">
         </div>
         <div class="field">
           <label for="m_email">Email</label>
-          <input class="input" id="m_email" type="email" name="FACULTY_EMAIL" required>
+          <input class="input" id="m_email" type="email" name="FACULTY_EMAIL" required maxlength="255">
         </div>
         <div class="field">
           <label for="m_rank">Rank</label>
@@ -435,6 +432,10 @@ $CSRF = csrf_token();
     emI.value = payload.email || '';
     rkI.value = payload.rank || '';
     dpI.value = payload.dept || '';
+
+    form.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
+    form.querySelectorAll('.error-message').forEach(el => el.remove());
+    
     modal.hidden = false;
   }
   function close(){ modal.hidden = true; }
