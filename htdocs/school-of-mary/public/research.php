@@ -263,9 +263,11 @@ $total = count($rows);
         <a class="card" href="<?= BASE_URL ?>/public/research.php?id=<?= (int)$row['RESEARCH_ID']; ?>" style="text-decoration:none; color:inherit;">
           
           <div class="card__icon" 
-               style="background: none; border: none; padding: 0; display: flex; align-items: center; justify-content: center; width: 64px; height: 64px;">
+               style="background: none; border: none; padding: 0; display: flex; align-items: center; justify-content: center; 
+                      /* Maximized Space for Icon Container */
+                      width: 80px; height: 80px;"> 
             <i class="bi bi-motherboard" 
-               style="font-size: 28px !important; color: #003366 !important;"></i>
+               style="font-size: 42px !important; color: #003366 !important;"></i>
           </div>
           <div class="card__content">
             <h3 class="card__title"><?= htmlspecialchars($row['RESEARCH_TITLE']); ?></h3>
