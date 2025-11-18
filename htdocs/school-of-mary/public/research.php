@@ -259,35 +259,13 @@ $total = count($rows);
   <?php else: ?>
     <div class="cards">
       <?php foreach ($rows as $row): ?>
-        <?php
-          $iconClass = 'bi bi-journal-text'; // Default icon
-          $iconColor = '#6c757d'; // Default grey
-
-          switch ($row['RESEARCH_STATUS']) {
-            case 'COMPLETED':
-              $iconClass = 'bi bi-check-circle-fill';
-              $iconColor = '#198754'; // Green
-              break;
-            case 'ONGOING':
-              $iconClass = 'bi bi-hourglass-split';
-              $iconColor = '#0d6efd'; // Blue
-              break;
-            case 'CANCELLED':
-              $iconClass = 'bi bi-x-octagon-fill';
-              $iconColor = '#dc3545'; // Red
-              break;
-            default:
-              // Uses default values
-              break;
-          }
-        ?>
-
+        
         <a class="card" href="<?= BASE_URL ?>/public/research.php?id=<?= (int)$row['RESEARCH_ID']; ?>" style="text-decoration:none; color:inherit;">
           
           <div class="card__icon" 
                style="background: none; border: none; padding: 0; display: flex; align-items: center; justify-content: center; width: 64px; height: 64px;">
-            <i class="<?= $iconClass ?>" 
-               style="font-size: 28px !important; color: <?= $iconColor ?> !important;"></i>
+            <i class="bi bi-motherboard" 
+               style="font-size: 28px !important; color: #003366 !important;"></i>
           </div>
           <div class="card__content">
             <h3 class="card__title"><?= htmlspecialchars($row['RESEARCH_TITLE']); ?></h3>
@@ -297,7 +275,7 @@ $total = count($rows);
               <?php if ($row['RESEARCH_ENDDATE']) echo ' · End: ' . htmlspecialchars($row['RESEARCH_ENDDATE']); ?>
             </div>
           </div>
-          </a>
+        </a>
       <?php endforeach; ?>
     </div>
   <?php endif; ?>
