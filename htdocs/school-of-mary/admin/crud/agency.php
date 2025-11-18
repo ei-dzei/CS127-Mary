@@ -5,7 +5,7 @@ require_once __DIR__ . '/../../partials/init.php';
 require_once __DIR__ . '/../../validators.php';
 
 if (!is_admin()) { redirect_to('/admin/login.php'); }
-// Note: csrf_check is moved inside the POST conditional for robustness, 
+// Note: csrf_check is moved inside the POST conditional for robustness,
 // but is kept here based on your original code structure.
 if ($_SERVER['REQUEST_METHOD'] === 'POST') { csrf_check(); }
 
@@ -16,8 +16,8 @@ if ($action === 'create') {
   if (!v_varchar($_POST['AGENCY_NAME'] ?? '', 255)) guardFail('Invalid name');
   if (!v_enum_exists($pdo, 'TYPE_AGENCY', 'TYPE_CODE', $_POST['AGENCY_TYPE'] ?? '')) guardFail('Invalid type');
   // Changed to v_email for server-side validation based on your request.
-  if (!v_email($_POST['AGENCY_CONTACTINFO'] ?? '')) guardFail('Invalid contact email address'); 
-  // If you must use v_varchar, it should be: 
+  if (!v_email($_POST['AGENCY_CONTACTINFO'] ?? '')) guardFail('Invalid contact email address');
+  // If you must use v_varchar, it should be:
   // if (!v_varchar($_POST['AGENCY_CONTACTINFO'] ?? '', 100)) guardFail('Invalid contact');
 
   $pdo->prepare("INSERT INTO AGENCY (AGENCY_NAME, AGENCY_TYPE, AGENCY_CONTACTINFO) VALUES (?,?,?)")
@@ -35,7 +35,7 @@ if ($action === 'update') {
   if (!v_enum_exists($pdo, 'TYPE_AGENCY', 'TYPE_CODE', $_POST['AGENCY_TYPE'] ?? '')) guardFail('Invalid type');
   // Changed to v_email for server-side validation based on your request.
   if (!v_email($_POST['AGENCY_CONTACTINFO'] ?? '')) guardFail('Invalid contact email address');
-  // If you must use v_varchar, it should be: 
+  // If you must use v_varchar, it should be:
   // if (!v_varchar($_POST['AGENCY_CONTACTINFO'] ?? '', 100)) guardFail('Invalid contact');
 
 
@@ -152,11 +152,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
   }
   .btn-ghost:hover{ background: rgba(11,83,148,.05); }
 
-/* Validation style for email format */
-.input:invalid:not(:focus):not(:placeholder-shown)[type="email"] {
-  border-color: #ef4444; /* Red border */
-  box-shadow: 0 0 0 1px #ef4444;
-}
+/* Removed the input:invalid:not(:focus):not(:placeholder-shown)[type="email"] style here */
 </style>
 
 <section class="panel fade-in crud-header-card">
@@ -212,7 +208,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
 
     <div class="field" style="grid-column: span 6">
       <label>Name</label>
-      <input class="input" name="AGENCY_NAME" required maxlength="255"> 
+      <input class="input" name="AGENCY_NAME" required maxlength="255">
     </div>
     <div class="field" style="grid-column: span 3">
       <label>Type</label>
@@ -224,7 +220,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
     </div>
     <div class="field" style="grid-column: span 3">
       <label>Contact (Email)</label>
-      <input class="input" type="email" name="AGENCY_CONTACTINFO" required maxlength="100"> 
+      <input class="input" type="email" name="AGENCY_CONTACTINFO" required maxlength="100">
     </div>
 
     <div class="field" style="grid-column: span 12; display:flex; justify-content:flex-end;">
@@ -350,8 +346,10 @@ require_once __DIR__ . '/../../partials/site_header.php';
     nameI.value = payload.name || '';
     typeI.value = payload.type || '';
     contI.value = payload.contact || '';
-    
-    // Clear browser-level validation errors on open
+
+    // Clear any previous error states for the contact field
+    // (This line is less critical now that the red outline CSS is removed,
+    // but good practice if you re-introduce custom validation styling later).
     contI.classList.remove('input-error');
 
     modal.hidden = false;
@@ -369,7 +367,11 @@ require_once __DIR__ . '/../../partials/site_header.php';
       });
     });
   });
-  
+
+  // NOTE: By setting type="email" and required, the browser will still
+  // automatically trigger a validation message (the "pop-out") if the
+  // input is not a valid email format when the user attempts to submit the form.
+  // We've only removed the *visual red border* style.
 
   // close handlers
   modal.addEventListener('click', e=>{
