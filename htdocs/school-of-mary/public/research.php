@@ -8,11 +8,6 @@ $statuses = $pdo->query("SELECT STATUS_CODE, STATUS_LABEL FROM RESEARCH_STATUS O
 /* --- Detail view --- */
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
-// Pagination setup
-$perPage = 6;
-$page    = (isset($_GET['page']) && is_numeric($_GET['page'])) ? (int)$_GET['page'] : 1;
-$offset  = ($page - 1) * $perPage;
-
 if ($id > 0) {
   $stmt = $pdo->prepare("
     SELECT re.*
@@ -155,59 +150,6 @@ $status = trim($_GET['status'] ?? '');
 $from   = trim($_GET['from'] ?? '');
 $to     = trim($_GET['to'] ?? '');
 
-/* Build WHERE with named params */
-$where   = [];
-$params  = [];
-
-if ($q !== '') {
-  $where[]        = "re.RESEARCH_TITLE LIKE :q";
-  $params[':q']   = "%{$q}%";
-}
-if ($status !== '') {
-  $where[]           = "re.RESEARCH_STATUS = :status";
-  $params[':status'] = $status;
-}
-if ($from !== '') {
-  $where[]         = "re.RESEARCH_STARTDATE >= :from";
-  $params[':from'] = $from;
-}
-if ($to !== '') {
-  // include records that end by this date OR ongoing that started before or equal to this date
-  $where[]        = "(re.RESEARCH_ENDDATE <= :to OR (re.RESEARCH_ENDDATE IS NULL AND re.RESEARCH_STARTDATE <= :to2))";
-  $params[':to']  = $to;
-  $params[':to2'] = $to;
-}
-
-$whereSql = $where ? (' AND ' . implode(' AND ', $where)) : '';
-
-/* Count with same filters */
-$countSql = "SELECT COUNT(*) FROM RESEARCH re WHERE 1=1 {$whereSql}";
-$countStmt = $pdo->prepare($countSql);
-foreach ($params as $k => $v) {
-  $countStmt->bindValue($k, $v);
-}
-$countStmt->execute();
-$totalRows  = (int)$countStmt->fetchColumn();
-$totalPages = max(1, (int)ceil($totalRows / $perPage));
-
-/* Fetch page rows with same filters */
-$listSql = "
-  SELECT re.RESEARCH_ID, re.RESEARCH_TITLE, re.RESEARCH_STATUS,
-         re.RESEARCH_STARTDATE, re.RESEARCH_ENDDATE
-  FROM RESEARCH re
-  WHERE 1=1 {$whereSql}
-  ORDER BY re.RESEARCH_STARTDATE DESC, re.RESEARCH_ID DESC
-  LIMIT :limit OFFSET :offset
-";
-$listStmt = $pdo->prepare($listSql);
-foreach ($params as $k => $v) {
-  $listStmt->bindValue($k, $v);
-}
-$listStmt->bindValue(':limit',  $perPage, PDO::PARAM_INT);
-$listStmt->bindValue(':offset', $offset,  PDO::PARAM_INT);
-$listStmt->execute();
-$rows  = $listStmt->fetchAll();
-$total = count($rows);
 ?>
 
 <section class="container fade-in" style="margin-top:6px;">
@@ -224,126 +166,121 @@ $total = count($rows);
           <path d="M10 18a8 8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/>
         </svg>
         <input name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search research titles…" />
-      </div>
-
-      <!-- Status -->
-      <div class="field" style="min-width:200px;">
-        <label>Status</label>
-        <select class="input" name="status">
-          <option value="">All</option>
-          <?php foreach ($statuses as $s): ?>
-            <option value="<?= htmlspecialchars($s['STATUS_CODE']) ?>"<?= $status===$s['STATUS_CODE'] ? ' selected' : '' ?>>
-              <?= htmlspecialchars($s['STATUS_LABEL']) ?>
-            </option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-
-      <!-- Date from -->
-      <div class="field" style="min-width:180px;">
-        <label>Start from</label>
-        <input class="input" type="date" name="from" value="<?= htmlspecialchars($from) ?>" />
-      </div>
-
-      <!-- Date to -->
-      <div class="field" style="min-width:180px;">
-        <label>End by</label>
-        <input class="input" type="date" name="to" value="<?= htmlspecialchars($to) ?>" />
-      </div>
-    </div>
-
-    <!-- Actions row (buttons under the search bar) -->
-    <div class="filter-actions">
-      <button class="btn" type="submit">Apply</button>
-      <a class="clear-btn" href="<?= BASE_URL ?>/public/research.php">Clear</a>
-    </div>
-  </form>
-
-  <p class="muted" style="margin:6px 0 12px;">Showing <?= (int)$total ?> <?= $total===1 ? 'project' : 'projects' ?></p>
-
-  <!-- Cards -->
-  <?php if (!$rows): ?>
-    <div class="panel">No matching research.</div>
-  <?php else: ?>
-    <div class="cards">
-      <?php foreach ($rows as $row): ?>
-        <div class="card">
-          <div class="card__icon">🔬</div>
-          <div class="card__content">
-            <h3 class="card__title"><?= htmlspecialchars($row['RESEARCH_TITLE']); ?></h3>
-            <p class="card__desc">Status: <?= htmlspecialchars($row['RESEARCH_STATUS']); ?></p>
-            <div class="card__meta">
-              🗓 Start: <?= htmlspecialchars($row['RESEARCH_STARTDATE']); ?>
-              <?php if ($row['RESEARCH_ENDDATE']) echo ' · End: ' . htmlspecialchars($row['RESEARCH_ENDDATE']); ?>
-            </div>
+        <button class="btn filter-btn" id="filter-btn" type="button" onclick="showHide()">Filter</button>
+        <div id="filter-dropdown">
+          <!-- Status -->
+          <div class="field" style="min-width:200px;">
+            <label>Status</label>
+            <select class="input" name="status">
+              <option value="">All</option>
+              <?php foreach ($statuses as $s): ?>
+                <option value="<?= htmlspecialchars($s['STATUS_CODE']) ?>"<?= $status===$s['STATUS_CODE'] ? ' selected' : '' ?>>
+                  <?= htmlspecialchars($s['STATUS_LABEL']) ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
           </div>
-          <div class="card__actions">
-            <button class="btn small"
-              data-read-more
-              data-type="research"
-              data-id="<?= (int)$row['RESEARCH_ID']; ?>">
-              Read More
-            </button>
+
+          <!-- Date from -->
+          <div class="field" style="min-width:180px;">
+            <label>Start from</label>
+            <input class="input" type="date" name="from" value="<?= htmlspecialchars($from) ?>" />
+          </div>
+
+          <!-- Date to -->
+          <div class="field" style="min-width:180px;">
+            <label>End by</label>
+            <input class="input" type="date" name="to" value="<?= htmlspecialchars($to) ?>" />
+          </div>
+          <button class="btn clear-btn" type="button" onclick="clearFilter()" id="clear-btn">Clear</button>
           </div>
         </div>
-      <?php endforeach; ?>
+      </div>
+
+      
     </div>
-  <?php endif; ?>
 
-  <div class="pagination">
-    <?php
-      //keep current filters in pagination link    
-      $queryParams = $_GET;
-      unset($queryParams['page']);
-      $baseQuery = http_build_query($queryParams);
-      $baseUrl   = '?' . ($baseQuery ? $baseQuery . '&' : '');
-      $maxPage = 5;
-    ?>
+  </form>
 
-    <?php if ($page > 1): ?>
-      <a href="<?= $baseUrl ?>page=<?= $page - 1 ?>" class="page-btn" title = "Previous Page">&#x276E;</a>
-    <?php endif; ?>
-
-    <?php 
-      $start = max(1, $page - floor($maxPage / 2));
-      $end = min($totalPages, $start + $maxPage - 1);
-
-      if ($end - $start < $maxPage - 1) {
-        $start = max(1, $end - $maxPage + 1);
-      }
-     ?>
-
-    <!-- 1 + ...  -->
-    <?php if ($start > 1): ?>
-      <a href="<?= $baseUrl ?>page=1" class="page-btn" >1</a>
-      <?php if ($start > 3): ?>
-        <a href="<?= $baseUrl ?>page=<?= max(1,$page - 5) ?>" class="page-btn" title="Jump backward 5 pages">...</a>        
-      <?php endif; ?>
-      <?php if ($start == 3): ?>
-              <a href="<?= $baseUrl ?>page=<?= 2?>" class="page-btn" >2</a>       
-      <?php endif; ?>
-    <?php endif; ?>
-
-    <?php for ($i = $start; $i <= $end; $i++): ?>
-      <a href="<?= $baseUrl ?>page=<?= $i ?>" class="page-btn <?= $i == $page ? 'active' : '' ?>"><?= $i ?></a>
-    <?php endfor; ?>
-
-
-    <!-- ... + lastPage -->
-    <?php if ($end < $totalPages): ?>
-      <?php if ($end == $totalPages - 2):?>
-        <a href="<?= $baseUrl ?>page=<?= $totalPages-1 ?>" class="page-btn" > <?=$totalPages - 1?></a>
-      <?php endif; ?>
-      <?php if ($end < $totalPages - 2): ?>
-        <a href="<?= $baseUrl ?>page=<?= min($totalPages,$page + 5)?>"class="page-btn" title="Jump forward 5 pages">...</a>
-      <?php endif; ?>
-        <a href="<?= $baseUrl ?>page=<?= $totalPages ?>" class="page-btn" > <?=$totalPages?></a>
-    <?php endif; ?>
-
-    <?php if ($page < $totalPages): ?>
-      <a href="<?= $baseUrl ?>page=<?= $page + 1 ?>" class="page-btn" title = "Next Page">&#x276F;</a>
-    <?php endif; ?>
-  </div>
+  <div id="research-results"></div>
 </section>
+<script>
+  const researchResults = document.querySelector('#research-results');
+  const queryInput =  document.querySelector('input[name="q"]');
+  const statusSelect = document.querySelector('select[name="status"]');
+  const fromInput = document.querySelector('input[name="from"]');
+  const toInput = document.querySelector('input[name="to"]');
+  let timer = null;
+
+  function showHide() {
+    var f = document.getElementById("filter-dropdown");
+    if (f.style.display === "none") {
+      f.style.display = "block";
+    } else {
+      f.style.display = "none";
+    }
+  }
+  function clearFilter() {
+    if((queryInput.value == '') && (statusSelect.value == '') && (fromInput.value == '') && (toInput.value == '')) {
+      return;
+    } else {
+      // queryInput.value = '';
+      statusSelect.value = '';
+      fromInput.value = '';
+      toInput.value = '';
+      fetchResults(1);
+    }
+  }
+  //fetch func
+  function fetchResults(page) {
+    const q = queryInput.value;
+    const status = statusSelect.value;
+    const from = fromInput.value;
+    const to = toInput.value;
+    const url =  `api/search_research.php?q=${q}&status=${status}&from=${from}&to=${to}&page=${page}`;
+    
+    
+    researchResults.innerHTML = "<div class='loading'>Loading...</div>";
+    fetch(url)
+      .then(res => res.text())
+      .then(html => {
+        researchResults.innerHTML = html;
+        attachPaginationEvents();
+      })
+      .catch (err => {
+        researchResults.innerHTML = "<div class='error'>Failed to load results. </div>";
+        console.error("Error: ", err);
+      })
+  }
+  
+  //Debounced input
+  function handleLiveInput() {
+    clearTimeout(timer);
+    timer = setTimeout(() => fetchResults(1), 300);//300ms
+  }
+
+  queryInput.addEventListener('input', handleLiveInput);
+  statusSelect.addEventListener('change', () => fetchResults(1));
+  fromInput.addEventListener('input', handleLiveInput);
+  toInput.addEventListener('input', handleLiveInput);
+
+  function attachPaginationEvents() {
+    const links = document.querySelectorAll('.page-btn');
+
+    links.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            const url = new URL(this.href);
+            const page = url.searchParams.get('page') || 1;
+
+            fetchResults(page);
+        });
+    });
+  }
+  //Load all faculty
+  fetchResults(1);
+  attachPaginationEvents();
+</script>
 
 <?php require_once __DIR__ . '/../partials/site_footer.php'; ?>

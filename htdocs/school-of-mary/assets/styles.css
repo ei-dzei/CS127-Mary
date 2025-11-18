@@ -687,12 +687,13 @@ th {
   }
   .filter-actions .btn,
   .filter-actions .clear-btn {
+    
     width: 100%;
     gap: 4px;
   
   }
 }
-#clear-btn{height: 34.4px;margin-bottom: 10px; vertical-align: bottom;display: relative;}
+#clear-btn{height: 34.4px;margin-bottom: 10px; vertical-align: bottom;display: relativex;}
 #filter-dropdown  {display: none; width: 100%; padding: 10px;}
 #filter-btn {float: inline-end;}
 #clear-searchbar {display: none; float:inline-end; }
