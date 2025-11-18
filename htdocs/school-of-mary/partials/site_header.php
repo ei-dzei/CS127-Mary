@@ -9,7 +9,6 @@ $uri  = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 $path = preg_replace('#^' . preg_quote(BASE_URL, '#') . '#', '', $uri);
 $path = $path === '' ? '/' : $path;
 
-// Dummy function for current_path if not in init.php
 if (!function_exists('current_path')) {
     function current_path() {
         return parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
@@ -35,16 +34,6 @@ if (!function_exists('current_path')) {
        THEME VARIABLES
        ======================================= */
     :root {
-      /* General Colors */
-      --color-primary: #003366; 
-      --color-accent: #0b5394; 
-      --color-bg: #ffffff;
-      --color-light: #f8f9fa; 
-      --color-border: #d9dee3;
-      --color-text: #1a1a1a;
-      --radius: 8px;
-      --transition: 0.25s ease;
-      
       /* Layout Specific */
       --sidebar-width: 230px; 
       --sidebar-collapsed-width: 0px; 
@@ -115,11 +104,20 @@ if (!function_exists('current_path')) {
     /* =======================================
        SIDEBAR STYLING (Color Fixed)
        ======================================= */
-    .sidebar .brand {
+    /* New Wrapper for Button and Logo */
+    .sidebar .brand-wrapper {
         display: flex;
         align-items: center;
         padding: 0 20px 20px;
         gap: 10px;
+    }
+    .sidebar .brand {
+        display: flex;
+        align-items: center;
+        padding: 0; /* Removed padding */
+        gap: 10px;
+        text-decoration: none; /* Ensure link decoration is off for the brand */
+        color: var(--color-sidebar-text);
     }
     .sidebar .brand__logo {
         width: 40px;
@@ -177,79 +175,101 @@ if (!function_exists('current_path')) {
     }
 
     /* =======================================
-       TOGGLE BUTTON AND COLLAPSE LOGIC (NEW)
+       TOGGLE BUTTON AND COLLAPSE LOGIC
        ======================================= */
-    #sidebar-toggle {
-        display: block;
-        position: fixed;
-        top: 15px;
-        left: calc(var(--sidebar-width) + 15px); /* Positioned next to the open sidebar */
-        z-index: 1001;
-        padding: 8px 12px;
-        background: var(--color-sidebar-active);
-        color: #fff;
+    /* Styling the new internal toggle button (Hamburger icon) */
+    #sidebar-toggle-internal {
+        background: none;
         border: none;
-        border-radius: 8px;
+        color: var(--color-sidebar-text); 
+        font-size: 24px; 
         cursor: pointer;
-        transition: left 0.3s ease-in-out, background 0.2s ease;
+        padding: 0; 
+        margin-right: 10px; 
+        transition: opacity 0.2s ease;
+        line-height: 1; /* Ensure 3 lines show correctly */
     }
-    #sidebar-toggle:hover {
-        background: #3e7099; 
+    #sidebar-toggle-internal:hover {
+        opacity: 0.7;
     }
 
     /* Desktop Collapsed State */
     .app-wrapper.sidebar-closed .sidebar {
         width: var(--sidebar-collapsed-width);
-        transform: translateX(-100%); /* Hides the menu completely */
+        transform: translateX(-100%); 
     }
     .app-wrapper.sidebar-closed .main-content-area {
-        margin-left: var(--sidebar-collapsed-width); /* Content moves left */
+        margin-left: var(--sidebar-collapsed-width); 
     }
-    .app-wrapper.sidebar-closed #sidebar-toggle {
-        left: 15px; /* Button moves to the far left */
+    
+    /* Hide the external placeholder button */
+    #sidebar-toggle {
+        display: none !important;
     }
 
-    /* Mobile/Tablet View (Default state is hidden/closed) */
+
+    /* Mobile/Tablet View */
     @media (max-width: 1024px) {
-        #sidebar-toggle {
-            left: 15px; /* Button stays on the far left */
+        /* Hide the internal button on mobile, as it conflicts with the overlay logic */
+        #sidebar-toggle-internal {
+            display: none; 
         }
+        
+        /* Add a mobile-specific external toggle button (required for mobile users to open the menu) */
+        /* Use the old ID for this external button */
+        #sidebar-toggle-mobile {
+            display: block;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1001;
+            padding: 8px 12px;
+            background: var(--color-sidebar-active);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
         .sidebar {
-            /* On mobile, transform handles the slide-in overlay */
             transform: translateX(-100%); 
             box-shadow: 2px 0 5px rgba(0,0,0,0.5);
-            /* Ensure width remains the same for the overlay effect */
             width: var(--sidebar-width); 
         }
         .app-wrapper.sidebar-open .sidebar {
-            transform: translateX(0); /* Shows sidebar as overlay */
+            transform: translateX(0); 
         }
         .main-content-area {
-            margin-left: 0; /* Content is full width on mobile */
+            margin-left: 0; 
         }
-        
-        /* Disable desktop collapse logic on mobile */
         .app-wrapper.sidebar-closed .sidebar {
             transform: translateX(-100%); 
         }
     }
   </style>
 
-  </head>
+</head>
 
 <body>
 
-<button id="sidebar-toggle">☰ Menu</button>
+<button id="sidebar-toggle-mobile" class="sidebar-toggle-mobile">☰ Menu</button>
+
 
 <div class="app-wrapper" id="app-wrapper">
 
     <aside class="sidebar" id="sidebar">
 
-      <a class="brand" href="<?= BASE_URL ?>/public/">
-        <img class="brand__logo" src="<?= BASE_URL ?>/public/logo.png" alt="School of Mary">
-        <span>School of Mary</span>
-      </a>
+      <div class="brand-wrapper">
+        <button id="sidebar-toggle-internal" aria-label="Toggle Menu">
+            <span class="hamburger-icon">☰</span>
+        </button>
 
+        <a class="brand" href="<?= BASE_URL ?>/public/">
+          <img class="brand__logo" src="<?= BASE_URL ?>/public/logo.png" alt="School of Mary">
+          <span>School of Mary</span>
+        </a>
+      </div>
+      
       <a href="<?= BASE_URL ?>/public/"
          class="<?= current_path()=== BASE_URL.'/public/' || current_path()==='/public/' ? 'active' : '' ?>">
          Home

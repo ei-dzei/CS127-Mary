@@ -1126,68 +1126,67 @@
             });
         }).observe(modal, { attributes: true });
     }
+    
+})();
 
-    document.addEventListener('DOMContentLoaded', function() {
-    const toggleButton = document.getElementById('sidebar-toggle');
+document.addEventListener('DOMContentLoaded', function() {
+    // Desktop Collapse Button (inside the sidebar)
+    const internalToggleButton = document.getElementById('sidebar-toggle-internal');
+    // Mobile Overlay Button (external, visible only on small screens)
+    const mobileToggleButton = document.getElementById('sidebar-toggle-mobile');
+    
     const appWrapper = document.getElementById('app-wrapper');
 
-    if (toggleButton && appWrapper) {
+    if (appWrapper) {
         
         // --- Initialization ---
-        const isDesktop = window.innerWidth > 1024;
-        
-        // Set initial button text based on default state (open on desktop, hidden on mobile)
-        if (isDesktop) {
-             toggleButton.innerHTML = '✕ Close';
-             // On desktop load, ensure the 'closed' class is removed by default
+        // On desktop load, ensure the sidebar is open by default
+        if (window.innerWidth > 1024) {
              appWrapper.classList.remove('sidebar-closed'); 
         } else {
-             toggleButton.innerHTML = '☰ Menu';
-             // On mobile load, ensure the 'open' class is not active
              appWrapper.classList.remove('sidebar-open');
         }
 
 
-        // --- Toggle Logic ---
-        toggleButton.addEventListener('click', function() {
-            const isDesktopClick = window.innerWidth > 1024;
-
-            if (isDesktopClick) {
-                // DESKTOP: Toggle the collapse state
-                const isNowClosed = appWrapper.classList.toggle('sidebar-closed');
-                
-                // Update button text
-                if (isNowClosed) {
-                    toggleButton.innerHTML = '☰ Menu';
-                } else {
-                    toggleButton.innerHTML = '✕ Close';
+        // --- Desktop Collapse Logic ---
+        if (internalToggleButton) {
+            internalToggleButton.addEventListener('click', function() {
+                // Only run desktop logic on desktop screen sizes
+                if (window.innerWidth > 1024) {
+                    appWrapper.classList.toggle('sidebar-closed');
                 }
-
-            } else {
-                // MOBILE/TABLET: Toggle the overlay state
-                const isNowOpen = appWrapper.classList.toggle('sidebar-open');
-                
-                // Update button text
-                if (isNowOpen) {
-                    toggleButton.innerHTML = '✕ Close';
-                } else {
-                    toggleButton.innerHTML = '☰ Menu';
+            });
+        }
+        
+        // --- Mobile Overlay Logic ---
+        if (mobileToggleButton) {
+            mobileToggleButton.addEventListener('click', function() {
+                // Only run mobile logic on mobile screen sizes
+                if (window.innerWidth <= 1024) {
+                    const isNowOpen = appWrapper.classList.toggle('sidebar-open');
+                    
+                    // Update button text/icon for mobile
+                    if (isNowOpen) {
+                        mobileToggleButton.innerHTML = '✕ Close';
+                    } else {
+                        mobileToggleButton.innerHTML = '☰ Menu';
+                    }
                 }
-            }
-        });
+            });
+        }
         
         // --- Close Sidebar on Mobile Link Click ---
-        // Find all links inside the sidebar
         const sidebarLinks = appWrapper.querySelectorAll('.sidebar a');
         sidebarLinks.forEach(link => {
             link.addEventListener('click', function() {
-                // Only close the sidebar if we are in mobile view
-                if (window.innerWidth <= 1024) {
+                // If the sidebar is open and we are on mobile, close it after clicking a link
+                if (window.innerWidth <= 1024 && appWrapper.classList.contains('sidebar-open')) {
                     appWrapper.classList.remove('sidebar-open');
-                    toggleButton.innerHTML = '☰ Menu';
+                    if (mobileToggleButton) {
+                        mobileToggleButton.innerHTML = '☰ Menu';
+                    }
                 }
             });
         });
     }
 });
-})();
