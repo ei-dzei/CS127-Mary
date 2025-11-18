@@ -5,7 +5,9 @@ require_once __DIR__ . '/../../partials/init.php';
 require_once __DIR__ . '/../../validators.php';
 
 if (!is_admin()) { redirect_to('/admin/login.php'); }
-csrf_check();
+// Note: csrf_check is moved inside the POST conditional for robustness, 
+// but is kept here based on your original code structure.
+if ($_SERVER['REQUEST_METHOD'] === 'POST') { csrf_check(); }
 
 /* ------------------------- Actions ------------------------- */
 $action = $_POST['action'] ?? '';
@@ -13,7 +15,10 @@ $action = $_POST['action'] ?? '';
 if ($action === 'create') {
   if (!v_varchar($_POST['AGENCY_NAME'] ?? '', 255)) guardFail('Invalid name');
   if (!v_enum_exists($pdo, 'TYPE_AGENCY', 'TYPE_CODE', $_POST['AGENCY_TYPE'] ?? '')) guardFail('Invalid type');
-  if (!v_varchar($_POST['AGENCY_CONTACTINFO'] ?? '', 100)) guardFail('Invalid contact');
+  // Changed to v_email for server-side validation based on your request.
+  if (!v_email($_POST['AGENCY_CONTACTINFO'] ?? '')) guardFail('Invalid contact email address'); 
+  // If you must use v_varchar, it should be: 
+  // if (!v_varchar($_POST['AGENCY_CONTACTINFO'] ?? '', 100)) guardFail('Invalid contact');
 
   $pdo->prepare("INSERT INTO AGENCY (AGENCY_NAME, AGENCY_TYPE, AGENCY_CONTACTINFO) VALUES (?,?,?)")
       ->execute([$_POST['AGENCY_NAME'], $_POST['AGENCY_TYPE'], $_POST['AGENCY_CONTACTINFO']]);
@@ -28,7 +33,11 @@ if ($action === 'update') {
   if (!v_int($_POST['AGENCY_ID'] ?? '')) guardFail('Missing ID');
   if (!v_varchar($_POST['AGENCY_NAME'] ?? '', 255)) guardFail('Invalid name');
   if (!v_enum_exists($pdo, 'TYPE_AGENCY', 'TYPE_CODE', $_POST['AGENCY_TYPE'] ?? '')) guardFail('Invalid type');
-  if (!v_varchar($_POST['AGENCY_CONTACTINFO'] ?? '', 100)) guardFail('Invalid contact');
+  // Changed to v_email for server-side validation based on your request.
+  if (!v_email($_POST['AGENCY_CONTACTINFO'] ?? '')) guardFail('Invalid contact email address');
+  // If you must use v_varchar, it should be: 
+  // if (!v_varchar($_POST['AGENCY_CONTACTINFO'] ?? '', 100)) guardFail('Invalid contact');
+
 
   $pdo->prepare("UPDATE AGENCY SET AGENCY_NAME=?, AGENCY_TYPE=?, AGENCY_CONTACTINFO=? WHERE AGENCY_ID=?")
       ->execute([$_POST['AGENCY_NAME'], $_POST['AGENCY_TYPE'], $_POST['AGENCY_CONTACTINFO'], $_POST['AGENCY_ID']]);
@@ -142,6 +151,12 @@ require_once __DIR__ . '/../../partials/site_header.php';
     border-color: rgba(11,83,148,.35);
   }
   .btn-ghost:hover{ background: rgba(11,83,148,.05); }
+
+/* Validation style for email format */
+.input:invalid:not(:focus):not(:placeholder-shown)[type="email"] {
+  border-color: #ef4444; /* Red border */
+  box-shadow: 0 0 0 1px #ef4444;
+}
 </style>
 
 <section class="panel fade-in crud-header-card">
@@ -157,7 +172,6 @@ require_once __DIR__ . '/../../partials/site_header.php';
     </form>
   </div>
 
-  <!-- Filter / Sort -->
   <form method="get" class="grid filter-bar" style="margin-bottom:10px;">
     <div class="field" style="grid-column: span 5">
       <label>Name</label>
@@ -198,7 +212,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
 
     <div class="field" style="grid-column: span 6">
       <label>Name</label>
-      <input class="input" name="AGENCY_NAME" required>
+      <input class="input" name="AGENCY_NAME" required maxlength="255"> 
     </div>
     <div class="field" style="grid-column: span 3">
       <label>Type</label>
@@ -209,8 +223,8 @@ require_once __DIR__ . '/../../partials/site_header.php';
       </select>
     </div>
     <div class="field" style="grid-column: span 3">
-      <label>Contact</label>
-      <input class="input" name="AGENCY_CONTACTINFO" required>
+      <label>Contact (Email)</label>
+      <input class="input" type="email" name="AGENCY_CONTACTINFO" required maxlength="100"> 
     </div>
 
     <div class="field" style="grid-column: span 12; display:flex; justify-content:flex-end;">
@@ -262,7 +276,6 @@ require_once __DIR__ . '/../../partials/site_header.php';
     </table>
   </div>
 
-  <!-- Pagination -->
   <div class="pagination">
     <?php
       // keep q/type/sort when paging
@@ -283,7 +296,6 @@ require_once __DIR__ . '/../../partials/site_header.php';
   </div>
 </section>
 
-<!-- --------- Modal HTML --------- -->
 <div class="admin-modal" id="agencyModal" hidden>
   <div class="admin-modal__backdrop" data-close="1"></div>
   <div class="admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="agencyModalTitle">
@@ -299,7 +311,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
       <div class="modal-grid">
         <div class="field">
           <label for="m_name">Name</label>
-          <input class="input" id="m_name" name="AGENCY_NAME" required>
+          <input class="input" id="m_name" name="AGENCY_NAME" required maxlength="255">
         </div>
         <div class="field">
           <label for="m_type">Type</label>
@@ -310,8 +322,8 @@ require_once __DIR__ . '/../../partials/site_header.php';
           </select>
         </div>
         <div class="field">
-          <label for="m_contact">Contact</label>
-          <input class="input" id="m_contact" name="AGENCY_CONTACTINFO" required>
+          <label for="m_contact">Contact (Email)</label>
+          <input class="input" id="m_contact" type="email" name="AGENCY_CONTACTINFO" required maxlength="100">
         </div>
       </div>
 
@@ -331,13 +343,17 @@ require_once __DIR__ . '/../../partials/site_header.php';
   const id    = document.getElementById('m_id');
   const nameI = document.getElementById('m_name');
   const typeI = document.getElementById('m_type');
-  const contI = document.getElementById('m_contact');
+  const contI = document.getElementById('m_contact'); // Contact field
 
   function open(payload){
     id.value    = payload.id;
     nameI.value = payload.name || '';
     typeI.value = payload.type || '';
     contI.value = payload.contact || '';
+    
+    // Clear browser-level validation errors on open
+    contI.classList.remove('input-error');
+
     modal.hidden = false;
   }
   function close(){ modal.hidden = true; }
@@ -353,6 +369,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
       });
     });
   });
+  
 
   // close handlers
   modal.addEventListener('click', e=>{
