@@ -9,7 +9,7 @@ $uri  = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 $path = preg_replace('#^' . preg_quote(BASE_URL, '#') . '#', '', $uri);
 $path = $path === '' ? '/' : $path;
 
-// Assuming you have a function to get the current path for active links
+// Dummy function for current_path if not in init.php
 if (!function_exists('current_path')) {
     function current_path() {
         return parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
@@ -31,62 +31,90 @@ if (!function_exists('current_path')) {
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
   <style>
-    /* ---------------------------------------------------------------- */
-    /* INLINE STYLES (MODIFIED FOR CORRECT MAXIMIZED LAYOUT)            */
-    /* ---------------------------------------------------------------- */
-    
+    /* =======================================
+       THEME VARIABLES
+       ======================================= */
+    :root {
+      /* General Colors */
+      --color-primary: #003366; 
+      --color-accent: #0b5394; 
+      --color-bg: #ffffff;
+      --color-light: #f8f9fa; 
+      --color-border: #d9dee3;
+      --color-text: #1a1a1a;
+      --radius: 8px;
+      --transition: 0.25s ease;
+      
+      /* Layout Specific */
+      --sidebar-width: 230px; 
+      --sidebar-collapsed-width: 0px; 
+      
+      /* Sidebar Colors (FIXED/UPDATED) */
+      --color-sidebar-bg: #1d3557; 
+      --color-sidebar-text: #f1f1f1; 
+      --color-sidebar-hover: #26466d; 
+      --color-sidebar-active: #457b9d; 
+      --color-sidebar-sub-bg: #1f4062; 
+    }
+
+    /* =======================================
+       RESET & BASE 
+       ======================================= */
     body {
         margin: 0;
         font-family: Arial, sans-serif;
         background: #f8f9fa;
-        /* Ensures the viewport height is used */
-        min-height: 100vh; 
+        min-height: 100vh;
         position: relative;
     }
 
-    /* === 1. Layout Container === */
+    /* =======================================
+       APP LAYOUT (Fixed for Maximized Content)
+       ======================================= */
     .app-wrapper {
-        /* This Flex container holds the fixed sidebar and the growing content area */
         display: flex; 
         min-height: 100vh;
+        position: relative;
     }
-
-    /* === 2. Sidebar (Desktop View) === */
     .sidebar {
-        width: 230px;
+        width: var(--sidebar-width);
         flex-shrink: 0;
         height: 100vh;
-        background: #1d3557;
+        background: var(--color-sidebar-bg);
         padding: 20px 0;
         display: flex;
         flex-direction: column;
-        position: fixed; /* Lock sidebar position */
+        position: fixed; 
         left: 0;
         top: 0;
-        color: #fff;
+        color: var(--color-sidebar-text);
         z-index: 1000;
         overflow-y: auto;
-        transition: transform 0.3s ease-in-out;
+        transition: transform 0.3s ease-in-out, width 0.3s ease-in-out;
     }
-
-    /* === 3. Main Content Area (NEW/FIXED) === */
     .main-content-area {
-        /* The key to shifting and maximizing the height */
-        flex-grow: 1; /* Occupy remaining horizontal space */
-        margin-left: 230px; /* Shift content area over by sidebar width */
+        flex-grow: 1; 
+        margin-left: var(--sidebar-width); 
         min-height: 100vh;
         display: flex;
-        flex-direction: column; /* Allows main content and footer to stack and stretch */
+        flex-direction: column;
+        transition: margin-left 0.3s ease-in-out;
     }
-
-    /* === 4. Main Content Container (inside the new area) === */
     main.container {
-        flex-grow: 1; /* Content area takes available vertical space */
+        flex-grow: 1; 
         padding: 20px;
         width: 100%; 
     }
+    .admin-stripe {
+      padding: 10px;
+      background: #ffd166;
+      font-weight: bold;
+      text-align: center;
+    }
 
-    /* === 5. Sidebar Styles (Keep as originally defined) === */
+    /* =======================================
+       SIDEBAR STYLING (Color Fixed)
+       ======================================= */
     .sidebar .brand {
         display: flex;
         align-items: center;
@@ -101,69 +129,113 @@ if (!function_exists('current_path')) {
         padding: 12px 20px;
         display: block;
         text-decoration: none;
-        color: #f1f1f1;
+        color: var(--color-sidebar-text);
         font-size: 15px;
     }
     .sidebar a:hover {
-        background: #26466d;
+        background: var(--color-sidebar-hover);
     }
     .sidebar .active {
-        background: #457b9d;
+        background: var(--color-sidebar-active);
         font-weight: bold;
     }
     .sidebar .sub-link {
         padding-left: 40px; 
-        background: #1f4062;
+        background: var(--color-sidebar-sub-bg);
     }
     .sidebar .sub-link:hover {
-        background: #26466d;
+        background: var(--color-sidebar-hover);
     }
     .sidebar .sub-link.active {
-        background: #457b9d;
+        background: var(--color-sidebar-active);
     }
-    .admin-stripe {
-      padding: 10px;
-      background: #ffd166;
-      font-weight: bold;
-      text-align: center;
+    .sidebar hr {
+        border-color: rgba(255, 255, 255, 0.18);
+        margin: 10px 0;
     }
-    
-    /* === 6. Mobile/Toggle Styles (CRITICAL) === */
+    .sidebar .btn.small {
+        background: var(--color-sidebar-active); 
+        color: #fff;
+        border: none;
+        padding: 8px 20px;
+        margin-top: 20px;
+        margin-left: 20px;
+        margin-right: 20px;
+        display: block;
+        text-align: center;
+        border-radius: 4px;
+        font-weight: bold;
+        font-size: 15px;
+    }
+    .sidebar .btn.small:hover {
+        background: #3e7099; 
+    }
+    .sidebar .btn.small a {
+        display: inline;
+        padding: 0;
+        background: none;
+    }
+
+    /* =======================================
+       TOGGLE BUTTON AND COLLAPSE LOGIC (NEW)
+       ======================================= */
     #sidebar-toggle {
-        display: none; /* Hidden by default */
+        display: block;
         position: fixed;
         top: 15px;
-        left: 15px;
+        left: calc(var(--sidebar-width) + 15px); /* Positioned next to the open sidebar */
         z-index: 1001;
         padding: 8px 12px;
-        background: #457b9d; /* Use an accent color */
+        background: var(--color-sidebar-active);
         color: #fff;
         border: none;
         border-radius: 8px;
         cursor: pointer;
+        transition: left 0.3s ease-in-out, background 0.2s ease;
+    }
+    #sidebar-toggle:hover {
+        background: #3e7099; 
     }
 
+    /* Desktop Collapsed State */
+    .app-wrapper.sidebar-closed .sidebar {
+        width: var(--sidebar-collapsed-width);
+        transform: translateX(-100%); /* Hides the menu completely */
+    }
+    .app-wrapper.sidebar-closed .main-content-area {
+        margin-left: var(--sidebar-collapsed-width); /* Content moves left */
+    }
+    .app-wrapper.sidebar-closed #sidebar-toggle {
+        left: 15px; /* Button moves to the far left */
+    }
+
+    /* Mobile/Tablet View (Default state is hidden/closed) */
     @media (max-width: 1024px) {
         #sidebar-toggle {
-            display: block; /* Show button on small screens */
+            left: 15px; /* Button stays on the far left */
         }
         .sidebar {
-            transform: translateX(-100%); /* Hide sidebar off-screen initially */
-            box-shadow: 2px 0 5px rgba(0,0,0,0.5); /* Add shadow for overlay effect */
+            /* On mobile, transform handles the slide-in overlay */
+            transform: translateX(-100%); 
+            box-shadow: 2px 0 5px rgba(0,0,0,0.5);
+            /* Ensure width remains the same for the overlay effect */
+            width: var(--sidebar-width); 
         }
         .app-wrapper.sidebar-open .sidebar {
-            transform: translateX(0); /* Show sidebar when class is applied */
+            transform: translateX(0); /* Shows sidebar as overlay */
         }
-        /* Remove margin shift on mobile */
         .main-content-area {
-            margin-left: 0; 
+            margin-left: 0; /* Content is full width on mobile */
+        }
+        
+        /* Disable desktop collapse logic on mobile */
+        .app-wrapper.sidebar-closed .sidebar {
+            transform: translateX(-100%); 
         }
     }
-    /* ----------------------------------------------------------------- */
   </style>
 
-  <script defer src="<?= BASE_URL ?>/assets/app.js"></script>
-</head>
+  </head>
 
 <body>
 

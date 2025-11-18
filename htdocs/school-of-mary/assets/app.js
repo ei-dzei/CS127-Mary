@@ -107,12 +107,6 @@
     setTimeout(() => { t.style.opacity = "0"; }, timeout);
   }
 
-  /* ------------------------------
-     Modal logic
-     - Open buttons: [data-modal="edit"] or [data-modal="open"]
-     - Close buttons: [data-close="modal"] or overlay click
-     - Pages inject field blocks into #modal-form
-  ------------------------------ */
   const modal      = qs("#modal");
   const modalForm  = qs("#modal-form", modal || document);
   const modalTitle = qs("#modal-title", modal || document);
@@ -1023,7 +1017,6 @@
         const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
 
-        // 1. Fill leading days from the previous month
         for (let i = 0; i < firstDayOfMonth; i++) {
             const dayNum = daysInPrevMonth - firstDayOfMonth + i + 1;
             const cell = document.createElement('div');
@@ -1032,20 +1025,17 @@
             daysGridEl.appendChild(cell);
         }
 
-        // 2. Fill current month days
         for (let i = 1; i <= daysInMonth; i++) {
             const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
             const cell = document.createElement('div');
             cell.classList.add('calendar-day');
             
-            // Highlight today
             if (dateStr === todayStr) {
                 cell.classList.add('calendar-day--today');
             }
 
             cell.innerHTML = `<span class="calendar-day-number">${i}</span>`;
             
-            // Add events for this day
             const events = DUMMY_EVENTS[dateStr];
             if (events) {
                 events.forEach(event => {
@@ -1060,9 +1050,7 @@
             daysGridEl.appendChild(cell);
         }
 
-        // 3. Fill trailing days from the next month
         const totalCells = firstDayOfMonth + daysInMonth;
-        // Check if we need a 6th row (42 cells total)
         const totalGridCells = totalCells > 35 ? 42 : 35;
         const remainingCells = totalGridCells - totalCells; 
 
@@ -1108,24 +1096,16 @@
         function validateAndSetMin() {
             const startDateValue = startEl.value;
             
-            // 1. Set the minimum selectable date for the end date to the start date
             endEl.min = startDateValue;
-
-            // 2. If the current end date is now earlier than the new start date, clear it.
             if (endEl.value && startDateValue && endEl.value < startDateValue) {
                 // Clear value to force re-selection and prevent submission of invalid data
                 endEl.value = ''; 
             }
         }
         
-        // Run validation whenever the start date changes
         startEl.addEventListener('change', validateAndSetMin);
-        
-        // This is important for the modal's input fields
         endEl.addEventListener('focus', validateAndSetMin, { once: true });
-        
-        // Run immediately for the Create form inputs on load
-        if (startEl === createStartDateEl) {
+                if (startEl === createStartDateEl) {
             validateAndSetMin();
         }
     }
@@ -1136,17 +1116,78 @@
     enforceDateConstraint(createStartDateEl, createEndDateEl);
     enforceDateConstraint(editStartDateEl, editEndDateEl);
 
-    // Re-run the modal's validation when it opens to apply constraints to the pre-filled data
     const modal = document.getElementById('researchModal');
     if (modal) {
-        // Observer to watch when the 'hidden' attribute is removed (i.e., modal opens)
         new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 if (mutation.attributeName === 'hidden' && !modal.hidden) {
-                    // Modal opened, run validation logic for the edit fields
                     enforceDateConstraint(editStartDateEl, editEndDateEl);
                 }
             });
         }).observe(modal, { attributes: true });
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+    const toggleButton = document.getElementById('sidebar-toggle');
+    const appWrapper = document.getElementById('app-wrapper');
+
+    if (toggleButton && appWrapper) {
+        
+        // --- Initialization ---
+        const isDesktop = window.innerWidth > 1024;
+        
+        // Set initial button text based on default state (open on desktop, hidden on mobile)
+        if (isDesktop) {
+             toggleButton.innerHTML = '✕ Close';
+             // On desktop load, ensure the 'closed' class is removed by default
+             appWrapper.classList.remove('sidebar-closed'); 
+        } else {
+             toggleButton.innerHTML = '☰ Menu';
+             // On mobile load, ensure the 'open' class is not active
+             appWrapper.classList.remove('sidebar-open');
+        }
+
+
+        // --- Toggle Logic ---
+        toggleButton.addEventListener('click', function() {
+            const isDesktopClick = window.innerWidth > 1024;
+
+            if (isDesktopClick) {
+                // DESKTOP: Toggle the collapse state
+                const isNowClosed = appWrapper.classList.toggle('sidebar-closed');
+                
+                // Update button text
+                if (isNowClosed) {
+                    toggleButton.innerHTML = '☰ Menu';
+                } else {
+                    toggleButton.innerHTML = '✕ Close';
+                }
+
+            } else {
+                // MOBILE/TABLET: Toggle the overlay state
+                const isNowOpen = appWrapper.classList.toggle('sidebar-open');
+                
+                // Update button text
+                if (isNowOpen) {
+                    toggleButton.innerHTML = '✕ Close';
+                } else {
+                    toggleButton.innerHTML = '☰ Menu';
+                }
+            }
+        });
+        
+        // --- Close Sidebar on Mobile Link Click ---
+        // Find all links inside the sidebar
+        const sidebarLinks = appWrapper.querySelectorAll('.sidebar a');
+        sidebarLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                // Only close the sidebar if we are in mobile view
+                if (window.innerWidth <= 1024) {
+                    appWrapper.classList.remove('sidebar-open');
+                    toggleButton.innerHTML = '☰ Menu';
+                }
+            });
+        });
+    }
+});
 })();
