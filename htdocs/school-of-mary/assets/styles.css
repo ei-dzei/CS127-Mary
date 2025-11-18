@@ -20,7 +20,6 @@
    THEME VARIABLES
    ======================================= */
 :root {
-  /* General Colors */
   --color-primary: #003366; /* Dark Blue */
   --color-accent: #0b5394; /* Medium Blue/Active */
   --color-bg: #ffffff;
@@ -32,13 +31,6 @@
 
   /* Layout Specific */
   --sidebar-width: 230px; 
-  
-  /* Sidebar Colors (FIXED/UPDATED) */
-  --color-sidebar-bg: #1d3557; /* Dark Blue */
-  --color-sidebar-text: #f1f1f1; /* Off-White Text */
-  --color-sidebar-hover: #26466d; /* Slightly Lighter Blue for Hover */
-  --color-sidebar-active: #457b9d; /* Medium Blue (Active State/Accent) */
-  --color-sidebar-sub-bg: #1f4062; /* Slightly different dark background for sub-links */
 }
 
 /* =======================================
@@ -56,11 +48,14 @@ body {
   font-size: 16px;
   font-family: 'Newsreader', 'Times New Roman', serif;
   min-height: 100vh;
-  transition: padding-left var(--transition); /* Used for non-flex body shift (optional) */
-  position: relative; /* Base for fixed elements */
+  /* Added transition for desktop sidebar push effect */
+  transition: padding-left var(--transition);
 
-  /* If body is used as the main flex container, this would apply,
-     but we are using .app-wrapper as the main flex container. */
+  /* === LAYOUT FIX: Enable Flexbox to stretch content vertically === */
+  display: flex;
+  flex-direction: column;
+  position: relative; 
+  /* ============================================================= */
 }
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Patua One', serif;
@@ -85,145 +80,14 @@ a:hover {
 }
 
 /* =======================================
-   APP LAYOUT (From header.php inline styles)
+   MAIN CONTENT WRAPPER (NEW RULE)
+   This class must wrap all content AFTER the sidebar, 
+   allowing it to fill the remaining vertical space.
    ======================================= */
-.app-wrapper {
-    display: flex; 
-    min-height: 100vh;
-}
-.sidebar {
-    width: var(--sidebar-width);
-    flex-shrink: 0;
-    height: 100vh;
-    background: var(--color-sidebar-bg);
-    padding: 20px 0;
+.content-wrapper {
+    flex-grow: 1; 
     display: flex;
     flex-direction: column;
-    position: fixed; 
-    left: 0;
-    top: 0;
-    color: var(--color-sidebar-text);
-    z-index: 1000;
-    overflow-y: auto;
-    transition: transform 0.3s ease-in-out;
-}
-.main-content-area {
-    flex-grow: 1; 
-    margin-left: var(--sidebar-width); 
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
-main.container {
-    flex-grow: 1; 
-    padding: 20px;
-    width: 100%; 
-}
-
-/* =======================================
-   SIDEBAR STYLING (FIXED COLORS)
-   ======================================= */
-.sidebar .brand {
-    display: flex;
-    align-items: center;
-    padding: 0 20px 20px;
-    gap: 10px;
-}
-.sidebar .brand__logo {
-    width: 40px;
-    height: auto;
-}
-.sidebar a {
-    padding: 12px 20px;
-    display: block;
-    text-decoration: none;
-    color: var(--color-sidebar-text);
-    font-size: 15px;
-}
-.sidebar a:hover {
-    background: var(--color-sidebar-hover);
-}
-.sidebar .active {
-    background: var(--color-sidebar-active);
-    font-weight: bold;
-}
-.sidebar .sub-link {
-    padding-left: 40px; 
-    background: var(--color-sidebar-sub-bg);
-}
-.sidebar .sub-link:hover {
-    background: var(--color-sidebar-hover);
-}
-.sidebar .sub-link.active {
-    background: var(--color-sidebar-active);
-}
-.sidebar hr {
-    border-color: rgba(255, 255, 255, 0.18);
-    margin: 10px 0;
-}
-.admin-stripe {
-    padding: 10px;
-    background: #ffd166;
-    font-weight: bold;
-    text-align: center;
-}
-.sidebar .btn.small {
-    background: var(--color-sidebar-active); 
-    color: #fff;
-    border: none;
-    padding: 8px 20px;
-    margin-top: 20px;
-    margin-left: 20px;
-    margin-right: 20px;
-    display: block;
-    text-align: center;
-    border-radius: 4px;
-    font-weight: bold;
-    font-size: 15px;
-}
-.sidebar .btn.small:hover {
-    background: #3e7099; 
-}
-.sidebar .btn.small a {
-    display: inline;
-    padding: 0;
-    background: none;
-}
-.sidebar .btn.small a:hover {
-    background: none;
-}
-
-/* =======================================
-   MOBILE/TOGGLE STYLES
-   ======================================= */
-#sidebar-toggle {
-    display: none;
-    position: fixed;
-    top: 15px;
-    left: 15px;
-    z-index: 1001;
-    padding: 8px 12px;
-    background: var(--color-sidebar-active);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-@media (max-width: 1024px) {
-    #sidebar-toggle {
-        display: block;
-    }
-    .sidebar {
-        transform: translateX(-100%);
-        box-shadow: 2px 0 5px rgba(0,0,0,0.5);
-    }
-    .app-wrapper.sidebar-open .sidebar {
-        transform: translateX(0);
-    }
-    .main-content-area {
-        margin-left: 0;
-    }
 }
 
 /* =======================================
@@ -243,7 +107,7 @@ main.container {
   background: #0a4c80;
   transform: translateY(-1px);
 }
-.btn:focus-visible { 
+.btn:focus-visible { /* Accessibility Focus State */
   outline: 3px solid rgba(11, 83, 148, 0.4);
   outline-offset: 2px;
 }
@@ -328,6 +192,7 @@ th {
     background: #1d3557; 
     color: #f1f1f1;
     padding: 2rem 0; 
+    /* Removed margin-top: auto; because .content-wrapper handles footer pushing */
     font-size: 0.95rem;
 }
 
@@ -337,6 +202,7 @@ th {
     gap: 20px; 
 }
 
+/* Responsive adjustments for 3 columns */
 @media (max-width: 1000px) { 
     .footer__grid {
         grid-template-columns: repeat(2, 1fr);
@@ -388,12 +254,14 @@ th {
     color: #457b9d; 
 }
 
+/* Contact list specific styling */
 .footer__contact li {
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
+/* FOOTER QUICK LINKS ADJUSTMENTS (Horizontal) */
 .footer__inline-links a {
     color: #f1f1f1; 
     text-decoration: none;
@@ -438,7 +306,72 @@ th {
 }
 
 /* =======================================
+   LAYOUT FIXES (Desktop Only)
+   ======================================= */
+
+
+/* =======================================
+   SIDEBAR (#sidebar) & LAYOUT (MODIFIED)
+   ======================================= */
+#sidebar {
+    width: var(--sidebar-width);
+    height: 100vh;
+    background: #fff;
+    padding: 20px 0;
+    z-index: 1000;
+    
+    /* === LAYOUT FIX: Make sidebar fixed for desktop layout === */
+    position: fixed; 
+    top: 0;
+    left: 0;
+    /* ======================================================= */
+}
+
+/* Mobile Toggle State */
+@media (max-width: 1024px) {
+    #sidebar-toggle {
+        display: block; 
+    }
+    
+    /* Removed redundant backdrop rule, relying on JS/inline CSS */
+}
+
+/* Desktop Styles (>= 1025px) */
+@media (min-width: 1025px) {
+    /* Hide the Toggle Button */
+    #sidebar-toggle {
+        display: none;
+    }
+
+    /* Rule to push content over for the fixed sidebar */
+    body.aside-sidebar {
+        padding-left: var(--sidebar-width);
+    }
+}
+
+/* Sidebar Content */
+.sidebar nav a {
+    display: block;
+    padding: 10px 20px;
+    color: var(--color-primary);
+    font-size: 0.95rem;
+    transition: background 0.15s ease;
+}
+
+.sidebar nav a:hover {
+    background: var(--color-light);
+    text-decoration: none;
+}
+
+.sidebar nav a.is-active {
+    background: var(--color-accent);
+    color: #fff;
+    font-weight: 600;
+}
+
+/* =======================================
    DROPDOWN
+   Consolidated redundant/conflicting dropdown rules
    ======================================= */
 .dropdown {
   position: relative;
@@ -464,12 +397,13 @@ th {
 .dropdown:hover .dropdown__menu {
   display: block;
 }
+/* Unified link styles for all dropdown/menu types */
 .dropdown__menu a,
 .navbar .dropdown-menu a,
 .menu.dropdown a,
 .dropdown-panel a {
   display: block;
-  padding: 8px 14px;
+  padding: 8px 14px; /* Used 8px 14px for consistency */
   color: #1b2a4a !important;
   text-decoration: none;
   transition: background var(--transition);
@@ -478,7 +412,7 @@ th {
 .navbar .dropdown-menu a:hover,
 .menu.dropdown a:hover,
 .dropdown-panel a:hover {
-  background: var(--color-light);      
+  background: var(--color-light); /* Use variable for consistency */        
   color: #1b2a4a !important;
 }
 
@@ -733,7 +667,7 @@ th {
 .overlay__close:hover {
   background: #f2f5f9;
 }
-.overlay__close:focus-visible { 
+.overlay__close:focus-visible { /* Accessibility Focus State */
   outline: 3px solid rgba(11, 83, 148, 0.4);
   outline-offset: 2px;
 }
@@ -1054,10 +988,12 @@ th {
 }
 
 /* ======================================= ADMIN CALENDAR STYLES ======================================= */
+
+/* --- NEW LAYOUT STYLES (If not already in your CSS) --- */
 .dual-column-layout {
     grid-column: span 12;
     display: grid;
-    grid-template-columns: 2fr 1fr; 
+    grid-template-columns: 2fr 1fr; /* 2 parts for content, 1 part for calendar */
     gap: 16px;
     margin-top: 16px;
 }
@@ -1071,8 +1007,9 @@ th {
     .research-col, .calendar-col { grid-column: span 1; }
 }
 
+/* --- CALENDAR BASE STYLES --- */
 #calendar-app {
-    font-family: 'Newsreader', serif;
+    font-family: 'Newsreader', serif; /* Use defined font */
     max-width: 100%;
     margin: 0 auto;
 }
@@ -1083,7 +1020,7 @@ th {
     align-items: center;
     padding: 10px 15px;
     background: var(--color-light); 
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border); /* Use var for border */
 }
 
 .calendar-grid, .calendar-grid-header {
@@ -1097,7 +1034,7 @@ th {
     padding: 8px 5px;
     font-size: 0.85rem;
     color: #666;
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border); /* Use var for border */
 }
 
 .calendar-day {
@@ -1125,6 +1062,7 @@ th {
     color: #aaa;
 }
 
+/* --- CALENDAR COMPACT OVERRIDES --- */
 .calendar-header .btn.small {
     padding: 4px 8px; 
 }
@@ -1139,7 +1077,7 @@ th {
     min-height: 55px; 
     padding: 3px;
 }
-.calendar-day--today { 
+.calendar-day--today { /* Highlight for today's date */
     background-color: #e6f7ff;
     border: 1px solid #cceeff;
 }
@@ -1148,10 +1086,10 @@ th {
     display: block;
     margin-bottom: 2px;
     color: #333;
-    font-size: 0.9rem;
+    font-size: 0.9rem; /* Smaller day number */
 }
 .calendar-event {
-    font-size: 0.7rem; 
+    font-size: 0.7rem; /* Tiny event text */
     padding: 1px 2px;
     border-radius: 4px;
     white-space: nowrap;
@@ -1159,6 +1097,7 @@ th {
     text-overflow: ellipsis;
 }
 
+/* --- EVENT STYLES --- */
 .calendar-event.type-deadline {
     background-color: #f7b2b2; 
     color: #8c0000;
