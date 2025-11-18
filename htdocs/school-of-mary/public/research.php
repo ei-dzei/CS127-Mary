@@ -262,7 +262,8 @@ $total = count($rows);
         <div class="card">
           <div class="card__icon" 
                style="background: none; border: none; padding: 0; display: flex; align-items: center; justify-content: center; width: 48px; height: 48px;">
-            <i class="bi bi-flask-fill text-primary fs-3"></i> 
+            <i class="bi bi-flask-fill" 
+               style="font-size: 28px !important; color: #1e70e3 !important; visibility: visible !important; opacity: 1 !important;"></i>
           </div>
           <div class="card__content">
             <h3 class="card__title"><?= htmlspecialchars($row['RESEARCH_TITLE']); ?></h3>
