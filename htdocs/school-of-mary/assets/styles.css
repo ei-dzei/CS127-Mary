@@ -695,9 +695,19 @@ th {
 }
 #clear-btn{height: 34.4px;margin-bottom: 10px; vertical-align: bottom;display: relativex;}
 #filter-dropdown  {display: none; width: 100%; padding: 10px;}
-#filter-btn {float: inline-end;}
+#filter-btn {
+  float: inline-end;
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  border: none;
+  color: var(--color-accent);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+}
 #clear-searchbar {display: none; float:inline-end; }
 #filter-options {display: flex; flex-direction: row; }
+#faculty-results{}
 .searchbox {
   
   align-items: center;

@@ -117,9 +117,14 @@
         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M10 18a8 8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/>
         </svg>
-        <input name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search by name or email…" />
+        <input type="search" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search by name or email…" />
+        <!-- <input type="reset" value="X" alt="Clear the search form"> -->
         <button class="btn clear-btn" id="clear-searchbar" type="button" onclick="clearQuery()" title="Clear Search">❌</button>
-        <button class="btn filter-btn" id="filter-btn" type="button" onclick="showHide()">Filter</button>
+        <button class="btn filter-btn" id="filter-btn" type="button" onclick="showHide()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-funnel" viewBox="0 0 16 16">
+            <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5zm1 .5v1.308l4.372 4.858A.5.5 0 0 1 7 8.5v5.306l2-.666V8.5a.5.5 0 0 1 .128-.334L13.5 3.308V2z"/>
+          </svg>
+        </button>
         <div id ="filter-dropdown">
           <div id="filter-options">
           <!-- Rank -->
@@ -163,7 +168,7 @@
     </div> -->
   </form>
 
-  <div id="faculty-results"></div>
+  <div id="faculty-results" class="fade-in"></div>
 </section>
 
 <script>
