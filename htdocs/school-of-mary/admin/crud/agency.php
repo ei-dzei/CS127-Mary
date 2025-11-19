@@ -153,6 +153,30 @@ require_once __DIR__ . '/../../partials/site_header.php';
   .btn-ghost:hover{ background: rgba(11,83,148,.05); }
 
 /* Removed the input:invalid:not(:focus):not(:placeholder-shown)[type="email"] style here */
+
+/* ======================================= ADMIN CRUD PAGES (WITH FIX) ======================================= */
+.actions-cell {
+  /* --- FIX APPLIED HERE: Flexbox for vertical alignment --- */
+  display: flex;
+  align-items: center; 
+  /* --- END FIX --- */
+
+  flex-wrap: wrap;
+  gap: 8px 10px;          
+  white-space: normal;    
+  min-width: 320px;      
+}
+.actions-cell .input,
+.actions-cell select {
+  max-width: 200px;
+}
+.actions-cell form { display: inline-flex; gap: 6px; align-items: center; }
+.actions-cell .btn.small { padding: 6px 10px; }
+@media (max-width: 1100px) {
+  .actions-cell select[style*="width:200px"] { width: 160px !important; }
+  .actions-cell select[style*="width:140px"] { width: 120px !important; }
+}
+.table-scroll { overflow-x: auto; }
 </style>
 
 <section class="panel fade-in crud-header-card">
