@@ -83,7 +83,7 @@ $params = [];
 if ($q !== '')    { $baseSql .= " AND a.AGENCY_NAME LIKE ?"; $params[] = "%$q%"; }
 if ($type !== '') { $baseSql .= " AND a.AGENCY_TYPE = ?";    $params[] = $type;  }
 
-$total = (int)$pdo->prepare("SELECT COUNT(*) ".$baseSql)->execute($params) ?: 0;
+// FIX: Corrected and non-redundant total count logic
 $stmtCount = $pdo->prepare("SELECT COUNT(*) ".$baseSql);
 $stmtCount->execute($params);
 $total = (int)$stmtCount->fetchColumn();
@@ -102,7 +102,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
 ?>
 
 <style>
-/* --------- Inline modal --------- */
+/* --------- Inline modal (Existing CSS) --------- */
 .admin-modal[hidden]{display:none!important;}
 .admin-modal{
   position:fixed; inset:0; z-index:3000;
@@ -169,7 +169,8 @@ td:has(.actions-cell) {
   flex-wrap: wrap;
   gap: 8px 10px;          
   white-space: normal;    
-  min-width: 320px;      
+  /* Reduced min-width to give space to the Contact column */
+  min-width: 160px;      
 }
 .actions-cell .input,
 .actions-cell select {
@@ -181,6 +182,42 @@ td:has(.actions-cell) {
   .actions-cell select[style*="width:200px"] { width: 160px !important; }
   .actions-cell select[style*="width:140px"] { width: 120px !important; }
 }
+
+/* --- Agency Table Specific Fixes --- */
+.table-scroll table {
+    table-layout: auto; /* Use auto layout to allow column flexibility */
+    width: 100%;
+}
+
+.table-scroll table th:nth-child(1), /* ID */
+.table-scroll table td:nth-child(1) {
+    width: 60px; /* Fixed width for ID */
+    min-width: 60px;
+}
+
+.table-scroll table th:nth-child(3), /* Type */
+.table-scroll table td:nth-child(3) {
+    width: 120px; /* Fixed width for Type (e.g., Government) */
+    min-width: 120px;
+}
+
+.table-scroll table th:nth-child(4), /* Contact (Email) */
+.table-scroll table td:nth-child(4) {
+    /* Set a minimum width for the email address to reduce truncation */
+    min-width: 250px; 
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.table-scroll table th:nth-child(5), /* Actions */
+.table-scroll table td:nth-child(5) {
+    /* Set max-width for Actions to prevent it from taking too much space */
+    width: 160px;
+    min-width: 160px;
+}
+/* Name column (2nd child) remains flexible to take up maximum remaining space. */
+
 .table-scroll { overflow-x: auto; }
 </style>
 
@@ -297,6 +334,9 @@ td:has(.actions-cell) {
           </td>
         </tr>
       <?php endforeach; ?>
+      <?php if (!$rows): ?>
+        <tr><td colspan="5" style="text-align:center;color:#666;">No records found.</td></tr>
+      <?php endif; ?>
       </tbody>
     </table>
   </div>
