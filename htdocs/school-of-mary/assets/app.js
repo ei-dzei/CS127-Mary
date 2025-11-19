@@ -406,16 +406,12 @@
     const prevBtn = document.getElementById('prev-month');
     const nextBtn = document.getElementById('next-month');
     
-    // Comprehensive list of dummy events (Holidays, Meetings, Deadlines)
     const DUMMY_EVENTS = {
         // --- November 2025 ---
         '2025-11-01': [{ title: 'All Saints Day (Holiday)', type: 'holiday' }],
-        '2025-11-20': [{ title: 'Funding Deadline A', type: 'deadline' }],
-        '2025-11-25': [{ title: 'Faculty Meeting', type: 'meeting' }],
         '2025-11-30': [{ title: 'Bonifacio Day (Holiday)', type: 'holiday' }],
         
         // --- December 2025 ---
-        '2025-12-10': [{ title: 'Project Review', type: 'meeting' }],
         '2025-12-24': [{ title: 'Christmas Eve (Special Holiday)', type: 'holiday' }],
         '2025-12-25': [{ title: 'Christmas Day (Holiday)', type: 'holiday' }],
         '2025-12-30': [{ title: 'Rizal Day (Holiday)', type: 'holiday' }],
@@ -423,7 +419,6 @@
         
         // --- January 2026 ---
         '2026-01-01': [{ title: 'New Year\'s Day (Holiday)', type: 'holiday' }],
-        '2026-01-20': [{ title: 'Q1 Budget Deadline', type: 'deadline' }],
         
         // --- February 2026 ---
         '2026-02-25': [{ title: 'EDSA Revolution Anniversary (Holiday)', type: 'holiday' }],
