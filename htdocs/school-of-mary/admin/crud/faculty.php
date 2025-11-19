@@ -180,6 +180,29 @@ $CSRF = csrf_token();
 .btn-primary:hover{ filter:brightness(.94); box-shadow:0 4px 10px rgba(0,0,0,.06); }
 .btn-ghost{ background:#fff; color: var(--color-accent); border-color: rgba(11,83,148,.35); }
 .btn-ghost:hover{ background: rgba(11,83,148,.05); }
+
+/* --- Table Optimization for single-line data (The Fix) --- */
+.table-scroll table {
+    table-layout: fixed; 
+    width: 100%;
+}
+
+.table-scroll table td {
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+}
+
+/* Set explicit widths for non-flexible columns */
+.table-scroll table th:nth-child(1), /* ID column */
+.table-scroll table td:nth-child(1) {
+    width: 50px; 
+}
+.table-scroll table th:nth-child(6), /* Actions column */
+.table-scroll table td:nth-child(6) {
+    width: 160px; /* Adjust based on button size */
+}
+/* --- End of Fix --- */
 </style>
 
 <section class="panel fade-in crud-header-card">
