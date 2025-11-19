@@ -35,8 +35,8 @@
 
     $totalPages = max(1, (int)ceil($total / $per));
 
-    $output = "";
-    $panel = "";
+    $output = '';
+    $panel = '';
     $panel .= '
         <h3 style="margin-top:0">Records</h3>
         <div class="table-scroll">

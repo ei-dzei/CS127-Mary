@@ -260,7 +260,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
   
   function showHide() {
     var f = document.getElementById("filter-dropdown");
-    if (f.style.display === "none") {
+    if (f.style.display == "none") {
       f.style.display = "block";
     } else {
       f.style.display = "none";
@@ -339,9 +339,9 @@ require_once __DIR__ . '/../../partials/site_header.php';
   function closeAgencyModal() { 
     createAgencyModal.hidden = true; 
   }
-  // Create agency button
+  
   document.getElementById('create-agency').addEventListener('click', function() {
-    openAgencyModal();  // Call without payload for create mode
+    openAgencyModal();  
   });
       createAgencyModal.addEventListener('click', e => {
     if (e.target.dataset.close) closeAgencyModal();
@@ -367,7 +367,6 @@ require_once __DIR__ . '/../../partials/site_header.php';
   }
   function closeModal() { modal.hidden = true; }
 
-  // link button
   function attachEditButtons() {
     const editButtons = document.querySelectorAll('.js-edit');
     
