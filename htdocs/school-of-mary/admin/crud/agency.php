@@ -152,15 +152,20 @@ require_once __DIR__ . '/../../partials/site_header.php';
   }
   .btn-ghost:hover{ background: rgba(11,83,148,.05); }
 
-/* Removed the input:invalid:not(:focus):not(:placeholder-shown)[type="email"] style here */
+/* ======================================= ADMIN CRUD PAGES (FIXED ALIGNMENT) ======================================= */
 
-/* ======================================= ADMIN CRUD PAGES (WITH FIX) ======================================= */
+/* FIX 1: Ensure the entire table data cell aligns content to the top
+   when a neighboring cell forces the row height to increase. */
+td:has(.actions-cell) {
+    vertical-align: top; 
+}
+
+
 .actions-cell {
-  /* --- FIX APPLIED HERE: Flexbox for vertical alignment --- */
+  /* FIX 2: Align flex items to the top (start) of the container */
   display: flex;
-  align-items: center; 
-  /* --- END FIX --- */
-
+  align-items: flex-start; 
+  /* The rest of your flex and size properties */
   flex-wrap: wrap;
   gap: 8px 10px;          
   white-space: normal;    
@@ -372,8 +377,6 @@ require_once __DIR__ . '/../../partials/site_header.php';
     contI.value = payload.contact || '';
 
     // Clear any previous error states for the contact field
-    // (This line is less critical now that the red outline CSS is removed,
-    // but good practice if you re-introduce custom validation styling later).
     contI.classList.remove('input-error');
 
     modal.hidden = false;
