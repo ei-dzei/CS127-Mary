@@ -196,30 +196,15 @@ $CSRF = csrf_token();
 /* Set explicit widths for non-flexible columns */
 .table-scroll table th:nth-child(1), /* ID column */
 .table-scroll table td:nth-child(1) {
-    width: 50px; /* ID width fixed at 50px */
+    width: 50px; 
+    /* IMPORTANT: Remove truncation rules for ID to make it fully visible */
     white-space: normal; 
     overflow: visible; 
     text-overflow: clip; 
 }
-.table-scroll table th:nth-child(2), /* Name column */
-.table-scroll table td:nth-child(2) {
-    text-align: right; /* Align Name content to the right */
-}
-.table-scroll table th:nth-child(3), /* Email column */
-.table-scroll table td:nth-child(3) {
-    text-align: left; /* Align Email content to the left */
-}
-.table-scroll table th:nth-child(4), /* Rank column */
-.table-scroll table td:nth-child(4) {
-    width: 150px; 
-}
-.table-scroll table th:nth-child(5), /* Department column */
-.table-scroll table td:nth-child(5) {
-    width: 140px; 
-}
 .table-scroll table th:nth-child(6), /* Actions column */
 .table-scroll table td:nth-child(6) {
-    width: 160px; 
+    width: 160px; /* Adjust based on button size */
 }
 /* --- End of Fix --- */
 </style>
