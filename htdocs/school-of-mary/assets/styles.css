@@ -699,8 +699,8 @@ th {
   float: inline-end;
   padding: 8px 14px;
   border-radius: var(--radius);
-  border: none;
-  color: var(--color-accent);
+  background: transparent;
+  color: black;
   font-weight: 500;
   cursor: pointer;
   transition: background var(--transition), transform var(--transition);

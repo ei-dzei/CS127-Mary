@@ -166,7 +166,11 @@ $to     = trim($_GET['to'] ?? '');
           <path d="M10 18a8 8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/>
         </svg>
         <input name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search research titles…" />
-        <button class="btn filter-btn" id="filter-btn" type="button" onclick="showHide()">Filter</button>
+        <button class="filter-btn" id="filter-btn" type="button" onclick="showHide()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-filter" viewBox="0 0 16 16">
+            <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5"/>
+          </svg>
+        </button>
         <div id="filter-dropdown">
           <!-- Status -->
           <div class="field" style="min-width:200px;">
