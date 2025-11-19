@@ -61,34 +61,6 @@ $page   = max(1, (int)($_GET['page'] ?? 1));
 $per    = 5;
 $offset = ($page - 1) * $per;
 
-$orderSql = "a.AGENCY_NAME ASC";
-switch ($sort) {
-  case 'name_desc':  $orderSql = "a.AGENCY_NAME DESC"; break;
-  case 'id_asc':     $orderSql = "a.AGENCY_ID ASC";    break;
-  case 'id_desc':    $orderSql = "a.AGENCY_ID DESC";   break;
-  case 'recent_desc':$orderSql = "a.AGENCY_ID DESC";   break;
-}
-
-$baseSql = "FROM AGENCY a LEFT JOIN TYPE_AGENCY t ON a.AGENCY_TYPE = t.TYPE_CODE WHERE 1=1";
-$params = [];
-if ($q !== '')    { $baseSql .= " AND a.AGENCY_NAME LIKE ?"; $params[] = "%$q%"; }
-if ($type !== '') { $baseSql .= " AND a.AGENCY_TYPE = ?";    $params[] = $type;  }
-
-$total = (int)$pdo->prepare("SELECT COUNT(*) ".$baseSql)->execute($params) ?: 0;
-$stmtCount = $pdo->prepare("SELECT COUNT(*) ".$baseSql);
-$stmtCount->execute($params);
-$total = (int)$stmtCount->fetchColumn();
-
-$sql = "SELECT a.AGENCY_ID, a.AGENCY_NAME, a.AGENCY_TYPE, a.AGENCY_CONTACTINFO, t.TYPE_LABEL
-        $baseSql
-        ORDER BY $orderSql
-        LIMIT $per OFFSET $offset";
-$stmt = $pdo->prepare($sql);
-$stmt->execute($params);
-$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-$totalPages = max(1, (int)ceil($total / $per));
-
 require_once __DIR__ . '/../../partials/site_header.php';
 ?>
 
@@ -125,7 +97,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
 /* Action buttons in the filter row */
   .btn-action{
     display:inline-flex;align-items:center;justify-content:center;
-    min-width:130px;height:40px;padding:0 16px;
+    min-width:30px;height:40px;padding:0 16px;
     border-radius:8px;border:1px solid var(--color-accent);
     font-weight:600;text-decoration:none;cursor:pointer;
     transition:background .2s ease,color .2s ease,transform .06s ease,box-shadow .15s ease;
@@ -142,35 +114,52 @@ require_once __DIR__ . '/../../partials/site_header.php';
     border-color: rgba(11,83,148,.35);
   }
   .btn-ghost:hover{ background: rgba(11,83,148,.05); }
+  #create-agency{display: flex; flex: 1; float: right;}
 </style>
 
 <section class="panel fade-in crud-header-card">
-  <h1 style="margin-bottom:8px;">Agencies</h1>
-  <p class="muted" style="margin-bottom:10px;">Manage agencies and their types. CSV import/export below.</p>
-
-  <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+    <button class="btn btn-action" id="create-agency" >+ Create Agency</button>
+  <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; flex: 1; float: right;">
     <a class="btn small" href="<?= app_url('/admin/api/export.php'); ?>?table=AGENCY">Export CSV</a>
   </div>
+  <h1 style="margin-bottom:8px;">Agencies</h1>
+  <p class="muted" style="margin-bottom:10px;">Manage agencies and their types.</p>
+  
 
   <!-- Filter / Sort -->
   <form method="get" class="grid filter-bar" style="margin-bottom:10px;">
-    <div class="field" style="grid-column: span 5">
-      <label>Name</label>
-      <input class="input" name="q" value="<?= htmlspecialchars($q); ?>">
+    <div class="searchbox" style="grid-column: span 11" >
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M10 18a8 8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/>
+        </svg>
+      <input class="input" type="search" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search agency..." style="width:70%" />
+      <button class="btn-action btn-primary" type="button" id="filter-btn" onclick="showHide()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-filter" viewBox="0 0 16 16">
+            <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5"/>
+          </svg>
+      </button>
+      <div id="filter-dropdown">
+        <div class="field" style="grid-column: span 3">
+        <label>Type</label>
+        <select class="input" name="type">
+          <option value="">All</option>
+          <?php foreach ($types as $t):
+            $sel = ($type === $t['TYPE_CODE']) ? ' selected' : '';
+            echo '<option'.$sel.' value="'.$t['TYPE_CODE'].'">'.htmlspecialchars($t['TYPE_LABEL']).'</option>';
+          endforeach; ?>
+        </select>
+        <div class="field" style="grid-column: span 2; display:flex; align-items:flex-end; gap:10px">
+          <a class="btn-action btn-ghost" onclick="clearFilter()">Clear</a>
+        </div>
+      </div>
+      </div>
     </div>
-    <div class="field" style="grid-column: span 3">
-      <label>Type</label>
-      <select class="input" name="type">
-        <option value="">All</option>
-        <?php foreach ($types as $t):
-          $sel = ($type === $t['TYPE_CODE']) ? ' selected' : '';
-          echo '<option'.$sel.' value="'.$t['TYPE_CODE'].'">'.htmlspecialchars($t['TYPE_LABEL']).'</option>';
-        endforeach; ?>
-      </select>
-    </div>
-    <div class="field" style="grid-column: span 2">
-      <label>Order</label>
+    <div class="field" style="grid-column: span 1; float: right; top: 0; margin: bottom 150px; vertical-align:text-top">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-arrows-sort"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 9l4 -4l4 4m-4 -4v14" /><path d="M21 15l-4 4l-4 -4m4 4v-14" /></svg>
       <select class="input" name="sort">
+        <option>
+          
+        </option>
         <option value="name_asc"  <?= $sort==='name_asc'?'selected':''; ?>>Name (A–Z)</option>
         <option value="name_desc" <?= $sort==='name_desc'?'selected':''; ?>>Name (Z–A)</option>
         <option value="id_asc"    <?= $sort==='id_asc'?'selected':''; ?>>ID (Low→High)</option>
@@ -178,143 +167,49 @@ require_once __DIR__ . '/../../partials/site_header.php';
         <option value="recent_desc" <?= $sort==='recent_desc'?'selected':''; ?>>Newest First</option>
       </select>
     </div>
-    <div class="field" style="grid-column: span 2; display:flex; align-items:flex-end; gap:10px">
-      <button class="btn-action btn-primary" type="submit">Filter</button>
-      <a class="btn-action btn-ghost" href="<?= app_url('/admin/crud/agency.php'); ?>">Clear</a>
-    </div>
-  </form>
-</section>
-
-<section class="panel crud-form-card" style="margin-bottom:16px;">
-  <h3 style="margin-top:0">Create Agency</h3>
-  <form method="post" class="grid">
-    <input type="hidden" name="csrf" value="<?= csrf_token(); ?>">
-    <input type="hidden" name="action" value="create">
-
-    <div class="field" style="grid-column: span 6">
-      <label>Name</label>
-      <input class="input" name="AGENCY_NAME" required>
-    </div>
-    <div class="field" style="grid-column: span 3">
-      <label>Type</label>
-      <select class="input" name="AGENCY_TYPE" required>
-        <?php foreach ($types as $t): ?>
-          <option value="<?= $t['TYPE_CODE']; ?>"><?= htmlspecialchars($t['TYPE_LABEL']); ?></option>
-        <?php endforeach; ?>
-      </select>
-    </div>
-    <div class="field" style="grid-column: span 3">
-      <label>Contact</label>
-      <input class="input" name="AGENCY_CONTACTINFO" required>
-    </div>
-
-    <div class="field" style="grid-column: span 12; display:flex; justify-content:flex-end;">
-      <button class="btn wide">Add</button>
-    </div>
-  </form>
-</section>
-
-<section class="panel">
-  <h3 style="margin-top:0">Records</h3>
-  <div class="table-scroll">
-    <table>
-      <thead>
-      <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Contact</th>
-        <th>Actions</th>
-      </tr>
-      </thead>
-      <tbody>
-      <?php foreach ($rows as $row): ?>
-        <tr>
-          <td><?= (int)$row['AGENCY_ID']; ?></td>
-          <td><?= htmlspecialchars($row['AGENCY_NAME']); ?></td>
-          <td><?= htmlspecialchars($row['TYPE_LABEL']); ?></td>
-          <td><?= htmlspecialchars($row['AGENCY_CONTACTINFO']); ?></td>
-          <td class="actions-cell">
-            <button
-              type="button"
-              class="btn small js-edit"
-              data-id="<?= (int)$row['AGENCY_ID']; ?>"
-              data-name="<?= htmlspecialchars($row['AGENCY_NAME'], ENT_QUOTES); ?>"
-              data-type="<?= htmlspecialchars($row['AGENCY_TYPE'], ENT_QUOTES); ?>"
-              data-contact="<?= htmlspecialchars($row['AGENCY_CONTACTINFO'], ENT_QUOTES); ?>"
-            >Edit</button>
-
-            <form method="post" onsubmit="return confirm('Delete agency?');" style="display:inline">
-              <input type="hidden" name="csrf" value="<?= csrf_token(); ?>">
-              <input type="hidden" name="action" value="delete">
-              <input type="hidden" name="AGENCY_ID" value="<?= (int)$row['AGENCY_ID']; ?>">
-              <button class="btn small" style="background:#b91c1c;border-color:#b91c1c">Delete</button>
-            </form>
-          </td>
-        </tr>
-      <?php endforeach; ?>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Pagination -->
-  <div class="pagination">
-    <?php
-      // keep q/type/sort when paging
-      $qs = function($p) use ($q, $type, $sort) {
-        $parts = ['page='.$p];
-        if ($q !== '')   $parts[]='q='.rawurlencode($q);
-        if ($type !== '')$parts[]='type='.rawurlencode($type);
-        if ($sort !== '')$parts[]='sort='.rawurlencode($sort);
-        return implode('&',$parts);
-      };
-      $base = app_url('/admin/crud/agency.php');
-    ?>
-    <?php if ($page > 1): ?>
-      <a class="page-btn" href="<?= $base.'?'.$qs(max(1,$page-1)); ?>" title = "Previous Page">&#x276E;</a>
-    <?php endif; ?>
-
-    <?php
-      $maxPage = 5;
-      $start = max(1, $page - floor($maxPage / 2));
-      $end = min($totalPages, $start + $maxPage - 1);
-
-      if ($end - $start < $maxPage - 1) {
-        $start = max(1, $end - $maxPage + 1);
-      } 
-    ?>
-    <!-- 1 + ...  -->
-    <?php if ($start > 1): ?>
-      <a href="<?= $base.'?'.$qs(1); ?>" class="page-btn" >1</a>
-      <?php if ($start > 3): ?>
-        <a href="<?= $base.'?'.$qs(max(1,$page - 5)) ?>" class="page-btn" title="Jump backward 5 pages">...</a>        
-      <?php endif; ?>
-      <?php if ($start == 3): ?>
-              <a href="<?= $base.'?'.$qs(2); ?>" class="page-btn" >2</a>       
-      <?php endif; ?>
-    <?php endif; ?>
-
-    <?php for ($i = $start;$i <= $end;$i++): ?>
-      <a class="page-btn <?= $i== $page?'active':''; ?>" href="<?= $base.'?'.$qs($i); ?>"><?= $i; ?></a>
-    <?php endfor; ?>
     
-    <!-- ... + lastPage -->
-    <?php if ($end < $totalPages): ?>
-      <?php if ($end == $totalPages - 2):?>
-        <a href="<?= $base.'?'.$qs($totalPages - 1); ?>" class="page-btn" > <?=$totalPages - 1?></a>
-      <?php endif; ?>
-      <?php if ($end < $totalPages - 2): ?>
-        <a href="<?= $base.'?'.$qs(min($totalPages,$page + 5)); ?>"class="page-btn" title="Jump forward 5 pages">...</a>
-      <?php endif; ?>
-        <a href="<?= $base.'?'.$qs($totalPages); ?>" class="page-btn" > <?=$totalPages?></a>
-    <?php endif; ?>
-
-    <?php  if ($page < $totalPages): ?>
-    <a class="page-btn" href="<?= $base.'?'.$qs(min($totalPages,$page+1)); ?>" title = "Next Page">&#x276F;</a>
-    <?php  endif;?>
-  </div>
+  </form>
 </section>
 
+<section class="panel" id="panel"></section>
+<!-- Create Agency Modal -->
+ <div class="admin-modal" id="createAgencyModal" hidden>
+  <div class="admin-modal__backdrop" data-close="1"></div>
+  <div class="admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="createAgencyTitle">
+    <div class="admin-modal__head">
+      <h3 class="admin-modal__title" id="createAgencyTitle">Create New Agency</h3>
+      <button class="admin-modal__close" type="button" data-close="1">✕</button>
+    </div>
+    <form class="admin-modal__body" method="post">
+      <input type="hidden" name="csrf" value="<?= csrf_token(); ?>">
+      <input type="hidden" name="action" value="create">
+
+      <div class="modal-grid">
+        <div class="field">
+          <label for="m_name">Agency Name</label>
+          <input class="input" id="a_name" name="AGENCY_NAME" required>
+        </div>
+        <div class="field">
+          <label for="a_type">Type</label>
+          <select class="input" id="a_type" name="AGENCY_TYPE" required>
+            <?php foreach ($types as $t): ?>
+              <option value="<?= $t['TYPE_CODE']; ?>"><?= htmlspecialchars($t['TYPE_LABEL']); ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        <div class="field">
+          <label for="a_contact">Contact Email</label>
+          <input class="input" id="a_contact" name="AGENCY_CONTACTINFO" required>
+        </div>
+      </div>
+
+      <div class="admin-modal__actions">
+        <button class="btn wide" type="submit">Create Agency</button>
+        <button class="btn wide" type="button" data-close="1" style="background:#6b7280;border-color:#6b7280">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
 <!-- --------- Modal HTML --------- -->
 <div class="admin-modal" id="agencyModal" hidden>
   <div class="admin-modal__backdrop" data-close="1"></div>
@@ -355,45 +250,150 @@ require_once __DIR__ . '/../../partials/site_header.php';
   </div>
 </div>
 
+
 <script>
-// Modal controller
-(function(){
+  const agencyPanel = document.querySelector('#panel');
+  const queryInput = document.querySelector('input[name="q"]');
+  const typeSelect = document.querySelector('select[name="type"]');
+  const sortSelect = document.querySelector('select[name="sort"]');
+  let timer = null;
+  
+  function showHide() {
+    var f = document.getElementById("filter-dropdown");
+    if (f.style.display === "none") {
+      f.style.display = "block";
+    } else {
+      f.style.display = "none";
+    }
+  }
+  
+  function clearFilter() {
+    if((queryInput.value == '') && (typeSelect.value == '')) {
+      return;
+    } else {
+      typeSelect.value = '';
+      fetchResults(1);
+    }
+  }
+  
+  // Fetch function
+  function fetchResults(page) {
+    const q = queryInput.value;
+    const type = typeSelect.value;
+    const sort = sortSelect.value;
+    const url = `../api/search_agency.php?q=${encodeURIComponent(q)}&type=${encodeURIComponent(type)}&sort=${encodeURIComponent(sort)}&page=${page}`;
+    
+    agencyPanel.innerHTML = "<div class='loading'>Loading...</div>";
+    
+    fetch(url)
+      .then(res => res.text())
+      .then(html => {
+        agencyPanel.innerHTML = html;
+        attachPaginationEvents();
+        attachEditButtons();  // ✅ Reattach after AJAX load
+      })
+      .catch(err => {
+        agencyPanel.innerHTML = "<div class='error'>Failed to load results.</div>";
+        console.error("Error:", err);
+      });
+  }
+  
+  // Debounced input
+  function handleLiveInput() {
+    clearTimeout(timer);
+    timer = setTimeout(() => fetchResults(1), 300);
+  }
+  
+  queryInput.addEventListener('input', handleLiveInput);
+  typeSelect.addEventListener('change', () => fetchResults(1));
+  sortSelect.addEventListener('change', () => fetchResults(1));
+  
+  // Attach pagination events
+  function attachPaginationEvents() {
+    const links = document.querySelectorAll('.page-btn');
+    
+    links.forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const url = new URL(this.href);
+        const page = url.searchParams.get('page') || 1;
+        fetchResults(page);
+      });
+    });
+  }
+  //Create Agency
+  const createAgencyModal = document.getElementById('createAgencyModal');
+  const createAgencyForm = createAgencyModal.querySelector('form');
+  const a_name = document.getElementById('a_name');
+  const a_type = document.getElementById('a_type');
+  const a_contact = document.getElementById('a_contact');
+
+  function openAgencyModal() {
+    a_name.value = '';
+    a_type.value = '';
+    a_contact.value = '';
+  
+    createAgencyModal.hidden = false; 
+  }
+
+  function closeAgencyModal() { 
+    createAgencyModal.hidden = true; 
+  }
+  // Create agency button
+  document.getElementById('create-agency').addEventListener('click', function() {
+    openAgencyModal();  // Call without payload for create mode
+  });
+      createAgencyModal.addEventListener('click', e => {
+    if (e.target.dataset.close) closeAgencyModal();
+  });
+  
+  window.addEventListener('keydown', e => {
+    if (!createAgencyModal.hidden && e.key === 'Escape') closeAgencyModal();
+  });
+  // Modal controller
   const modal = document.getElementById('agencyModal');
-  const form  = modal.querySelector('form');
-  const id    = document.getElementById('m_id');
+  const form = modal.querySelector('form');
+  const id = document.getElementById('m_id');
   const nameI = document.getElementById('m_name');
   const typeI = document.getElementById('m_type');
   const contI = document.getElementById('m_contact');
 
-  function open(payload){
-    id.value    = payload.id;
+  function openModal(payload) {
+    id.value = payload.id;
     nameI.value = payload.name || '';
     typeI.value = payload.type || '';
     contI.value = payload.contact || '';
     modal.hidden = false;
   }
-  function close(){ modal.hidden = true; }
+  function closeModal() { modal.hidden = true; }
 
-  // open buttons
-  document.querySelectorAll('.js-edit').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      open({
-        id: btn.dataset.id,
-        name: btn.dataset.name,
-        type: btn.dataset.type,
-        contact: btn.dataset.contact
+  // link button
+  function attachEditButtons() {
+    const editButtons = document.querySelectorAll('.js-edit');
+    
+    editButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        openModal({
+          id: this.dataset.id,
+          name: this.dataset.name,
+          type: this.dataset.type,
+          contact: this.dataset.contact
+        });
       });
     });
-  });
+  }
 
-  // close handlers
-  modal.addEventListener('click', e=>{
-    if (e.target.dataset.close) close();
+  // Close handlers
+  modal.addEventListener('click', e => {
+    if (e.target.dataset.close) closeModal();
   });
-  window.addEventListener('keydown', e=>{
-    if (!modal.hidden && e.key === 'Escape') close();
+  
+  window.addEventListener('keydown', e => {
+    if (!modal.hidden && e.key === 'Escape') closeModal();
   });
-})();
+  
+  // Initial load
+  fetchResults(1);
 </script>
 
 <?php require_once __DIR__ . '/../../partials/site_footer.php'; ?>

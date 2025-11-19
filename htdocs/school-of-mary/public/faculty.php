@@ -125,32 +125,32 @@
           </svg>
         </button>
         <div id ="filter-dropdown">
-          <div id="filter-options">
-          <!-- Rank -->
-          <div class="field" style="width:200px;" display="inline-block">
-            <label>Rank</label>
-            <select class="input" name="rank">
-              <option value="">All</option>
-              <?php foreach ($ranks as $r): ?>
-                <option value="<?= htmlspecialchars($r['RANK_ID']) ?>"<?= $rank===$r['RANK_ID'] ? ' selected' : '' ?>>
-                  <?= htmlspecialchars($r['RANK_DESCRIPTION']) ?>
-                </option>
-              <?php endforeach; ?>
-            </select>
-          </div>
-          <!-- Department -->
-          <div class="field" style="width:200px;" display="inline-block">
-            <label>Department</label>
-            <select class="input" name="dept">
-              <option value="">All</option>
-              <?php foreach ($depts as $d): ?>
-                <option value="<?= htmlspecialchars($d['DEPT_ID']) ?>"<?= $dept===$d['DEPT_ID'] ? ' selected' : '' ?>>
-                  <?= htmlspecialchars($d['DEPT_SPECIALIZATION']) ?>
-                </option>
-              <?php endforeach; ?>
-            </select>
-          </div>   
-          <button class="btn clear-btn" type="button" onclick="clearFilter()" id="clear-btn">Clear Filters</button>
+            <div id="filter-options">
+            <!-- Rank -->
+            <div class="field" style="width:200px;" display="inline-block">
+              <label>Rank</label>
+              <select class="input" name="rank">
+                <option value="">All</option>
+                <?php foreach ($ranks as $r): ?>
+                  <option value="<?= htmlspecialchars($r['RANK_ID']) ?>"<?= $rank===$r['RANK_ID'] ? ' selected' : '' ?>>
+                    <?= htmlspecialchars($r['RANK_DESCRIPTION']) ?>
+                  </option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+            <!-- Department -->
+            <div class="field" style="width:200px;" display="inline-block">
+              <label>Department</label>
+              <select class="input" name="dept">
+                <option value="">All</option>
+                <?php foreach ($depts as $d): ?>
+                  <option value="<?= htmlspecialchars($d['DEPT_ID']) ?>"<?= $dept===$d['DEPT_ID'] ? ' selected' : '' ?>>
+                    <?= htmlspecialchars($d['DEPT_SPECIALIZATION']) ?>
+                  </option>
+                <?php endforeach; ?>
+              </select>
+            </div>   
+            <button class="btn clear-btn" type="button" onclick="clearFilter()" id="clear-btn">Clear Filters</button>
           </div>
         </div>
       </div>
