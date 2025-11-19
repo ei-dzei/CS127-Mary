@@ -173,7 +173,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
 
 <section class="panel" id="panel"></section>
 <!-- Create Agency Modal -->
- <div class="admin-modal" id="createAgencyModal" hidden>
+<div class="admin-modal" id="createAgencyModal" hidden>
   <div class="admin-modal__backdrop" data-close="1"></div>
   <div class="admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="createAgencyTitle">
     <div class="admin-modal__head">
@@ -276,7 +276,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
     }
   }
   
-  // Fetch function
+  // fetch func
   function fetchResults(page) {
     const q = queryInput.value;
     const type = typeSelect.value;
@@ -290,7 +290,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
       .then(html => {
         agencyPanel.innerHTML = html;
         attachPaginationEvents();
-        attachEditButtons();  // ✅ Reattach after AJAX load
+        attachEditButtons(); 
       })
       .catch(err => {
         agencyPanel.innerHTML = "<div class='error'>Failed to load results.</div>";
@@ -298,7 +298,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
       });
   }
   
-  // Debounced input
+  // debounced input
   function handleLiveInput() {
     clearTimeout(timer);
     timer = setTimeout(() => fetchResults(1), 300);
@@ -323,7 +323,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
   }
   //Create Agency
   const createAgencyModal = document.getElementById('createAgencyModal');
-  const createAgencyForm = createAgencyModal.querySelector('form');
+  //const createAgencyForm = createAgencyModal.querySelector('form');
   const a_name = document.getElementById('a_name');
   const a_type = document.getElementById('a_type');
   const a_contact = document.getElementById('a_contact');
@@ -352,7 +352,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
   });
   // Modal controller
   const modal = document.getElementById('agencyModal');
-  const form = modal.querySelector('form');
+  //const form = modal.querySelector('form');
   const id = document.getElementById('m_id');
   const nameI = document.getElementById('m_name');
   const typeI = document.getElementById('m_type');

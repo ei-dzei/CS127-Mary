@@ -81,44 +81,6 @@ $page = max(1, (int)($_GET['page'] ?? 1));
 $per  = 5;
 $offset = ($page - 1) * $per;
 
-$sortMap = [
-  'id_desc'   => 'f.FACULTY_ID DESC',
-  'id_asc'    => 'f.FACULTY_ID ASC',
-  'name_asc'  => 'f.FACULTY_LNAME ASC, f.FACULTY_FNAME ASC',
-  'name_desc' => 'f.FACULTY_LNAME DESC, f.FACULTY_FNAME DESC',
-  'email_asc' => 'f.FACULTY_EMAIL ASC',
-  'email_desc'=> 'f.FACULTY_EMAIL DESC',
-  'rank_asc'  => 'r.RANK_LEVEL ASC, f.FACULTY_LNAME ASC',
-  'dept_asc'  => 'd.DEPT_SPECIALIZATION ASC, f.FACULTY_LNAME ASC',
-];
-$orderSql = $sortMap[$sort] ?? $sortMap['name_asc'];
-
-$baseSql = "FROM FACULTY f
-            JOIN `RANK` r ON f.RANK_ID=r.RANK_ID
-            JOIN DEPARTMENT d ON f.DEPT_ID=d.DEPT_ID
-            WHERE 1=1";
-$params = [];
-if ($q !== '') {
-  $baseSql .= " AND (f.FACULTY_LNAME LIKE ? OR f.FACULTY_FNAME LIKE ? OR f.FACULTY_EMAIL LIKE ?)";
-  array_push($params, "%$q%", "%$q%", "%$q%");
-}
-if ($rank !== '') { $baseSql .= " AND f.RANK_ID = ?"; $params[] = $rank; }
-if ($dept !== '') { $baseSql .= " AND f.DEPT_ID = ?"; $params[] = $dept; }
-
-$stmtCount = $pdo->prepare("SELECT COUNT(*) ".$baseSql);
-$stmtCount->execute($params);
-$total = (int)$stmtCount->fetchColumn();
-
-$sql = "SELECT f.*, r.RANK_DESCRIPTION, d.DEPT_SPECIALIZATION
-        $baseSql
-        ORDER BY $orderSql
-        LIMIT $per OFFSET $offset";
-$stmt = $pdo->prepare($sql);
-$stmt->execute($params);
-$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-$totalPages = max(1, (int)ceil($total / $per));
-
 require_once __DIR__ . '/../../partials/site_header.php';
 $CSRF = csrf_token();
 ?>
@@ -164,6 +126,7 @@ $CSRF = csrf_token();
 </style>
 
 <section class="panel fade-in crud-header-card">
+  <button class="btn btn-action" id="create-faculty" >+ Create Faculty</button>
   <h1 style="margin-bottom:8px;">Faculty</h1>
   <p class="muted" style="margin-bottom:10px;">Create, update, delete records. CSV import/export below.</p>
 
@@ -217,143 +180,47 @@ $CSRF = csrf_token();
   </form>
 </section>
 
-<section class="panel crud-form-card" style="margin-bottom:16px;">
-  <h3 style="margin-top:0">Create Faculty</h3>
-  <form method="post" class="grid">
-    <input type="hidden" name="csrf" value="<?= $CSRF; ?>">
-    <input type="hidden" name="action" value="create">
 
-    <div class="field" style="grid-column: span 3"><label>First name</label><input class="input" name="FACULTY_FNAME" required></div>
-    <div class="field" style="grid-column: span 2"><label>Initial</label><input class="input" name="FACULTY_INITIAL" maxlength="2"></div>
-    <div class="field" style="grid-column: span 3"><label>Last name</label><input class="input" name="FACULTY_LNAME" required></div>
-    <div class="field" style="grid-column: span 4"><label>Email</label><input class="input" type="email" name="FACULTY_EMAIL" required></div>
-    <div class="field" style="grid-column: span 3">
-      <label>Rank</label>
-      <select class="input" name="RANK_ID" required>
-        <?php foreach ($ranks as $r): ?>
-          <option value="<?= htmlspecialchars($r['RANK_ID'], ENT_QUOTES); ?>"><?= htmlspecialchars($r['RANK_DESCRIPTION']); ?></option>
-        <?php endforeach; ?>
-      </select>
+
+<section class="panel" id="panel"></section>
+<!-- Create Faculty Modal -->
+<div class="admin-modal" id="createFacultyModal" hidden>
+  <div class="admin-modal__backdrop" data-close="1"></div>
+  <div class="admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="createFacultyTitle">
+    <div class="admin-modal__head">
+      <h3 class="admin-modal__title" id="createFacultyTitle">Create New Faculty</h3>
+      <button class="admin-modal__close" type="button" data-close="1">✕</button>
     </div>
-    <div class="field" style="grid-column: span 3">
-      <label>Department</label>
-      <select class="input" name="DEPT_ID" required>
-        <?php foreach ($depts as $d): ?>
-          <option value="<?= htmlspecialchars($d['DEPT_ID'], ENT_QUOTES); ?>"><?= htmlspecialchars($d['DEPT_SPECIALIZATION']); ?></option>
-        <?php endforeach; ?>
-      </select>
-    </div>
+    <form class="admin-modal__body" method="post">
+      <input type="hidden" name="csrf" value="<?= $CSRF; ?>">
+      <input type="hidden" name="action" value="create">
 
-    <div class="field" style="grid-column: span 12; display:flex; justify-content:flex-end;">
-      <button class="btn wide">Add</button>
-    </div>
-  </form>
-</section>
+      <div class="modal-grid">
+        <div class="field">
+          <label for="f_first">First Name</label>
+          <input class="input" id="f_first" name="FACULTY_FNAME" required>
+        </div>
+        <div class="field">
+          <label for="f_initial">Middle Initial</label>
+          <input class="input" id="f_initial" name="FACULTY_INITIAL" required>
+        </div>
+        <div class="field">
+          <label for="f_last">Last Name</label>
+          <input class="input" id="f_last" name="FACULTY_LNAME" required>
+        </div>
+        <div class="field">
+          <label for="f_email">Contact Email</label>
+          <input class="input" id="f_email" name="FACULTY_EMAIL" required>
+        </div>
+      </div>
 
-<section class="panel">
-  <h3 style="margin-top:0">Records</h3>
-  <div class="table-scroll">
-    <table>
-      <thead>
-      <tr>
-        <th>ID</th><th>Name</th><th>Email</th><th>Rank</th><th>Dept</th><th>Actions</th>
-      </tr>
-      </thead>
-      <tbody>
-      <?php foreach ($rows as $row): ?>
-        <tr>
-          <td><?= (int)$row['FACULTY_ID']; ?></td>
-          <td><?= htmlspecialchars($row['FACULTY_LNAME'].', '.$row['FACULTY_FNAME'].($row['FACULTY_INITIAL']?' '.$row['FACULTY_INITIAL']:'')); ?></td>
-          <td><?= htmlspecialchars($row['FACULTY_EMAIL']); ?></td>
-          <td><?= htmlspecialchars($row['RANK_DESCRIPTION']); ?></td>
-          <td><?= htmlspecialchars($row['DEPT_SPECIALIZATION']); ?></td>
-          <td class="actions-cell">
-            <button
-              type="button"
-              class="btn small js-edit"
-              data-id="<?= (int)$row['FACULTY_ID']; ?>"
-              data-fname="<?= htmlspecialchars($row['FACULTY_FNAME'], ENT_QUOTES); ?>"
-              data-initial="<?= htmlspecialchars($row['FACULTY_INITIAL'], ENT_QUOTES); ?>"
-              data-lname="<?= htmlspecialchars($row['FACULTY_LNAME'], ENT_QUOTES); ?>"
-              data-email="<?= htmlspecialchars($row['FACULTY_EMAIL'], ENT_QUOTES); ?>"
-              data-rank="<?= htmlspecialchars($row['RANK_ID'], ENT_QUOTES); ?>"
-              data-dept="<?= htmlspecialchars($row['DEPT_ID'], ENT_QUOTES); ?>"
-            >Edit</button>
-
-            <form method="post" onsubmit="return confirm('Delete faculty?');" style="display:inline">
-              <input type="hidden" name="csrf" value="<?= $CSRF; ?>">
-              <input type="hidden" name="action" value="delete">
-              <input type="hidden" name="FACULTY_ID" value="<?= (int)$row['FACULTY_ID']; ?>">
-              <button class="btn small" style="background:#b91c1c;border-color:#b91c1c">Delete</button>
-            </form>
-          </td>
-        </tr>
-      <?php endforeach; ?>
-      <?php if (!$rows): ?>
-        <tr><td colspan="6" style="text-align:center;color:#666;">No records found.</td></tr>
-      <?php endif; ?>
-      </tbody>
-    </table>
+      <div class="admin-modal__actions">
+        <button class="btn wide" type="submit">Create Faculty</button>
+        <button class="btn wide" type="button" data-close="1" style="background:#6b7280;border-color:#6b7280">Cancel</button>
+      </div>
+    </form>
   </div>
-
-  <!-- Pagination -->
-  <div class="pagination">
-    <?php
-      $qs = function($p) use ($q, $rank, $dept, $sort) {
-        $parts = ['page='.$p];
-        if ($q   !== '') $parts[]='q='.rawurlencode($q);
-        if ($rank!== '') $parts[]='rank='.rawurlencode($rank);
-        if ($dept!== '') $parts[]='dept='.rawurlencode($dept);
-        if ($sort!== '') $parts[]='sort='.rawurlencode($sort);
-        return implode('&',$parts);
-      };
-      $base = app_url('/admin/crud/faculty.php');
-    ?>
-    <?php if ($page > 1): ?>
-      <a class="page-btn" href="<?= $base.'?'.$qs(max(1,$page-1)); ?>" title = "Previous Page">&#x276E;</a>
-    <?php endif; ?>
-
-    <?php
-      $maxPage = 5;
-      $start = max(1, $page - floor($maxPage / 2));
-      $end = min($totalPages, $start + $maxPage - 1);
-
-      if ($end - $start < $maxPage - 1) {
-        $start = max(1, $end - $maxPage + 1);
-      } 
-    ?>
-    <!-- 1 + ...  -->
-    <?php if ($start > 1): ?>
-      <a href="<?= $base.'?'.$qs(1); ?>" class="page-btn" >1</a>
-      <?php if ($start > 3): ?>
-        <a href="<?= $base.'?'.$qs(max(1,$page - 5)) ?>" class="page-btn" title="Jump backward 5 pages">...</a>        
-      <?php endif; ?>
-      <?php if ($start == 3): ?>
-              <a href="<?= $base.'?'.$qs(2); ?>" class="page-btn" >2</a>       
-      <?php endif; ?>
-    <?php endif; ?>
-
-    <?php for ($i = $start;$i <= $end;$i++): ?>
-      <a class="page-btn <?= $i== $page?'active':''; ?>" href="<?= $base.'?'.$qs($i); ?>"><?= $i; ?></a>
-    <?php endfor; ?>
-    
-    <!-- ... + lastPage -->
-    <?php if ($end < $totalPages): ?>
-      <?php if ($end == $totalPages - 2):?>
-        <a href="<?= $base.'?'.$qs($totalPages - 1); ?>" class="page-btn" > <?=$totalPages - 1?></a>
-      <?php endif; ?>
-      <?php if ($end < $totalPages - 2): ?>
-        <a href="<?= $base.'?'.$qs(min($totalPages,$page + 5)); ?>"class="page-btn" title="Jump forward 5 pages">...</a>
-      <?php endif; ?>
-        <a href="<?= $base.'?'.$qs($totalPages); ?>" class="page-btn" > <?=$totalPages?></a>
-    <?php endif; ?>
-
-    <?php  if ($page < $totalPages): ?>
-    <a class="page-btn" href="<?= $base.'?'.$qs(min($totalPages,$page+1)); ?>" title = "Next Page">&#x276F;</a>
-    <?php  endif;?>
-  </div>
-</section>
-
+</div>
 <!-- --------- Modal HTML --------- -->
 <div class="admin-modal" id="facultyModal" hidden>
   <div class="admin-modal__backdrop" data-close="1"></div>
@@ -415,17 +282,98 @@ $CSRF = csrf_token();
 </div>
 
 <script>
-// Modal controller
-(function(){
-  const modal = document.getElementById('facultyModal');
-  const form  = modal.querySelector('form');
-  const idI   = document.getElementById('m_id');
-  const fnI   = document.getElementById('m_fname');
-  const inI   = document.getElementById('m_initial');
-  const lnI   = document.getElementById('m_lname');
-  const emI   = document.getElementById('m_email');
-  const rkI   = document.getElementById('m_rank');
-  const dpI   = document.getElementById('m_dept');
+  const facultyPanel = document.querySelector('#panel');
+  const queryInput = document.querySelector('input[name="q"]');
+  const rankSelect = document.querySelector('select[name="rank"]');
+  const deptSelect = document.querySelector('select[name="dept"]');
+  const sortSelect = document.querySelector('select[name="sort"]');
+  let timer = null;
+
+  // fetch func
+  function fetchResults(page) {
+    const q = queryInput.value;
+    const rank = rankSelect.value;
+    const dept = deptSelect.value;
+    const sort = sortSelect.value;
+    const url = `../api/search_faculty.php?q=${encodeURIComponent(q)}&rank=${encodeURIComponent(rank)}&dept=${encodeURIComponent(dept)}&sort=${encodeURIComponent(sort)}&page=${page}`;
+    
+    facultyPanel.innerHTML = "<div class='loading'>Loading...</div>";
+    
+    fetch(url)
+      .then(res => res.text())
+      .then(html => {
+        facultyPanel.innerHTML = html;
+        attachPaginationEvents();
+        attachEditButtons();  
+      })
+      .catch(err => {
+        facultyPanel.innerHTML = "<div class='error'>Failed to load results.</div>";
+        console.error("Error:", err);
+      });
+  }
+  
+  // debounced input
+  function handleLiveInput() {
+    clearTimeout(timer);
+    timer = setTimeout(() => fetchResults(1), 300);
+  }
+  
+  queryInput.addEventListener('input', handleLiveInput);
+  rankSelect.addEventListener('change', () => fetchResults(1));
+  deptSelect.addEventListener('change', () => fetchResults(1));
+  sortSelect.addEventListener('change', () => fetchResults(1));
+  
+  // Attach pagination events
+  function attachPaginationEvents() {
+    const links = document.querySelectorAll('.page-btn');
+    
+    links.forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const url = new URL(this.href);
+        const page = url.searchParams.get('page') || 1;
+        fetchResults(page);
+      });
+    });
+  }
+  //Create Faculty
+  const createFacultyModal = document.getElementById('createFacultyModal');
+  const createFacultyForm = createFacultyModal.querySelector('form');
+  const f_first = document.getElementById('f_first');
+  const f_initial = document.getElementById('f_initial');
+  const f_last = document.getElementById('f_last');
+  const f_email = document.getElementById('f_email');
+
+  function openFacultyModal() {
+    f_first.value = '';
+    f_initial.value = '';
+    f_last.value = '';
+    f_email.value = '';
+    createFacultyModal.hidden = false;
+  }
+  function closeFacultyModal() {
+    createFacultyModal.hidden = true;
+  }
+  document.getElementById('create-faculty').addEventListener('click', function() {
+    openFacultyModal();  // Call without payload for create mode
+  });
+      createFacultyModal.addEventListener('click', e => {
+    if (e.target.dataset.close) closeFacultyModal();
+  });
+  
+  window.addEventListener('keydown', e => {
+    if (!createFacultyModal.hidden && e.key === 'Escape') closeFacultyModal();
+  });
+  // Edit Modal 
+    const modal = document.getElementById('facultyModal');
+    const form  = modal.querySelector('form');
+    const idI   = document.getElementById('m_id');
+    const fnI   = document.getElementById('m_fname');
+    const inI   = document.getElementById('m_initial');
+    const lnI   = document.getElementById('m_lname');
+    const emI   = document.getElementById('m_email');
+    const rkI   = document.getElementById('m_rank');
+    const dpI   = document.getElementById('m_dept');
 
   function open(payload){
     idI.value = payload.id;
@@ -436,26 +384,35 @@ $CSRF = csrf_token();
     rkI.value = payload.rank || '';
     dpI.value = payload.dept || '';
     modal.hidden = false;
-  }
+  }  
   function close(){ modal.hidden = true; }
-
-  document.querySelectorAll('.js-edit').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      open({
-        id: btn.dataset.id,
-        fname: btn.dataset.fname,
-        initial: btn.dataset.initial,
-        lname: btn.dataset.lname,
-        email: btn.dataset.email,
-        rank: btn.dataset.rank,
-        dept: btn.dataset.dept
+    
+  function attachEditButtons() {
+    const editButtons = document.querySelectorAll('.js-edit');
+      
+    editButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        open({
+          id: this.dataset.id,
+          fname: this.dataset.fname,
+          initial: this.dataset.initial,
+          lname: this.dataset.lname,
+          email: this.dataset.email,
+          rank: this.dataset.rank,
+          dept: this.dataset.dept
+        });
       });
     });
+  }
+  modal.addEventListener('click', e => {
+    if (e.target.dataset.close) close();
   });
-
-  modal.addEventListener('click', e=>{ if (e.target.dataset.close) close(); });
-  window.addEventListener('keydown', e=>{ if (!modal.hidden && e.key === 'Escape') close(); });
-})();
+  
+  window.addEventListener('keydown', e => {
+    if (!modal.hidden && e.key === 'Escape') close();
+  });
+    // Initial load
+  fetchResults(1);
 </script>
 
 <?php require_once __DIR__ . '/../../partials/site_footer.php'; ?>

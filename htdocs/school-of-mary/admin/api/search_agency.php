@@ -67,8 +67,8 @@
                     data-contact="' . htmlspecialchars($row['AGENCY_CONTACTINFO'], ENT_QUOTES) . '"
                     >Edit</button>
 
-                    <form method="post" onsubmit="return confirm("Delete agency?");" style="display:inline">
-                    <input type="hidden" name="csrf" value="<?= csrf_token(); ?>">
+                    <form method="post" action="' . app_url('/admin/crud/agency.php') . '" onsubmit="return confirm(\"Delete agency?\");" style="display:inline">
+                    <input type="hidden" name="csrf" value="' . csrf_token() . '">
                     <input type="hidden" name="action" value="delete">
                     <input type="hidden" name="AGENCY_ID" value="' .  (int)$row['AGENCY_ID'] . '">
                     <button class="btn small" style="background:#b91c1c;border-color:#b91c1c">Delete</button>
