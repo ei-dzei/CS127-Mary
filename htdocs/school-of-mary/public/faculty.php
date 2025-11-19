@@ -146,7 +146,7 @@
               <?php endforeach; ?>
             </select>
           </div>   
-          <button class="btn clear-btn" type="button" onclick="clearFilter()" id="clear-btn">Clear</button>
+          <button class="btn clear-btn" type="button" onclick="clearFilter()" id="clear-btn">Clear Filters</button>
           </div>
         </div>
       </div>
@@ -218,7 +218,7 @@
         attachPaginationEvents();
       })
       .catch (err => {
-        facultyResults.innerHTML = "<div class='error>Failed to load results. </div>";
+        facultyResults.innerHTML = "<div class='error'>Failed to load results. </div>";
         console.error("Error: ", err);
       })
   }
