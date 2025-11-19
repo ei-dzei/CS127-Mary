@@ -126,14 +126,12 @@ $CSRF = csrf_token();
 </style>
 
 <section class="panel fade-in crud-header-card">
-  <button class="btn btn-action" id="create-faculty" >+ Create Faculty</button>
-  <h1 style="margin-bottom:8px;">Faculty</h1>
-  <p class="muted" style="margin-bottom:10px;">Create, update, delete records. CSV import/export below.</p>
-
-  <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+  <button class="btn btn-action" id="create-faculty" style="float:inline-end">+ Create Faculty</button>
+  <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; float:inline-end">
     <a class="btn small" href="<?= app_url('/admin/api/export.php'); ?>?table=FACULTY">Export CSV</a>
   </div>
-
+  <h1 style="margin-bottom:8px;">Faculty</h1>
+  <p class="muted" style="margin-bottom:10px;">Create, update, delete records. CSV export also available.</p>
   <!-- Filter / Sort -->
   <form method="get" class="grid filter-bar" style="margin-bottom:10px;">
     <div class="field" style="grid-column: span 4">
