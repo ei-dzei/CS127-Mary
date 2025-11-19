@@ -4,6 +4,9 @@ $pageTitle = 'Faculty (Admin)';
 require_once __DIR__ . '/../../partials/init.php';
 require_once __DIR__ . '/../../validators.php';
 
+$flashError = $_SESSION['error_message'] ?? null;
+unset($_SESSION['error_message']); 
+
 if (!is_admin()) { redirect_to('/admin/login.php'); }
 if ($_SERVER['REQUEST_METHOD'] === 'POST') { csrf_check(); }
 
@@ -56,7 +59,7 @@ if ($action === 'update') {
   redirect_to('/admin/crud/faculty.php?ok=1');
 }
 
-// ------------------------- DELETE ACTION (UPDATED) -------------------------
+// ------------------------- DELETE ACTION (UPDATED for Pop-up) -------------------------
 if ($action === 'delete') {
   if (!v_int($_POST['FACULTY_ID'] ?? '')) guardFail('Missing ID');
   
@@ -64,22 +67,27 @@ if ($action === 'delete') {
     // Attempt the delete operation
     $pdo->prepare("DELETE FROM FACULTY WHERE FACULTY_ID=?")->execute([$_POST['FACULTY_ID']]);
 
-    // If successful, log the action
+    // If successful, log the action and set a success flash message
     $pdo->prepare("INSERT INTO AUDIT_LOG (ACTOR,ACTION_ENUM,TABLE_NAME,PK_VALUE) VALUES (?,?,?,?)")
         ->execute([$_SESSION['admin_user'], 'DELETE', 'FACULTY', $_POST['FACULTY_ID']]);
-
-    redirect_to('/admin/crud/faculty.php?ok=1');
+    
+    // Redirect on success (with ?ok=1 flag)
+    redirect_to('/admin/crud/faculty.php?ok=1'); 
 
   } catch (PDOException $e) {
-    // Log the error for internal review (recommended)
-    // error_log("Faculty Delete Error: " . $e->getMessage()); 
+    // Catch the database error (Foreign Key Constraint violation causes this)
     
-    // Provide a user-friendly error message for constraint violation
-    $errorMessage = "Cannot delete faculty. This record is referenced by other data (e.g., courses, schedules, or other related tables). Please delete dependent records or update database constraints first.";
-    guardFail($errorMessage);
+    // Define the user-friendly error message
+    $errorMessage = "Cannot delete faculty. This record is referenced by other data (e.g., courses or schedules). Please delete dependent records first.";
+    
+    // Set the error message into a session variable (FLASH MESSAGE)
+    $_SESSION['error_message'] = $errorMessage;
+    
+    // Redirect back to the page to trigger the JavaScript alert
+    redirect_to('/admin/crud/faculty.php');
   }
 }
-// ------------------------- END DELETE ACTION (UPDATED) -------------------------
+// ------------------------- END DELETE ACTION -------------------------
 
 /* ------------------------- Lookups ------------------------- */
 $ranks = $pdo->query("SELECT RANK_ID, RANK_DESCRIPTION FROM `RANK` ORDER BY RANK_LEVEL")->fetchAll(PDO::FETCH_ASSOC);
@@ -473,4 +481,12 @@ $CSRF = csrf_token();
 })();
 </script>
 
+<script>
+const flashError = '<?= htmlspecialchars(addslashes($flashError ?? '')); ?>'; 
+
+if (flashError) {
+    // Show the browser pop-up alert with the error message
+    alert('Error: ' + flashError);
+}
+</script>
 <?php require_once __DIR__ . '/../../partials/site_footer.php'; ?>
