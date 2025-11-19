@@ -197,6 +197,10 @@ $CSRF = csrf_token();
 .table-scroll table th:nth-child(1), /* ID column */
 .table-scroll table td:nth-child(1) {
     width: 50px; 
+    /* IMPORTANT: Remove truncation rules for ID to make it fully visible */
+    white-space: normal; 
+    overflow: visible; 
+    text-overflow: clip; 
 }
 .table-scroll table th:nth-child(6), /* Actions column */
 .table-scroll table td:nth-child(6) {
@@ -300,7 +304,7 @@ $CSRF = csrf_token();
     <table>
       <thead>
       <tr>
-        <th>ID</th><th>Name</th><th>Email</th><th>Rank</th><th>Dept</th><th>Actions</th>
+        <th>ID</th><th>Name</th><th>Email</th><th>Rank</th><th>Department</th><th>Actions</th>
       </tr>
       </thead>
       <tbody>
