@@ -5,7 +5,7 @@ require_once __DIR__ . '/../../partials/init.php';
 require_once __DIR__ . '/../../validators.php';
 
 $flashError = $_SESSION['error_message'] ?? null;
-unset($_SESSION['error_message']); 
+unset($_SESSION['error_message']); // Clear the session variable immediately after retrieval
 
 if (!is_admin()) { redirect_to('/admin/login.php'); }
 if ($_SERVER['REQUEST_METHOD'] === 'POST') { csrf_check(); }
@@ -59,7 +59,7 @@ if ($action === 'update') {
   redirect_to('/admin/crud/faculty.php?ok=1');
 }
 
-// ------------------------- DELETE ACTION (UPDATED for Pop-up) -------------------------
+// ------------------------- DELETE ACTION (UPDATED for Pop-up Modal) -------------------------
 if ($action === 'delete') {
   if (!v_int($_POST['FACULTY_ID'] ?? '')) guardFail('Missing ID');
   
@@ -75,15 +75,13 @@ if ($action === 'delete') {
     redirect_to('/admin/crud/faculty.php?ok=1'); 
 
   } catch (PDOException $e) {
-    // Catch the database error (Foreign Key Constraint violation causes this)
-    
-    // Define the user-friendly error message
+    // Catch the database error 
     $errorMessage = "Cannot delete faculty. This record is referenced by other data (e.g., courses or schedules). Please delete dependent records first.";
     
     // Set the error message into a session variable (FLASH MESSAGE)
     $_SESSION['error_message'] = $errorMessage;
     
-    // Redirect back to the page to trigger the JavaScript alert
+    // Redirect back to the page to trigger the JavaScript modal
     redirect_to('/admin/crud/faculty.php');
   }
 }
@@ -145,7 +143,7 @@ $CSRF = csrf_token();
 ?>
 
 <style>
-/* --------- Inline modal --------- */
+/* --------- Inline modal (Existing CSS) --------- */
 .admin-modal[hidden]{display:none!important;}
 .admin-modal{
   position:fixed; inset:0; z-index:3000;
@@ -432,9 +430,23 @@ $CSRF = csrf_token();
     </form>
   </div>
 </div>
-
+<div class="admin-modal" id="errorModal" hidden>
+  <div class="admin-modal__backdrop" data-close="1"></div>
+  <div class="admin-modal__dialog" role="alertdialog" aria-modal="true" aria-labelledby="errorModalTitle">
+    <div class="admin-modal__head" style="background:rgba(185,28,28,.08); border-color:rgba(185,28,28,.2)">
+      <h3 class="admin-modal__title" id="errorModalTitle" style="color:#b91c1c;">🛑 Error</h3>
+      <button class="admin-modal__close" type="button" data-close="1">✕</button>
+    </div>
+    <div class="admin-modal__body">
+      <p id="errorModalMessage" style="margin:0; font-size:16px;"></p>
+    </div>
+    <div class="admin-modal__actions">
+      <button class="btn wide" type="button" data-close="1" style="background:#b91c1c;border-color:#b91c1c">Close</button>
+    </div>
+  </div>
+</div>
 <script>
-// Modal controller
+// Modal controller for EDIT MODAL (No changes here)
 (function(){
   const modal = document.getElementById('facultyModal');
   const form  = modal.querySelector('form');
@@ -479,14 +491,31 @@ $CSRF = csrf_token();
   modal.addEventListener('click', e=>{ if (e.target.dataset.close) close(); });
   window.addEventListener('keydown', e=>{ if (!modal.hidden && e.key === 'Escape') close(); });
 })();
+
+
+(function(){
+  const errorModal = document.getElementById('errorModal');
+  const messageEl = document.getElementById('errorModalMessage');
+  
+  const flashError = '<?= htmlspecialchars(addslashes($flashError ?? '')); ?>'; 
+
+  if (flashError) {
+    messageEl.textContent = flashError;
+    errorModal.hidden = false;
+  }
+  
+  errorModal.addEventListener('click', e => { 
+    if (e.target.dataset.close) {
+      errorModal.hidden = true; 
+    }
+  });
+
+  window.addEventListener('keydown', e => { 
+    if (!errorModal.hidden && e.key === 'Escape') { 
+      errorModal.hidden = true; 
+    }
+  });
+})();
 </script>
 
-<script>
-const flashError = '<?= htmlspecialchars(addslashes($flashError ?? '')); ?>'; 
-
-if (flashError) {
-    // Show the browser pop-up alert with the error message
-    alert('Error: ' + flashError);
-}
-</script>
 <?php require_once __DIR__ . '/../../partials/site_footer.php'; ?>
