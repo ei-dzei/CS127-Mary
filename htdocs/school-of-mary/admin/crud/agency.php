@@ -368,11 +368,6 @@ require_once __DIR__ . '/../../partials/site_header.php';
     });
   });
 
-  // NOTE: By setting type="email" and required, the browser will still
-  // automatically trigger a validation message (the "pop-out") if the
-  // input is not a valid email format when the user attempts to submit the form.
-  // We've only removed the *visual red border* style.
-
   // close handlers
   modal.addEventListener('click', e=>{
     if (e.target.dataset.close) close();

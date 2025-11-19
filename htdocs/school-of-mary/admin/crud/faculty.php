@@ -56,16 +56,30 @@ if ($action === 'update') {
   redirect_to('/admin/crud/faculty.php?ok=1');
 }
 
+// ------------------------- DELETE ACTION (UPDATED) -------------------------
 if ($action === 'delete') {
   if (!v_int($_POST['FACULTY_ID'] ?? '')) guardFail('Missing ID');
+  
+  try {
+    // Attempt the delete operation
+    $pdo->prepare("DELETE FROM FACULTY WHERE FACULTY_ID=?")->execute([$_POST['FACULTY_ID']]);
 
-  $pdo->prepare("DELETE FROM FACULTY WHERE FACULTY_ID=?")->execute([$_POST['FACULTY_ID']]);
+    // If successful, log the action
+    $pdo->prepare("INSERT INTO AUDIT_LOG (ACTOR,ACTION_ENUM,TABLE_NAME,PK_VALUE) VALUES (?,?,?,?)")
+        ->execute([$_SESSION['admin_user'], 'DELETE', 'FACULTY', $_POST['FACULTY_ID']]);
 
-  $pdo->prepare("INSERT INTO AUDIT_LOG (ACTOR,ACTION_ENUM,TABLE_NAME,PK_VALUE) VALUES (?,?,?,?)")
-      ->execute([$_SESSION['admin_user'], 'DELETE', 'FACULTY', $_POST['FACULTY_ID']]);
+    redirect_to('/admin/crud/faculty.php?ok=1');
 
-  redirect_to('/admin/crud/faculty.php?ok=1');
+  } catch (PDOException $e) {
+    // Log the error for internal review (recommended)
+    // error_log("Faculty Delete Error: " . $e->getMessage()); 
+    
+    // Provide a user-friendly error message for constraint violation
+    $errorMessage = "Cannot delete faculty. This record is referenced by other data (e.g., courses, schedules, or other related tables). Please delete dependent records or update database constraints first.";
+    guardFail($errorMessage);
+  }
 }
+// ------------------------- END DELETE ACTION (UPDATED) -------------------------
 
 /* ------------------------- Lookups ------------------------- */
 $ranks = $pdo->query("SELECT RANK_ID, RANK_DESCRIPTION FROM `RANK` ORDER BY RANK_LEVEL")->fetchAll(PDO::FETCH_ASSOC);
