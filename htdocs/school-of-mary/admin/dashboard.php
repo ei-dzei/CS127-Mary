@@ -25,6 +25,7 @@ function faculty_label(PDO $pdo, int $facultyId): string {
   $first = trim((string)($row['FACULTY_FNAME'] ?? ''));
   $init  = trim((string)($row['FACULTY_INITIAL'] ?? ''));
   $last  = trim((string)($row['FACULTY_LNAME'] ?? ''));
+  // Format as: Last, First Initial
   $name = trim($last . ', ' . $first . ($init !== '' ? ' ' . $init : ''));
   return $name !== '' ? $name : 'Faculty #'.$facultyId;
 }
@@ -137,6 +138,15 @@ require_once __DIR__ . '/../partials/site_header.php';
     border-radius: 14px;
     box-shadow: 0 1px 2px rgba(0,0,0,.04);
     padding: 22px;
+  }
+  
+  /* NEW STYLE: Welcome Message */
+  .welcome-message {
+    color: var(--color-secondary, #f0b800); /* Use a secondary/accent color */
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 4px;
+    display: block;
   }
 
   /* KPI cards */
@@ -259,6 +269,18 @@ require_once __DIR__ . '/../partials/site_header.php';
     font-size: 0.7rem; /* Tiny event text */
     padding: 1px 2px;
   }
+  
+  /* NEW STYLE: Live Clock */
+  #live-clock {
+    display: block;
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-primary); /* Use a strong color for the time */
+    padding-top: 10px;
+    margin-top: 10px;
+    border-top: 1px solid #eee;
+  }
 
   .kpi-card,
   .section-card,
@@ -295,6 +317,7 @@ require_once __DIR__ . '/../partials/site_header.php';
 <section class="container fade-in" style="margin-bottom: 16px;">
   <div class="dash-wrap">
     <div class="hero-card">
+      <span class="welcome-message">Welcome, Admin!</span>
       <h1 style="margin:0 0 6px;">Admin Dashboard</h1>
       <p class="muted" style="margin:0;">Overview of your database and the latest changes in real time.</p>
     </div>
@@ -428,7 +451,9 @@ require_once __DIR__ . '/../partials/site_header.php';
               </div>
 
               <div id="calendar-days" class="calendar-grid">
-                  </div>
+              </div>
+              
+              <span id="live-clock">Loading Time...</span>
           </div>
         </div>
     </div>
@@ -541,9 +566,26 @@ require_once __DIR__ . '/../partials/site_header.php';
     res:  document.getElementById('kpi-research'),
     ag:   document.getElementById('kpi-agencies'),
     fund: document.getElementById('kpi-funding'),
-    asg:  document.getElementById('kpi-assignment')
+    asg:  document.getElementById('kpi-assignment'),
+    clock: document.getElementById('live-clock') // ADDED: Clock element
   };
   function number(n){ return (Number(n)||0).toLocaleString(); }
+  
+  // ADDED: Function to update the clock
+  function updateClock() {
+    const now = new Date();
+    // Format the time as HH:MM:SS AM/PM
+    const timeString = now.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    });
+    if (el.clock) {
+        el.clock.textContent = timeString;
+    }
+  }
+
   async function refreshKPIs(){
     try {
       const r = await fetch(ENDPOINT, { credentials: 'same-origin' });
@@ -558,8 +600,13 @@ require_once __DIR__ . '/../partials/site_header.php';
       }
     } catch(e){ /* silent */ }
   }
+  
+  // Initial calls and interval setup
   refreshKPIs();
-  setInterval(refreshKPIs, 60000);
+  updateClock(); // Initial clock update
+  setInterval(refreshKPIs, 60000); // Keep KPI refresh
+  setInterval(updateClock, 1000); // ADDED: Update clock every second
+
 })();
 </script>
 
