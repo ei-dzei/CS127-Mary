@@ -112,7 +112,6 @@
   <form method="get" class="filterbar" id="form" style="margin-bottom:14px;">
     <!-- Inputs row -->
     <div class="filter-inputs">
-      <!-- Search pill -->
       <div class="searchbox" style="flex:1 1 360px;">
         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M10 18a8 8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/>
@@ -160,8 +159,7 @@
       
     </div>
 
-    <!-- Actions row (buttons under the search bar) -->
-    <!-- <div class="filter-actions">
+    <div class="filter-actions">
       <button class="btn" type="submit">Apply</button>
       <a class="clear-btn" href="<?= BASE_URL ?>/public/faculty.php">Clear</a>
     </div> -->

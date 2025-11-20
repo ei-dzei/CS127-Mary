@@ -156,11 +156,8 @@ $to     = trim($_GET['to'] ?? '');
   <h1 style="margin-bottom:6px;">Research</h1>
   <p class="muted" style="margin-bottom:10px;">Browse the research database system of School of Mary.</p>
 
-  <!-- Filter Bar -->
   <form method="get" class="filterbar" style="margin-bottom:14px;">
-    <!-- Inputs row -->
     <div class="filter-inputs">
-      <!-- Search pill -->
       <div class="searchbox" style="flex:1 1 360px;">
         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M10 18a8 8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/>

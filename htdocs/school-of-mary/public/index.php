@@ -8,15 +8,13 @@ $pageTitle = 'Home';
 require_once __DIR__ . '/../partials/site_header.php';
 ?>
 
-<!-- HERO / SLIDER -->
 <section class="hero fade-in" aria-label="Featured highlights">
 
-  <!-- Slide 1 -->
   <article class="hero__slide is-active"
            style="background: url('bg1.png') center/cover no-repeat;">
     <div class="hero__overlay"></div>
     <div class="hero__content">
-      <div class="hero__icon" aria-hidden="true">🎓</div>
+      <div class="hero__icon" aria-hidden="true"><i class="bi bi-mortarboard-fill"></i></div>
       <h1 class="hero__title">School of Mary Research Portal</h1>
       <p class="hero__subtitle">
         Discover faculty expertise, funded projects, and academic impact—all in one place.
@@ -28,12 +26,11 @@ require_once __DIR__ . '/../partials/site_header.php';
     </div>
   </article>
 
-  <!-- Slide 2 -->
   <article class="hero__slide"
            style="background: url('bg2.png') center/cover no-repeat;">
     <div class="hero__overlay"></div>
     <div class="hero__content">
-      <div class="hero__icon" aria-hidden="true">🔬</div>
+      <div class="hero__icon" aria-hidden="true"><i class="bi bi-search"></i></div>
       <h2 class="hero__title">Explore Ongoing & Completed Studies</h2>
       <p class="hero__subtitle">
         Filter by status and date range, and dive into details on funding and collaborators.
@@ -44,12 +41,11 @@ require_once __DIR__ . '/../partials/site_header.php';
     </div>
   </article>
 
-  <!-- Slide 3 -->
   <article class="hero__slide"
            style="background: url('bg3.png') center/cover no-repeat;">
     <div class="hero__overlay"></div>
     <div class="hero__content">
-      <div class="hero__icon" aria-hidden="true">🤝</div>
+      <div class="hero__icon" aria-hidden="true"><i class="bi bi-people-fill"></i></div>
       <h2 class="hero__title">Funding & Partnerships</h2>
       <p class="hero__subtitle">
         See agencies supporting our research and how resources are allocated.
@@ -60,7 +56,6 @@ require_once __DIR__ . '/../partials/site_header.php';
     </div>
   </article>
 
-  <!-- Pagination dots -->
   <nav class="hero__dots" aria-label="Slides">
     <button class="is-active" aria-label="Slide 1" data-index="0"></button>
     <button aria-label="Slide 2" data-index="1"></button>
@@ -68,10 +63,9 @@ require_once __DIR__ . '/../partials/site_header.php';
   </nav>
 </section>
 
-<!-- About us -->
 <section class="feature">
   <div class="feature-card">
-    <div class="feature-icon" aria-hidden="true">🏫</div>
+    <div class="feature-icon" aria-hidden="true"><i class="bi bi-info-circle-fill"></i></div>
     <h2 class="feature-title">About the Portal</h2>
     <p class="feature-text">
       The <strong>School of Mary Research Portal</strong> provides a unified system for managing research,
@@ -84,7 +78,7 @@ require_once __DIR__ . '/../partials/site_header.php';
 
 <section class="feature">
   <div class="feature-card">
-    <div class="feature-icon" aria-hidden="true">🛡️</div>
+    <div class="feature-icon" aria-hidden="true"><i class="bi bi-lock-fill"></i></div>
     <h2 class="feature-title">Admin Access</h2>
     <p class="feature-text">
       Authorized staff may log in to the Admin Dashboard to view and manage database records in real time.

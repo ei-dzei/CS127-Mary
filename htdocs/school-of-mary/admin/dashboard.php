@@ -25,6 +25,7 @@ function faculty_label(PDO $pdo, int $facultyId): string {
   $first = trim((string)($row['FACULTY_FNAME'] ?? ''));
   $init  = trim((string)($row['FACULTY_INITIAL'] ?? ''));
   $last  = trim((string)($row['FACULTY_LNAME'] ?? ''));
+  // Format as: Last, First Initial
   $name = trim($last . ', ' . $first . ($init !== '' ? ' ' . $init : ''));
   return $name !== '' ? $name : 'Faculty #'.$facultyId;
 }
@@ -138,6 +139,15 @@ require_once __DIR__ . '/../partials/site_header.php';
     box-shadow: 0 1px 2px rgba(0,0,0,.04);
     padding: 22px;
   }
+  
+  /* NEW STYLE: Welcome Message */
+  .welcome-message {
+    color: var(--color-secondary, #f0b800); /* Use a secondary/accent color */
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 4px;
+    display: block;
+  }
 
   /* KPI cards */
   .kpi-card {
@@ -150,18 +160,41 @@ require_once __DIR__ . '/../partials/site_header.php';
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    /* --- RULE 1: Center items horizontally (for the button) --- */
+    align-items: center; 
   }
   .kpi-col { grid-column: span 4; }
-  .kpi-emoji { font-size: 28px; line-height: 1; }
+  
+  /* NEW RULE: Container for text content (Icon, Title, Value) */
+  .kpi-card > div:first-child { 
+    width: 100%; 
+    text-align: center; /* Center the icon, title, and value */
+    margin-bottom: 10px;
+  }
+  
+  /* Bootstrap Icon Styles */
+  .kpi-emoji { 
+    font-size: 32px; /* Slightly larger for Bootstrap Icons */
+    line-height: 1;
+    color: var(--color-primary, #1e4073); /* Give icons color for visibility */
+  }
+  .kpi-emoji i { vertical-align: middle; }
+  
   .kpi-title { font-weight: 700; margin-top: 6px; }
   .kpi-value { font-size: 2rem; font-weight: 800; margin-top: 6px; }
+
+  /* --- UPDATED RULE 2: Make the link span full width and center its text --- */
   .btn-link {
-    align-self: flex-start;
-    display: inline-flex;
-    padding: 6px 10px;
+    align-self: stretch; /* Stretch the link button to fill the card width */
+    display: flex; /* Change to flex for content centering */
+    justify-content: center; /* Center the text inside the button */
+    padding: 8px 10px; /* Adjusted padding for a better look */
     border-radius: 8px;
     background: var(--color-primary);
-    color: #fff; text-decoration: none; font-weight: 600; font-size: .95rem;
+    color: #fff; 
+    text-decoration: none; 
+    font-weight: 600; 
+    font-size: .95rem;
   }
   .btn-link:hover { filter: brightness(0.95); }
 
@@ -177,7 +210,12 @@ require_once __DIR__ . '/../partials/site_header.php';
   .section-header {
     display:flex; align-items:center; gap:10px; margin-bottom:10px;
   }
-  .section-emoji { font-size: 24px; }
+  .section-emoji {
+    font-size: 24px;
+    color: #444; /* Standard icon color */
+  }
+  .section-emoji i { vertical-align: middle; }
+
   .list {
     width:100%;
     border-collapse: collapse;
@@ -190,9 +228,61 @@ require_once __DIR__ . '/../partials/site_header.php';
   .list tr:last-child td { border-bottom:none; }
   .muted-small { color:#666; font-size:.9rem; }
 
+  /* New Dual Column Layout */
+  .dual-column-layout {
+    grid-column: span 12;
+    display: grid;
+    grid-template-columns: 2fr 1fr; /* 2 parts for content, 1 part for calendar */
+    gap: 16px;
+    margin-top: 16px; /* Added separation from KPI cards */
+  }
+  .research-col { grid-column: span 1; }
+  .calendar-col { grid-column: span 1; }
+
   @media (max-width: 960px) {
     .kpi-col { grid-column: span 12; }
+    .dual-column-layout {
+      grid-template-columns: 1fr; /* Stack on smaller screens */
+    }
+    .research-col, .calendar-col { grid-column: span 1; }
   }
+  
+  /* Calendar Compact Overrides */
+  .calendar-header .btn.small {
+    padding: 4px 8px; /* Smaller buttons */
+  }
+  .calendar-header h2 {
+    font-size: 1rem; /* Smaller month name */
+  }
+  .calendar-grid-header > div {
+    padding: 5px 3px;
+    font-size: 0.8rem; /* Smaller day names */
+  }
+  .calendar-day {
+    min-height: 55px; /* Significantly smaller cells */
+    padding: 3px;
+  }
+  .calendar-day-number {
+    font-size: 0.9rem; /* Smaller day number */
+    margin-bottom: 2px;
+  }
+  .calendar-event {
+    font-size: 0.7rem; /* Tiny event text */
+    padding: 1px 2px;
+  }
+  
+  /* NEW STYLE: Live Clock */
+  #live-clock {
+    display: block;
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-primary); /* Use a strong color for the time */
+    padding-top: 10px;
+    margin-top: 10px;
+    border-top: 1px solid #eee;
+  }
+
   .kpi-card,
   .section-card,
   .hero-card {
@@ -227,16 +317,15 @@ require_once __DIR__ . '/../partials/site_header.php';
 
 <section class="container fade-in" style="margin-bottom: 16px;">
   <div class="dash-wrap">
-    <!-- Header  -->
     <div class="hero-card">
+      <span class="welcome-message">Welcome, Admin!</span>
       <h1 style="margin:0 0 6px;">Admin Dashboard</h1>
       <p class="muted" style="margin:0;">Overview of your database and the latest changes in real time.</p>
     </div>
 
-    <!-- KPI cards  -->
     <div class="kpi-card kpi-col">
       <div>
-        <div class="kpi-emoji">👩‍🏫</div>
+        <div class="kpi-emoji"><i class="bi bi-person-badge"></i></div>
         <div class="kpi-title">Faculty</div>
         <div class="kpi-value" id="kpi-faculty"><?= number_format($kpi['faculty']); ?></div>
       </div>
@@ -245,7 +334,7 @@ require_once __DIR__ . '/../partials/site_header.php';
 
     <div class="kpi-card kpi-col">
       <div>
-        <div class="kpi-emoji">📚</div>
+        <div class="kpi-emoji"><i class="bi bi-book"></i></div>
         <div class="kpi-title">Research</div>
         <div class="kpi-value" id="kpi-research"><?= number_format($kpi['research']); ?></div>
       </div>
@@ -254,7 +343,7 @@ require_once __DIR__ . '/../partials/site_header.php';
 
     <div class="kpi-card kpi-col">
       <div>
-        <div class="kpi-emoji">🏢</div>
+        <div class="kpi-emoji"><i class="bi bi-building"></i></div>
         <div class="kpi-title">Agencies</div>
         <div class="kpi-value" id="kpi-agencies"><?= number_format($kpi['agencies']); ?></div>
       </div>
@@ -263,7 +352,7 @@ require_once __DIR__ . '/../partials/site_header.php';
 
     <div class="kpi-card kpi-col">
       <div>
-        <div class="kpi-emoji">💰</div>
+        <div class="kpi-emoji"><i class="bi bi-cash-stack"></i></div>
         <div class="kpi-title">Fundings</div>
         <div class="kpi-value" id="kpi-funding"><?= number_format($kpi['funding']); ?></div>
       </div>
@@ -272,7 +361,7 @@ require_once __DIR__ . '/../partials/site_header.php';
 
     <div class="kpi-card kpi-col">
       <div>
-        <div class="kpi-emoji">✅</div>
+        <div class="kpi-emoji"><i class="bi bi-list-check"></i></div>
         <div class="kpi-title">Assignments</div>
         <div class="kpi-value" id="kpi-assignment"><?= number_format($kpi['assignment']); ?></div>
       </div>
@@ -281,7 +370,7 @@ require_once __DIR__ . '/../partials/site_header.php';
 
     <div class="kpi-card kpi-col">
       <div>
-        <div class="kpi-emoji">🖨️</div>
+        <div class="kpi-emoji"><i class="bi bi-printer"></i></div>
         <div class="kpi-title">Audit (Print)</div>
         <div class="muted-small">Formal printable log of changes</div>
       </div>
@@ -289,40 +378,40 @@ require_once __DIR__ . '/../partials/site_header.php';
     </div>
 
     <!-- Top Research by Total Funding -->
-    <div class="section-card" id="research-section">
-      <div class="section-header">
-        <div class="section-emoji">🏆</div>
-        <h3 style="margin:0;">Top Research by Total Funding</h3>
-      </div>
-      <?php if (!$topResearch): ?>
-        <div class="muted">No data.</div>
-      <?php else: ?>
-        <table class="list">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Research</th>
-              <th>Total Funding</th>
-            </tr>
-          </thead>
-          <tbody>
-            <?php
-              $rankStart = $tr_offset + 1;
-              foreach ($topResearch as $idx => $tr):
-            ?>
-              <tr>
-                <td><?= $rankStart + $idx; ?></td>
-                <td>
-                  <a href="<?= app_url('/public/research.php'); ?>?id=<?= (int)$tr['RESEARCH_ID']; ?>">
-                    <?= htmlspecialchars($tr['RESEARCH_TITLE']); ?>
-                  </a>
-                </td>
-                <td><?= '₱' . number_format((float)$tr['total'], 2); ?></td>
-              </tr>
-            <?php endforeach; ?>
-          </tbody>
-        </table>
-        <!-- Pagination -->
+        <div class="section-card research-col">
+          <div class="section-header">
+            <div class="section-emoji"><i class="bi bi-trophy"></i></div>
+            <h3 style="margin:0;">Top Research by Total Funding</h3>
+          </div>
+          <?php if (!$topResearch): ?>
+            <div class="muted">No data.</div>
+          <?php else: ?>
+            <table class="list">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Research</th>
+                  <th>Total Funding</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php
+                  $rankStart = $tr_offset + 1;
+                  foreach ($topResearch as $idx => $tr):
+                ?>
+                  <tr>
+                    <td><?= $rankStart + $idx; ?></td>
+                    <td>
+                      <a href="<?= app_url('/public/research.php'); ?>?id=<?= (int)$tr['RESEARCH_ID']; ?>">
+                        <?= htmlspecialchars($tr['RESEARCH_TITLE']); ?>
+                      </a>
+                    </td>
+                    <td><?= '₱' . number_format((float)$tr['total'], 2); ?></td>
+                  </tr>
+                <?php endforeach; ?>
+              </tbody>
+            </table>
+            <!-- Pagination -->
         <div class="pagination">
           <?php
             $base  = app_url('/admin/dashboard.php');
@@ -369,14 +458,42 @@ require_once __DIR__ . '/../partials/site_header.php';
           <?php  if ($tr_page < $tr_pages): ?>
             <a class="page-btn" href="<?= $base.'?'.$qs_tr(min($tr_pages,$tr_page+1)); ?>#research-section" title = "Next Page">&#x276F;</a>
           <?php  endif;?>
+    <div class="dual-column-layout">
         </div>
-      <?php endif; ?>
-    </div>
 
-    <!-- Top Faculty by Total Assignments -->
-    <div class="section-card" id="faculty-section">
+        <div class="section-card calendar-col">
+          <div class="section-header">
+              <div class="section-emoji"><i class="bi bi-calendar-check"></i></div>
+              <h3 style="margin:0;">Calendar</h3>
+          </div>
+          
+          <div id="calendar-app" class="panel" style="padding: 0; border: none; box-shadow: none;">
+              <div class="calendar-header">
+                  <button id="prev-month" class="btn small">←</button>
+                  <h2 id="current-month-year">Loading...</h2>
+                  <button id="next-month" class="btn small">→</button>
+              </div>
+              
+              <div class="calendar-grid-header">
+                  <div>S</div>
+                  <div>M</div>
+                  <div>T</div>
+                  <div>W</div>
+                  <div>T</div>
+                  <div>F</div>
+                  <div>S</div>
+              </div>
+
+              <div id="calendar-days" class="calendar-grid">
+              </div>
+              
+              <span id="live-clock">Loading Time...</span>
+          </div>
+        </div>
+    </div>
+    <div class="section-card">
       <div class="section-header">
-        <div class="section-emoji">👥</div>
+        <div class="section-emoji"><i class="bi bi-people"></i></div>
         <h3 style="margin:0;">Top Faculty by Total Assignments</h3>
       </div>
       <?php if (!$topFaculty): ?>
@@ -408,7 +525,6 @@ require_once __DIR__ . '/../partials/site_header.php';
             <?php endforeach; ?>
           </tbody>
         </table>
-        <!-- Pagination -->
         <div class="pagination">
           <?php
             $base  = app_url('/admin/dashboard.php');
@@ -459,10 +575,9 @@ require_once __DIR__ . '/../partials/site_header.php';
       <?php endif; ?>
     </div>
 
-    <!-- Live Activity -->
-    <div class="section-card" id="audit-section">
+    <div class="section-card">
       <div class="section-header">
-        <div class="section-emoji">📜</div>
+        <div class="section-emoji"><i class="bi bi-receipt"></i></div>
         <h3 style="margin:0;">Live Activity</h3>
       </div>
       <?php if (!$audit): ?>
@@ -492,7 +607,6 @@ require_once __DIR__ . '/../partials/site_header.php';
             <?php endforeach; ?>
           </tbody>
         </table>
-        <!-- Pagination -->
         <div class="pagination">
           <?php
             $base   = app_url('/admin/dashboard.php');
@@ -546,7 +660,6 @@ require_once __DIR__ . '/../partials/site_header.php';
   </div>
 </section>
 
-<!-- KPI auto-refresh via /admin/api/dashboard_stats.php -->
 <script>
 (function(){
   const ENDPOINT = "<?= app_url('/admin/api/dashboard_stats.php'); ?>";
@@ -555,9 +668,26 @@ require_once __DIR__ . '/../partials/site_header.php';
     res:  document.getElementById('kpi-research'),
     ag:   document.getElementById('kpi-agencies'),
     fund: document.getElementById('kpi-funding'),
-    asg:  document.getElementById('kpi-assignment')
+    asg:  document.getElementById('kpi-assignment'),
+    clock: document.getElementById('live-clock') // ADDED: Clock element
   };
   function number(n){ return (Number(n)||0).toLocaleString(); }
+  
+  // ADDED: Function to update the clock
+  function updateClock() {
+    const now = new Date();
+    // Format the time as HH:MM:SS AM/PM
+    const timeString = now.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    });
+    if (el.clock) {
+        el.clock.textContent = timeString;
+    }
+  }
+
   async function refreshKPIs(){
     try {
       const r = await fetch(ENDPOINT, { credentials: 'same-origin' });
@@ -572,8 +702,13 @@ require_once __DIR__ . '/../partials/site_header.php';
       }
     } catch(e){ /* silent */ }
   }
+  
+  // Initial calls and interval setup
   refreshKPIs();
-  setInterval(refreshKPIs, 60000);
+  updateClock(); // Initial clock update
+  setInterval(refreshKPIs, 60000); // Keep KPI refresh
+  setInterval(updateClock, 1000); // ADDED: Update clock every second
+
 })();
 </script>
 

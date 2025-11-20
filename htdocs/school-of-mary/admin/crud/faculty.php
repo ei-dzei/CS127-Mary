@@ -4,7 +4,9 @@ $pageTitle = 'Faculty (Admin)';
 require_once __DIR__ . '/../../partials/init.php';
 require_once __DIR__ . '/../../validators.php';
 
-/* ------- Auth & CSRF ------- */
+$flashError = $_SESSION['error_message'] ?? null;
+unset($_SESSION['error_message']); // Clear the session variable immediately after retrieval
+
 if (!is_admin()) { redirect_to('/admin/login.php'); }
 if ($_SERVER['REQUEST_METHOD'] === 'POST') { csrf_check(); }
 
@@ -57,16 +59,33 @@ if ($action === 'update') {
   redirect_to('/admin/crud/faculty.php?ok=1');
 }
 
+// ------------------------- DELETE ACTION (UPDATED for Pop-up Modal) -------------------------
 if ($action === 'delete') {
   if (!v_int($_POST['FACULTY_ID'] ?? '')) guardFail('Missing ID');
+  
+  try {
+    // Attempt the delete operation
+    $pdo->prepare("DELETE FROM FACULTY WHERE FACULTY_ID=?")->execute([$_POST['FACULTY_ID']]);
 
-  $pdo->prepare("DELETE FROM FACULTY WHERE FACULTY_ID=?")->execute([$_POST['FACULTY_ID']]);
+    // If successful, log the action and set a success flash message
+    $pdo->prepare("INSERT INTO AUDIT_LOG (ACTOR,ACTION_ENUM,TABLE_NAME,PK_VALUE) VALUES (?,?,?,?)")
+        ->execute([$_SESSION['admin_user'], 'DELETE', 'FACULTY', $_POST['FACULTY_ID']]);
+    
+    // Redirect on success (with ?ok=1 flag)
+    redirect_to('/admin/crud/faculty.php?ok=1'); 
 
-  $pdo->prepare("INSERT INTO AUDIT_LOG (ACTOR,ACTION_ENUM,TABLE_NAME,PK_VALUE) VALUES (?,?,?,?)")
-      ->execute([$_SESSION['admin_user'], 'DELETE', 'FACULTY', $_POST['FACULTY_ID']]);
-
-  redirect_to('/admin/crud/faculty.php?ok=1');
+  } catch (PDOException $e) {
+    // Catch the database error 
+    $errorMessage = "Cannot delete faculty. This record is referenced by other data (e.g., courses or schedules). Please delete dependent records first.";
+    
+    // Set the error message into a session variable (FLASH MESSAGE)
+    $_SESSION['error_message'] = $errorMessage;
+    
+    // Redirect back to the page to trigger the JavaScript modal
+    redirect_to('/admin/crud/faculty.php');
+  }
 }
+// ------------------------- END DELETE ACTION -------------------------
 
 /* ------------------------- Lookups ------------------------- */
 $ranks = $pdo->query("SELECT RANK_ID, RANK_DESCRIPTION FROM `RANK` ORDER BY RANK_LEVEL")->fetchAll(PDO::FETCH_ASSOC);
@@ -86,7 +105,7 @@ $CSRF = csrf_token();
 ?>
 
 <style>
-/* --------- Inline modal --------- */
+/* --------- Inline modal (Existing CSS) --------- */
 .admin-modal[hidden]{display:none!important;}
 .admin-modal{
   position:fixed; inset:0; z-index:3000;
@@ -123,6 +142,33 @@ $CSRF = csrf_token();
 .btn-primary:hover{ filter:brightness(.94); box-shadow:0 4px 10px rgba(0,0,0,.06); }
 .btn-ghost{ background:#fff; color: var(--color-accent); border-color: rgba(11,83,148,.35); }
 .btn-ghost:hover{ background: rgba(11,83,148,.05); }
+
+/* --- Table Optimization for single-line data (The Fix) --- */
+.table-scroll table {
+    table-layout: fixed; 
+    width: 100%;
+}
+
+.table-scroll table td {
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+}
+
+/* Set explicit widths for non-flexible columns */
+.table-scroll table th:nth-child(1), /* ID column */
+.table-scroll table td:nth-child(1) {
+    width: 50px; 
+    /* IMPORTANT: Remove truncation rules for ID to make it fully visible */
+    white-space: normal; 
+    overflow: visible; 
+    text-overflow: clip; 
+}
+.table-scroll table th:nth-child(6), /* Actions column */
+.table-scroll table td:nth-child(6) {
+    width: 160px; /* Adjust based on button size */
+}
+/* --- End of Fix --- */
 </style>
 
 <section class="panel fade-in crud-header-card">
@@ -178,8 +224,6 @@ $CSRF = csrf_token();
   </form>
 </section>
 
-
-
 <section class="panel" id="panel"></section>
 <!-- Create Faculty Modal -->
 <div class="admin-modal" id="createFacultyModal" hidden>
@@ -196,19 +240,19 @@ $CSRF = csrf_token();
       <div class="modal-grid">
         <div class="field">
           <label for="f_first">First Name</label>
-          <input class="input" id="f_first" name="FACULTY_FNAME" required>
+          <input class="input" id="f_first" name="FACULTY_FNAME" maxlength="50" required>
         </div>
         <div class="field">
           <label for="f_initial">Middle Initial</label>
-          <input class="input" id="f_initial" name="FACULTY_INITIAL" required>
+          <input class="input" id="f_initial" name="FACULTY_INITIAL" maxlength="2" required>
         </div>
         <div class="field">
           <label for="f_last">Last Name</label>
-          <input class="input" id="f_last" name="FACULTY_LNAME" required>
+          <input class="input" id="f_last" name="FACULTY_LNAME"  maxlength="50" required>
         </div>
         <div class="field">
           <label for="f_email">Contact Email</label>
-          <input class="input" id="f_email" name="FACULTY_EMAIL" required>
+          <input class="input" id="f_email" name="FACULTY_EMAIL" type="email" required>
         </div>
       </div>
 
@@ -235,7 +279,7 @@ $CSRF = csrf_token();
       <div class="modal-grid">
         <div class="field">
           <label for="m_fname">First name</label>
-          <input class="input" id="m_fname" name="FACULTY_FNAME" required>
+          <input class="input" id="m_fname" name="FACULTY_FNAME" required maxlength="50">
         </div>
         <div class="field">
           <label for="m_initial">Initial</label>
@@ -243,11 +287,11 @@ $CSRF = csrf_token();
         </div>
         <div class="field">
           <label for="m_lname">Last name</label>
-          <input class="input" id="m_lname" name="FACULTY_LNAME" required>
+          <input class="input" id="m_lname" name="FACULTY_LNAME" required maxlength="50">
         </div>
         <div class="field">
           <label for="m_email">Email</label>
-          <input class="input" id="m_email" type="email" name="FACULTY_EMAIL" required>
+          <input class="input" id="m_email" type="email" name="FACULTY_EMAIL" required maxlength="255">
         </div>
         <div class="field">
           <label for="m_rank">Rank</label>
@@ -278,7 +322,21 @@ $CSRF = csrf_token();
     </form>
   </div>
 </div>
-
+<div class="admin-modal" id="errorModal" hidden>
+  <div class="admin-modal__backdrop" data-close="1"></div>
+  <div class="admin-modal__dialog" role="alertdialog" aria-modal="true" aria-labelledby="errorModalTitle">
+    <div class="admin-modal__head" style="background:rgba(185,28,28,.08); border-color:rgba(185,28,28,.2)">
+      <h3 class="admin-modal__title" id="errorModalTitle" style="color:#b91c1c;">🛑 Error</h3>
+      <button class="admin-modal__close" type="button" data-close="1">✕</button>
+    </div>
+    <div class="admin-modal__body">
+      <p id="errorModalMessage" style="margin:0; font-size:16px;"></p>
+    </div>
+    <div class="admin-modal__actions">
+      <button class="btn wide" type="button" data-close="1" style="background:#b91c1c;border-color:#b91c1c">Close</button>
+    </div>
+  </div>
+</div>
 <script>
   const facultyPanel = document.querySelector('#panel');
   const queryInput = document.querySelector('input[name="q"]');
@@ -381,6 +439,10 @@ $CSRF = csrf_token();
     emI.value = payload.email || '';
     rkI.value = payload.rank || '';
     dpI.value = payload.dept || '';
+
+    form.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
+    form.querySelectorAll('.error-message').forEach(el => el.remove());
+    
     modal.hidden = false;
   }  
   function close(){ modal.hidden = true; }
@@ -411,6 +473,35 @@ $CSRF = csrf_token();
   });
     // Initial load
   fetchResults(1);
+
+  modal.addEventListener('click', e=>{ if (e.target.dataset.close) close(); });
+  window.addEventListener('keydown', e=>{ if (!modal.hidden && e.key === 'Escape') close(); });
+})();
+
+
+(function(){
+  const errorModal = document.getElementById('errorModal');
+  const messageEl = document.getElementById('errorModalMessage');
+  
+  const flashError = '<?= htmlspecialchars(addslashes($flashError ?? '')); ?>'; 
+
+  if (flashError) {
+    messageEl.textContent = flashError;
+    errorModal.hidden = false;
+  }
+  
+  errorModal.addEventListener('click', e => { 
+    if (e.target.dataset.close) {
+      errorModal.hidden = true; 
+    }
+  });
+
+  window.addEventListener('keydown', e => { 
+    if (!errorModal.hidden && e.key === 'Escape') { 
+      errorModal.hidden = true; 
+    }
+  });
+})();
 </script>
 
 <?php require_once __DIR__ . '/../../partials/site_footer.php'; ?>

@@ -80,18 +80,20 @@ require_once __DIR__ . '/../partials/site_header.php';
 .btn-ghost{ background:#fff; color:var(--color-accent); border-color:rgba(11,83,148,.35); }
 .btn-ghost:hover{ background:rgba(11,83,148,.05); }
 
-.filter-bar .btn-action{ min-width:140px; }
-@media (max-width: 720px){ .filter-bar .btn-action{ width:100%; } }
+/* Updated layout for three buttons */
+.filter-bar .btn-action{ min-width:110px; } 
+@media (max-width: 720px){ 
+  .filter-bar .btn-action{ width:100%; } 
+  .filter-bar .field:last-child { 
+      grid-column: span 12; 
+  }
+}
 </style>
 
-<!-- Filters -->
 <section class="panel fade-in">
   <h1 style="margin-bottom:8px;">Audit Log — Print View</h1>
-  <p class="muted" style="margin-bottom:10px;">
-    Use filters then press <strong>Ctrl/Cmd + P</strong> to print. This page uses formal print styles automatically.
-  </p>
   <form method="get" class="grid filter-bar">
-    <div class="field" style="grid-column:span 3;">
+    <div class="field" style="grid-column:span 2;">
       <label>Actor</label>
       <input class="input" name="actor" value="<?= htmlspecialchars($actor); ?>" placeholder="admin, user id, etc." />
     </div>
@@ -121,12 +123,19 @@ require_once __DIR__ . '/../partials/site_header.php';
       <label>To</label>
       <input class="input" type="date" name="to" value="<?= htmlspecialchars($to); ?>">
     </div>
+    
+    <div class="field" style="grid-column:span 2; display:flex; align-items:flex-end;">
+      <a class="btn-action btn-ghost" style="width:100%;" href="<?= app_url('/admin/audit_print.php'); ?>">Clear</a>
+    </div>
+
+    <div class="field" style="grid-column:span 1; display:flex; align-items:flex-end;">
+      <button class="btn-action btn-ghost" type="button" onclick="window.print()" style="width:100%;">Print</button>
+    </div>
+    
     <div class="field" style="grid-column:span 1; display:flex; align-items:flex-end;">
       <button class="btn-action btn-primary" type="submit">Apply</button>
     </div>
-    <div class="field" style="grid-column:span 1; display:flex; align-items:flex-end;">
-      <a class="btn-action btn-ghost" href="<?= app_url('/admin/audit_print.php'); ?>">Clear</a>
-    </div>
+
   </form>
 </section>
 

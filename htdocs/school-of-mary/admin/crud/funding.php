@@ -148,6 +148,17 @@ $CSRF = csrf_token();
   border-color: rgba(11,83,148,.35);
 }
 .btn-ghost:hover{ background: rgba(11,83,148,.05); }
+
+/* CRUD Table Fixes for Funding */
+.table-scroll table {
+    /* Enforce table-layout: fixed for better column control, but use auto if content needs to wrap */
+    table-layout: fixed; 
+}
+.table-scroll th:nth-child(1), .table-scroll td:nth-child(1) { width: 50px; }  /* ID */
+.table-scroll th:nth-child(4), .table-scroll td:nth-child(4) { width: 120px; } /* Amount */
+.table-scroll th:nth-child(5), .table-scroll td:nth-child(5) { width: 100px; } /* Date */
+.table-scroll th:nth-child(6), .table-scroll td:nth-child(6) { width: 150px; } /* Actions */
+/* Research (2nd) and Agency (3rd) share the remaining width */
 </style>
 
 <section class="panel fade-in crud-header-card">
@@ -159,7 +170,6 @@ $CSRF = csrf_token();
     <a class="btn small" href="<?= app_url('/admin/api/export.php'); ?>?table=FUNDING">Export CSV</a>
   </div>
 
-  <!-- Filter / Sort -->
   <form method="get" class="grid filter-bar" style="margin-bottom:10px;">
     <div class="field" style="grid-column: span 7">
       <label>Search (research or agency)</label>
@@ -372,7 +382,9 @@ $CSRF = csrf_token();
     idI.value   = payload.id;
     resI.value  = payload.research || '';
     agI.value   = payload.agency || '';
-    amtI.value  = payload.amount || '';
+    // The amount is explicitly set to empty string in PHP if null, 
+    // so this line correctly handles both number and empty string for the number input.
+    amtI.value  = payload.amount || ''; 
     dateI.value = payload.date || '';
     modal.hidden = false;
   }
