@@ -186,7 +186,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
 
       <div class="modal-grid">
         <div class="field">
-          <label for="m_name">Agency Name</label>
+          <label for="a_name">Agency Name</label>
           <input class="input" id="a_name" name="AGENCY_NAME" required>
         </div>
         <div class="field">
@@ -382,7 +382,6 @@ require_once __DIR__ . '/../../partials/site_header.php';
     });
   }
 
-  // Close handlers
   modal.addEventListener('click', e => {
     if (e.target.dataset.close) closeModal();
   });
