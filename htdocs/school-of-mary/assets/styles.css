@@ -880,7 +880,7 @@ th {
   
   }
 }
-#clear-btn{height: 34.4px;margin-bottom: 10px; vertical-align: bottom;display: relativex;}
+#clear-btn{height: 34.4px;margin-bottom: 10px; vertical-align: bottom;display: relative;}
 #filter-dropdown  {display: none; width: 100%; padding: 10px;}
 #filter-btn {
   border: none;
@@ -896,7 +896,6 @@ th {
 }
 #clear-searchbar {display: none; float:inline-end; }
 #filter-options {display: flex; flex-direction: row; }
-#faculty-results{}
 .searchbox {
   
   align-items: center;

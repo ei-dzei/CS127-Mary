@@ -9,7 +9,7 @@ $statuses = $pdo->query("SELECT STATUS_CODE, STATUS_LABEL FROM RESEARCH_STATUS O
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 // Pagination setup
-$perPage = 5;
+$perPage = 6;
 $page    = (isset($_GET['page']) && is_numeric($_GET['page'])) ? (int)$_GET['page'] : 1;
 $offset  = ($page - 1) * $perPage;
 
@@ -214,8 +214,11 @@ $total = count($rows);
   <h1 style="margin-bottom:6px;">Research</h1>
   <p class="muted" style="margin-bottom:10px;">Browse the research database system of School of Mary.</p>
 
+  <!-- Filter Bar -->
   <form method="get" class="filterbar" style="margin-bottom:14px;">
+    <!-- Inputs row -->
     <div class="filter-inputs">
+      <!-- Search pill -->
       <div class="searchbox" style="flex:1 1 360px;">
         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M10 18a8 8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/>
@@ -223,6 +226,7 @@ $total = count($rows);
         <input name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search research titles…" />
       </div>
 
+      <!-- Status -->
       <div class="field" style="min-width:200px;">
         <label>Status</label>
         <select class="input" name="status">
@@ -235,17 +239,20 @@ $total = count($rows);
         </select>
       </div>
 
+      <!-- Date from -->
       <div class="field" style="min-width:180px;">
         <label>Start from</label>
         <input class="input" type="date" name="from" value="<?= htmlspecialchars($from) ?>" />
       </div>
 
+      <!-- Date to -->
       <div class="field" style="min-width:180px;">
         <label>End by</label>
         <input class="input" type="date" name="to" value="<?= htmlspecialchars($to) ?>" />
       </div>
     </div>
 
+    <!-- Actions row (buttons under the search bar) -->
     <div class="filter-actions">
       <button class="btn" type="submit">Apply</button>
       <a class="clear-btn" href="<?= BASE_URL ?>/public/research.php">Clear</a>
@@ -254,21 +261,14 @@ $total = count($rows);
 
   <p class="muted" style="margin:6px 0 12px;">Showing <?= (int)$total ?> <?= $total===1 ? 'project' : 'projects' ?></p>
 
+  <!-- Cards -->
   <?php if (!$rows): ?>
     <div class="panel">No matching research.</div>
   <?php else: ?>
     <div class="cards">
       <?php foreach ($rows as $row): ?>
-        
-        <a class="card" href="<?= BASE_URL ?>/public/research.php?id=<?= (int)$row['RESEARCH_ID']; ?>" style="text-decoration:none; color:inherit;">
-          
-          <div class="card__icon" 
-               style="background: none; border: none; padding: 0; display: flex; align-items: center; justify-content: center; 
-                      /* Maximized Space for Icon Container */
-                      width: 80px; height: 80px;"> 
-            <i class="bi bi-motherboard" 
-               style="font-size: 42px !important; color: #003366 !important;"></i>
-          </div>
+        <div class="card">
+          <div class="card__icon">🔬</div>
           <div class="card__content">
             <h3 class="card__title"><?= htmlspecialchars($row['RESEARCH_TITLE']); ?></h3>
             <p class="card__desc">Status: <?= htmlspecialchars($row['RESEARCH_STATUS']); ?></p>
@@ -277,30 +277,71 @@ $total = count($rows);
               <?php if ($row['RESEARCH_ENDDATE']) echo ' · End: ' . htmlspecialchars($row['RESEARCH_ENDDATE']); ?>
             </div>
           </div>
-        </a>
+          <div class="card__actions">
+            <button class="btn small"
+              data-read-more
+              data-type="research"
+              data-id="<?= (int)$row['RESEARCH_ID']; ?>">
+              Read More
+            </button>
+          </div>
+        </div>
       <?php endforeach; ?>
     </div>
   <?php endif; ?>
 
   <div class="pagination">
     <?php
-      // keep current filters in pagination links
+      //keep current filters in pagination link    
       $queryParams = $_GET;
       unset($queryParams['page']);
       $baseQuery = http_build_query($queryParams);
       $baseUrl   = '?' . ($baseQuery ? $baseQuery . '&' : '');
+      $maxPage = 5;
     ?>
 
     <?php if ($page > 1): ?>
-      <a href="<?= $baseUrl ?>page=<?= $page - 1 ?>" class="page-btn"><<</a>
+      <a href="<?= $baseUrl ?>page=<?= $page - 1 ?>" class="page-btn" title = "Previous Page">&#x276E;</a>
     <?php endif; ?>
 
-    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-      <a href="<?= $baseUrl ?>page=<?= $i ?>" class="page-btn <?= $i === $page ? 'active' : '' ?>"><?= $i ?></a>
+    <?php 
+      $start = max(1, $page - floor($maxPage / 2));
+      $end = min($totalPages, $start + $maxPage - 1);
+
+      if ($end - $start < $maxPage - 1) {
+        $start = max(1, $end - $maxPage + 1);
+      }
+     ?>
+
+    <!-- 1 + ...  -->
+    <?php if ($start > 1): ?>
+      <a href="<?= $baseUrl ?>page=1" class="page-btn" >1</a>
+      <?php if ($start > 3): ?>
+        <a href="<?= $baseUrl ?>page=<?= max(1,$page - 5) ?>" class="page-btn" title="Jump backward 5 pages">...</a>        
+      <?php endif; ?>
+      <?php if ($start == 3): ?>
+              <a href="<?= $baseUrl ?>page=<?= 2?>" class="page-btn" >2</a>       
+      <?php endif; ?>
+    <?php endif; ?>
+
+    <?php for ($i = $start; $i <= $end; $i++): ?>
+      <a href="<?= $baseUrl ?>page=<?= $i ?>" class="page-btn <?= $i == $page ? 'active' : '' ?>"><?= $i ?></a>
     <?php endfor; ?>
 
+
+    <!-- ... + lastPage -->
+    <?php if ($end < $totalPages): ?>
+      <?php if ($end == $totalPages - 2):?>
+        <a href="<?= $baseUrl ?>page=<?= $totalPages-1 ?>" class="page-btn" > <?=$totalPages - 1?></a>
+      <?php endif; ?>
+      <?php if ($end < $totalPages - 2): ?>
+        <a href="<?= $baseUrl ?>page=<?= min($totalPages,$page + 5)?>"class="page-btn" title="Jump forward 5 pages">...</a>
+      <?php endif; ?>
+        <a href="<?= $baseUrl ?>page=<?= $totalPages ?>" class="page-btn" > <?=$totalPages?></a>
+    <?php endif; ?>
+
     <?php if ($page < $totalPages): ?>
-      <a href="<?= $baseUrl ?>page=<?= $page + 1 ?>" class="page-btn">>></a>
+      <a href="<?= $baseUrl ?>page=<?= $page + 1 ?>" class="page-btn" title = "Next Page">&#x276F;</a>
     <?php endif; ?>
   </div>
 </section>

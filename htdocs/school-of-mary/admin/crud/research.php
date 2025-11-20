@@ -30,18 +30,6 @@ if ($action === 'create') {
   if (!v_date_nullable($_POST['RESEARCH_ENDDATE'] ?? '')) guardFail('Invalid end date');
   if (!v_enum_exists($pdo, 'RESEARCH_STATUS', 'STATUS_CODE', $_POST['RESEARCH_STATUS'] ?? null)) guardFail('Invalid status');
 
-  // --- START: DATE COMPARISON CHECK (CREATE) ---
-  $startDate = $_POST['RESEARCH_STARTDATE'];
-  $endDate   = $_POST['RESEARCH_ENDDATE'] ?? '';
-
-  if (!empty($endDate) && (strtotime($endDate) < strtotime($startDate))) {
-    // MODIFIED: Use set_flash_message for toast popup display
-    //set_flash_message('error', 'The End Date cannot be earlier than the Start Date.');
-    redirect_to('/admin/crud/research.php');
-    exit;
-  }
-  // --- END: DATE COMPARISON CHECK (CREATE) ---
-
   $pdo->prepare("INSERT INTO RESEARCH (RESEARCH_TITLE, RESEARCH_STARTDATE, RESEARCH_ENDDATE, RESEARCH_STATUS) VALUES (?,?,?,?)")
       ->execute([
         $_POST['RESEARCH_TITLE'],
@@ -62,18 +50,6 @@ if ($action === 'update') {
   if (!v_date($_POST['RESEARCH_STARTDATE'] ?? ''))     guardFail('Invalid start date');
   if (!v_date_nullable($_POST['RESEARCH_ENDDATE'] ?? '')) guardFail('Invalid end date');
   if (!v_enum_exists($pdo, 'RESEARCH_STATUS', 'STATUS_CODE', $_POST['RESEARCH_STATUS'] ?? null)) guardFail('Invalid status');
-
-  // --- START: DATE COMPARISON CHECK (UPDATE) ---
-  $startDate = $_POST['RESEARCH_STARTDATE'];
-  $endDate   = $_POST['RESEARCH_ENDDATE'] ?? ''; 
-
-  if (!empty($endDate) && (strtotime($endDate) < strtotime($startDate))) {
-    // MODIFIED: Use set_flash_message for toast popup display
-    //set_flash_message('error', 'The End Date cannot be earlier than the Start Date (Update Failed).');
-    redirect_to('/admin/crud/research.php');
-    exit;
-  }
-  // --- END: DATE COMPARISON CHECK (UPDATE) ---
 
   $pdo->prepare("UPDATE RESEARCH SET RESEARCH_TITLE=?, RESEARCH_STARTDATE=?, RESEARCH_ENDDATE=?, RESEARCH_STATUS=? WHERE RESEARCH_ID=?")
       ->execute([
@@ -165,58 +141,11 @@ require_once __DIR__ . '/../../partials/site_header.php';
   border-color: rgba(11,83,148,.35);
 }
 .btn-ghost:hover{ background: rgba(11,83,148,.05); }
-
-/* --- Table Optimization (Maximization Fix for Research) --- */
-.table-scroll table {
-    table-layout: fixed; 
-    width: 100%;
-}
-
-.table-scroll table td {
-    white-space: nowrap; 
-    overflow: hidden; 
-    text-overflow: ellipsis; 
-}
-
-/* Set explicit widths for non-flexible columns */
-.table-scroll table th:nth-child(1), /* ID column */
-.table-scroll table td:nth-child(1) {
-    width: 60px; /* ID width fixed */
-    text-align: left;
-    white-space: normal; 
-    overflow: visible; 
-    text-overflow: clip; 
-}
-.table-scroll table th:nth-child(3), /* Status column */
-.table-scroll table td:nth-child(3) {
-    width: 100px; /* Status width fixed */
-    text-align: center;
-}
-.table-scroll table th:nth-child(4), /* Start Date column */
-.table-scroll table td:nth-child(4) {
-    width: 100px; /* Start Date width fixed */
-    text-align: center;
-}
-.table-scroll table th:nth-child(5), /* End Date column */
-.table-scroll table td:nth-child(5) {
-    width: 100px; /* End Date width fixed */
-    text-align: center;
-}
-.table-scroll table th:nth-child(6), /* Actions column */
-.table-scroll table td:nth-child(6) {
-    width: 160px; /* Actions width fixed */
-}
-/* Title column (2nd child) is left flexible to take up maximum remaining space. */
-.table-scroll table th:nth-child(2),
-.table-scroll table td:nth-child(2) {
-    text-align: left;
-}
-/* --- End of Fix --- */
 </style>
 
 <section class="panel fade-in crud-header-card">
   <button class="btn btn-action" id="create-research" style="float:inline-end">+ Create Research</button>
-  <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; float: inline-end">
+  <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; float:inline-end">
     <a class="btn small" href="<?= app_url('/admin/api/export.php'); ?>?table=RESEARCH">Export CSV</a>
   </div>
   <h1 style="margin-bottom:8px;">Research</h1>
@@ -324,7 +253,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
       <div class="modal-grid">
         <div class="field">
           <label for="m_title">Title</label>
-          <input class="input" id="m_title" name="RESEARCH_TITLE" required maxlength="255">
+          <input class="input" id="m_title" name="RESEARCH_TITLE" required>
         </div>
         <div class="field">
           <label for="m_start">Start</label>
@@ -444,62 +373,6 @@ require_once __DIR__ . '/../../partials/site_header.php';
     if (!createResearchModal.hidden && e.key === 'Escape') closeResearchModal();
   });
 // Edit Modal controller
-// --- START: CLIENT-SIDE DATE VALIDATION ---
-
-// Function to handle validation on Create/Edit forms
-function validateResearchDates(startInput, endInput, event) {
-    const startDate = startInput.value;
-    const endDate = endInput.value;
-
-    // Check only if both dates are provided
-    if (startDate && endDate && (new Date(endDate) < new Date(startDate))) {
-        alert('The End Date cannot be earlier than the Start Date.');
-        event.preventDefault(); // Stop form submission
-        return false;
-    }
-    return true;
-}
-
-// Function to handle validation on the Filter form
-function validateFilterDates(startInput, endInput, event) {
-    const startDate = startInput.value;
-    const endDate = endInput.value;
-
-    if (startDate && endDate && (new Date(startDate) > new Date(endDate))) {
-        alert("The 'Start from' date cannot be later than the 'End by' date.");
-        event.preventDefault(); // Stop form submission
-        return false;
-    }
-    return true;
-}
-
-
-// 1. Attach validation to CREATE FORM submission
-document.querySelector('section.crud-form-card form').addEventListener('submit', function(e) {
-    const startInput = document.getElementById('research_startdate');
-    const endInput = document.getElementById('research_enddate');
-    validateResearchDates(startInput, endInput, e);
-});
-
-// 2. Attach validation to EDIT MODAL submission
-document.querySelector('#researchModal form').addEventListener('submit', function(e) {
-    const startInput = document.getElementById('m_start');
-    const endInput = document.getElementById('m_end');
-    validateResearchDates(startInput, endInput, e);
-});
-
-// 3. Attach validation to FILTER BAR submission
-document.querySelector('form.filter-bar').addEventListener('submit', function(e) {
-    // Get inputs directly by name for the filter bar
-    const startInput = this.querySelector('input[name="from"]');
-    const endInput = this.querySelector('input[name="to"]');
-    validateFilterDates(startInput, endInput, e);
-});
-
-// --- END: CLIENT-SIDE DATE VALIDATION ---
-
-// Modal controller (Existing JS, handles opening/closing and data transfer)
-(function(){
   const modal = document.getElementById('researchModal');
   const form  = modal.querySelector('form');
   const idI   = document.getElementById('m_id');
@@ -514,10 +387,6 @@ document.querySelector('form.filter-bar').addEventListener('submit', function(e)
     sI.value  = payload.start || '';
     eI.value  = payload.end || '';
     stI.value = payload.status || '';
-    
-    // Clear any previous error states (best practice)
-    tI.classList.remove('input-error');
-    
     modal.hidden = false;
   }
   function close(){ modal.hidden = true; }
