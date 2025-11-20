@@ -225,6 +225,7 @@ $total = count($rows);
         </svg>
         <input name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search research titles…" />
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         <button class="btn filter-btn" id="filter-btn" type="button" onclick="showHide()">Filter</button>
         <div id="filter-dropdown">
           <!-- Status -->
@@ -254,6 +255,8 @@ $total = count($rows);
           <button class="btn clear-btn" type="button" onclick="clearFilter()" id="clear-btn">Clear</button>
           </div>
         </div>
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
       </div>
