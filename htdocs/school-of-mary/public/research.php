@@ -54,7 +54,7 @@ if ($id > 0) {
     }
   }
   ?>
-  <section class="container fade-in">
+  <section class="panel fade-in">
     <?php if (!$research): ?>
       <h1>Research</h1>
       <p class="muted">Record not found.</p>
@@ -214,51 +214,13 @@ $total = count($rows);
   <h1 style="margin-bottom:6px;">Research</h1>
   <p class="muted" style="margin-bottom:10px;">Browse the research database system of School of Mary.</p>
 
-  <!-- Filter Bar -->
   <form method="get" class="filterbar" style="margin-bottom:14px;">
-    <!-- Inputs row -->
     <div class="filter-inputs">
-      <!-- Search pill -->
       <div class="searchbox" style="flex:1 1 360px;">
         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M10 18a8 8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/>
         </svg>
         <input name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search research titles…" />
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        <button class="btn filter-btn" id="filter-btn" type="button" onclick="showHide()">Filter</button>
-        <div id="filter-dropdown">
-          <!-- Status -->
-          <div class="field" style="min-width:200px;">
-            <label>Status</label>
-            <select class="input" name="status">
-              <option value="">All</option>
-              <?php foreach ($statuses as $s): ?>
-                <option value="<?= htmlspecialchars($s['STATUS_CODE']) ?>"<?= $status===$s['STATUS_CODE'] ? ' selected' : '' ?>>
-                  <?= htmlspecialchars($s['STATUS_LABEL']) ?>
-                </option>
-              <?php endforeach; ?>
-            </select>
-          </div>
-
-          <!-- Date from -->
-          <div class="field" style="min-width:180px;">
-            <label>Start from</label>
-            <input class="input" type="date" name="from" value="<?= htmlspecialchars($from) ?>" />
-          </div>
-
-          <!-- Date to -->
-          <div class="field" style="min-width:180px;">
-            <label>End by</label>
-            <input class="input" type="date" name="to" value="<?= htmlspecialchars($to) ?>" />
-          </div>
-          <button class="btn clear-btn" type="button" onclick="clearFilter()" id="clear-btn">Clear</button>
-          </div>
-        </div>
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
       </div>
 
       <div class="field" style="min-width:200px;">
