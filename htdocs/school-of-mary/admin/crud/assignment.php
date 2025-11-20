@@ -123,7 +123,7 @@ $CSRF = csrf_token();
 ?>
 
 <style>
-/* --------- Inline modal --------- */
+/* --------- Inline modal (Existing CSS) --------- */
 .admin-modal[hidden]{display:none!important;}
 .admin-modal{
   position:fixed; inset:0; z-index:3000;
@@ -170,6 +170,58 @@ $CSRF = csrf_token();
   border-color: rgba(11,83,148,.35);
 }
 .btn-ghost:hover{ background: rgba(11,83,148,.05); }
+
+/* --- Table Optimization for Assignments (Maximization Fix) --- */
+.table-scroll table {
+    table-layout: fixed; 
+    width: 100%;
+}
+
+.table-scroll table td {
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+}
+
+/* Set explicit widths for non-flexible columns */
+.table-scroll table th:nth-child(1), /* ID column */
+.table-scroll table td:nth-child(1) {
+    width: 60px; /* ID width fixed */
+    text-align: left;
+    /* IMPORTANT: Remove truncation rules for ID to make it fully visible */
+    white-space: normal; 
+    overflow: visible; 
+    text-overflow: clip; 
+}
+.table-scroll table th:nth-child(2), /* Faculty column */
+.table-scroll table td:nth-child(2) {
+    width: 160px; /* Faculty width fixed */
+    text-align: left;
+}
+.table-scroll table th:nth-child(4), /* Role column */
+.table-scroll table td:nth-child(4) {
+    width: 80px; /* Role width fixed (e.g., CR, FC, RA, TW) */
+    text-align: center;
+    /* IMPORTANT: Remove truncation rules for Role to make it fully visible */
+    white-space: normal; 
+    overflow: visible; 
+    text-overflow: clip; 
+}
+.table-scroll table th:nth-child(5), /* Date column */
+.table-scroll table td:nth-child(5) {
+    width: 100px; /* Date width fixed */
+    text-align: center;
+}
+.table-scroll table th:nth-child(6), /* Actions column */
+.table-scroll table td:nth-child(6) {
+    width: 160px; /* Actions width fixed */
+}
+/* Research Title column (3rd child) is left flexible to take up maximum remaining space. */
+.table-scroll table th:nth-child(3),
+.table-scroll table td:nth-child(3) {
+    text-align: left;
+}
+/* --- End of Fix --- */
 </style>
 
 <section class="panel fade-in crud-header-card">
@@ -186,7 +238,6 @@ $CSRF = csrf_token();
     </form>
   </div>
 
-  <!-- Filter / Sort -->
   <form method="get" class="grid filter-bar" style="margin-bottom:10px;">
     <div class="field" style="grid-column: span 5">
       <label>Search (faculty or research title)</label>
@@ -280,8 +331,8 @@ $CSRF = csrf_token();
           <td><?= (int)$row['ASSIGNMENT_ID']; ?></td>
           <td><?= htmlspecialchars($row['FACULTY_NAME']); ?></td>
           <td><?= htmlspecialchars($row['RESEARCH_TITLE']); ?></td>
-          <td><?= htmlspecialchars($row['ROLE_ID']); ?></td>
-          <td><?= htmlspecialchars($row['DATE_ASSIGNED']); ?></td>
+          <td style="text-align:center;"><?= htmlspecialchars($row['ROLE_ID']); ?></td>
+          <td style="text-align:center;"><?= htmlspecialchars($row['DATE_ASSIGNED']); ?></td>
           <td class="actions-cell">
             <button
               type="button"
@@ -309,7 +360,6 @@ $CSRF = csrf_token();
     </table>
   </div>
 
-  <!-- Pagination -->
   <div class="pagination">
     <?php
       // keep q/sort when paging
@@ -329,7 +379,6 @@ $CSRF = csrf_token();
   </div>
 </section>
 
-<!-- --------- Modal HTML --------- -->
 <div class="admin-modal" id="assignModal" hidden>
   <div class="admin-modal__backdrop" data-close="1"></div>
   <div class="admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="assignModalTitle">

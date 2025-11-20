@@ -107,12 +107,6 @@
     setTimeout(() => { t.style.opacity = "0"; }, timeout);
   }
 
-  /* ------------------------------
-     Modal logic
-     - Open buttons: [data-modal="edit"] or [data-modal="open"]
-     - Close buttons: [data-close="modal"] or overlay click
-     - Pages inject field blocks into #modal-form
-  ------------------------------ */
   const modal      = qs("#modal");
   const modalForm  = qs("#modal-form", modal || document);
   const modalTitle = qs("#modal-title", modal || document);
@@ -412,16 +406,12 @@
     const prevBtn = document.getElementById('prev-month');
     const nextBtn = document.getElementById('next-month');
     
-    // Comprehensive list of dummy events (Holidays, Meetings, Deadlines)
     const DUMMY_EVENTS = {
         // --- November 2025 ---
         '2025-11-01': [{ title: 'All Saints Day (Holiday)', type: 'holiday' }],
-        '2025-11-20': [{ title: 'Funding Deadline A', type: 'deadline' }],
-        '2025-11-25': [{ title: 'Faculty Meeting', type: 'meeting' }],
         '2025-11-30': [{ title: 'Bonifacio Day (Holiday)', type: 'holiday' }],
         
         // --- December 2025 ---
-        '2025-12-10': [{ title: 'Project Review', type: 'meeting' }],
         '2025-12-24': [{ title: 'Christmas Eve (Special Holiday)', type: 'holiday' }],
         '2025-12-25': [{ title: 'Christmas Day (Holiday)', type: 'holiday' }],
         '2025-12-30': [{ title: 'Rizal Day (Holiday)', type: 'holiday' }],
@@ -429,7 +419,6 @@
         
         // --- January 2026 ---
         '2026-01-01': [{ title: 'New Year\'s Day (Holiday)', type: 'holiday' }],
-        '2026-01-20': [{ title: 'Q1 Budget Deadline', type: 'deadline' }],
         
         // --- February 2026 ---
         '2026-02-25': [{ title: 'EDSA Revolution Anniversary (Holiday)', type: 'holiday' }],
@@ -1023,7 +1012,6 @@
         const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
 
-        // 1. Fill leading days from the previous month
         for (let i = 0; i < firstDayOfMonth; i++) {
             const dayNum = daysInPrevMonth - firstDayOfMonth + i + 1;
             const cell = document.createElement('div');
@@ -1032,20 +1020,17 @@
             daysGridEl.appendChild(cell);
         }
 
-        // 2. Fill current month days
         for (let i = 1; i <= daysInMonth; i++) {
             const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
             const cell = document.createElement('div');
             cell.classList.add('calendar-day');
             
-            // Highlight today
             if (dateStr === todayStr) {
                 cell.classList.add('calendar-day--today');
             }
 
             cell.innerHTML = `<span class="calendar-day-number">${i}</span>`;
             
-            // Add events for this day
             const events = DUMMY_EVENTS[dateStr];
             if (events) {
                 events.forEach(event => {
@@ -1060,9 +1045,7 @@
             daysGridEl.appendChild(cell);
         }
 
-        // 3. Fill trailing days from the next month
         const totalCells = firstDayOfMonth + daysInMonth;
-        // Check if we need a 6th row (42 cells total)
         const totalGridCells = totalCells > 35 ? 42 : 35;
         const remainingCells = totalGridCells - totalCells; 
 
@@ -1108,24 +1091,16 @@
         function validateAndSetMin() {
             const startDateValue = startEl.value;
             
-            // 1. Set the minimum selectable date for the end date to the start date
             endEl.min = startDateValue;
-
-            // 2. If the current end date is now earlier than the new start date, clear it.
             if (endEl.value && startDateValue && endEl.value < startDateValue) {
                 // Clear value to force re-selection and prevent submission of invalid data
                 endEl.value = ''; 
             }
         }
         
-        // Run validation whenever the start date changes
         startEl.addEventListener('change', validateAndSetMin);
-        
-        // This is important for the modal's input fields
         endEl.addEventListener('focus', validateAndSetMin, { once: true });
-        
-        // Run immediately for the Create form inputs on load
-        if (startEl === createStartDateEl) {
+                if (startEl === createStartDateEl) {
             validateAndSetMin();
         }
     }
@@ -1136,17 +1111,77 @@
     enforceDateConstraint(createStartDateEl, createEndDateEl);
     enforceDateConstraint(editStartDateEl, editEndDateEl);
 
-    // Re-run the modal's validation when it opens to apply constraints to the pre-filled data
     const modal = document.getElementById('researchModal');
     if (modal) {
-        // Observer to watch when the 'hidden' attribute is removed (i.e., modal opens)
         new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 if (mutation.attributeName === 'hidden' && !modal.hidden) {
-                    // Modal opened, run validation logic for the edit fields
                     enforceDateConstraint(editStartDateEl, editEndDateEl);
                 }
             });
         }).observe(modal, { attributes: true });
     }
+    
 })();
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Desktop Collapse Button (inside the sidebar)
+    const internalToggleButton = document.getElementById('sidebar-toggle-internal');
+    // Mobile Overlay Button (external, visible only on small screens)
+    const mobileToggleButton = document.getElementById('sidebar-toggle-mobile');
+    
+    const appWrapper = document.getElementById('app-wrapper');
+
+    if (appWrapper) {
+        
+        // --- Initialization ---
+        // On desktop load, ensure the sidebar is open by default
+        if (window.innerWidth > 1024) {
+             appWrapper.classList.remove('sidebar-closed'); 
+        } else {
+             appWrapper.classList.remove('sidebar-open');
+        }
+
+
+        // --- Desktop Collapse Logic ---
+        if (internalToggleButton) {
+            internalToggleButton.addEventListener('click', function() {
+                // Only run desktop logic on desktop screen sizes
+                if (window.innerWidth > 1024) {
+                    appWrapper.classList.toggle('sidebar-closed');
+                }
+            });
+        }
+        
+        // --- Mobile Overlay Logic ---
+        if (mobileToggleButton) {
+            mobileToggleButton.addEventListener('click', function() {
+                // Only run mobile logic on mobile screen sizes
+                if (window.innerWidth <= 1024) {
+                    const isNowOpen = appWrapper.classList.toggle('sidebar-open');
+                    
+                    // Update button text/icon for mobile
+                    if (isNowOpen) {
+                        mobileToggleButton.innerHTML = '✕ Close';
+                    } else {
+                        mobileToggleButton.innerHTML = '☰ Menu';
+                    }
+                }
+            });
+        }
+        
+        // --- Close Sidebar on Mobile Link Click ---
+        const sidebarLinks = appWrapper.querySelectorAll('.sidebar a');
+        sidebarLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                // If the sidebar is open and we are on mobile, close it after clicking a link
+                if (window.innerWidth <= 1024 && appWrapper.classList.contains('sidebar-open')) {
+                    appWrapper.classList.remove('sidebar-open');
+                    if (mobileToggleButton) {
+                        mobileToggleButton.innerHTML = '☰ Menu';
+                    }
+                }
+            });
+        });
+    }
+});

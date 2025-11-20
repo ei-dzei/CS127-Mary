@@ -5,7 +5,9 @@ require_once __DIR__ . '/../../partials/init.php';
 require_once __DIR__ . '/../../validators.php';
 
 if (!is_admin()) { redirect_to('/admin/login.php'); }
-csrf_check();
+// Note: csrf_check is moved inside the POST conditional for robustness,
+// but is kept here based on your original code structure.
+if ($_SERVER['REQUEST_METHOD'] === 'POST') { csrf_check(); }
 
 /* ------------------------- Actions ------------------------- */
 $action = $_POST['action'] ?? '';
@@ -13,7 +15,10 @@ $action = $_POST['action'] ?? '';
 if ($action === 'create') {
   if (!v_varchar($_POST['AGENCY_NAME'] ?? '', 255)) guardFail('Invalid name');
   if (!v_enum_exists($pdo, 'TYPE_AGENCY', 'TYPE_CODE', $_POST['AGENCY_TYPE'] ?? '')) guardFail('Invalid type');
-  if (!v_varchar($_POST['AGENCY_CONTACTINFO'] ?? '', 100)) guardFail('Invalid contact');
+  // Changed to v_email for server-side validation based on your request.
+  if (!v_email($_POST['AGENCY_CONTACTINFO'] ?? '')) guardFail('Invalid contact email address');
+  // If you must use v_varchar, it should be:
+  // if (!v_varchar($_POST['AGENCY_CONTACTINFO'] ?? '', 100)) guardFail('Invalid contact');
 
   $pdo->prepare("INSERT INTO AGENCY (AGENCY_NAME, AGENCY_TYPE, AGENCY_CONTACTINFO) VALUES (?,?,?)")
       ->execute([$_POST['AGENCY_NAME'], $_POST['AGENCY_TYPE'], $_POST['AGENCY_CONTACTINFO']]);
@@ -28,7 +33,11 @@ if ($action === 'update') {
   if (!v_int($_POST['AGENCY_ID'] ?? '')) guardFail('Missing ID');
   if (!v_varchar($_POST['AGENCY_NAME'] ?? '', 255)) guardFail('Invalid name');
   if (!v_enum_exists($pdo, 'TYPE_AGENCY', 'TYPE_CODE', $_POST['AGENCY_TYPE'] ?? '')) guardFail('Invalid type');
-  if (!v_varchar($_POST['AGENCY_CONTACTINFO'] ?? '', 100)) guardFail('Invalid contact');
+  // Changed to v_email for server-side validation based on your request.
+  if (!v_email($_POST['AGENCY_CONTACTINFO'] ?? '')) guardFail('Invalid contact email address');
+  // If you must use v_varchar, it should be:
+  // if (!v_varchar($_POST['AGENCY_CONTACTINFO'] ?? '', 100)) guardFail('Invalid contact');
+
 
   $pdo->prepare("UPDATE AGENCY SET AGENCY_NAME=?, AGENCY_TYPE=?, AGENCY_CONTACTINFO=? WHERE AGENCY_ID=?")
       ->execute([$_POST['AGENCY_NAME'], $_POST['AGENCY_TYPE'], $_POST['AGENCY_CONTACTINFO'], $_POST['AGENCY_ID']]);
@@ -74,7 +83,7 @@ $params = [];
 if ($q !== '')    { $baseSql .= " AND a.AGENCY_NAME LIKE ?"; $params[] = "%$q%"; }
 if ($type !== '') { $baseSql .= " AND a.AGENCY_TYPE = ?";    $params[] = $type;  }
 
-$total = (int)$pdo->prepare("SELECT COUNT(*) ".$baseSql)->execute($params) ?: 0;
+// FIX: Corrected and non-redundant total count logic
 $stmtCount = $pdo->prepare("SELECT COUNT(*) ".$baseSql);
 $stmtCount->execute($params);
 $total = (int)$stmtCount->fetchColumn();
@@ -93,7 +102,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
 ?>
 
 <style>
-/* --------- Inline modal --------- */
+/* --------- Inline modal (Existing CSS) --------- */
 .admin-modal[hidden]{display:none!important;}
 .admin-modal{
   position:fixed; inset:0; z-index:3000;
@@ -142,6 +151,74 @@ require_once __DIR__ . '/../../partials/site_header.php';
     border-color: rgba(11,83,148,.35);
   }
   .btn-ghost:hover{ background: rgba(11,83,148,.05); }
+
+/* ======================================= ADMIN CRUD PAGES (FIXED ALIGNMENT) ======================================= */
+
+/* FIX 1: Ensure the entire table data cell aligns content to the top
+   when a neighboring cell forces the row height to increase. */
+td:has(.actions-cell) {
+    vertical-align: top; 
+}
+
+
+.actions-cell {
+  /* FIX 2: Align flex items to the top (start) of the container */
+  display: flex;
+  align-items: flex-start; 
+  /* The rest of your flex and size properties */
+  flex-wrap: wrap;
+  gap: 8px 10px;          
+  white-space: normal;    
+  /* Reduced min-width to give space to the Contact column */
+  min-width: 160px;      
+}
+.actions-cell .input,
+.actions-cell select {
+  max-width: 200px;
+}
+.actions-cell form { display: inline-flex; gap: 6px; align-items: center; }
+.actions-cell .btn.small { padding: 6px 10px; }
+@media (max-width: 1100px) {
+  .actions-cell select[style*="width:200px"] { width: 160px !important; }
+  .actions-cell select[style*="width:140px"] { width: 120px !important; }
+}
+
+/* --- Agency Table Specific Fixes --- */
+.table-scroll table {
+    table-layout: auto; /* Use auto layout to allow column flexibility */
+    width: 100%;
+}
+
+.table-scroll table th:nth-child(1), /* ID */
+.table-scroll table td:nth-child(1) {
+    width: 60px; /* Fixed width for ID */
+    min-width: 60px;
+}
+
+.table-scroll table th:nth-child(3), /* Type */
+.table-scroll table td:nth-child(3) {
+    width: 120px; /* Fixed width for Type (e.g., Government) */
+    min-width: 120px;
+}
+
+.table-scroll table th:nth-child(4), /* Contact (Email) */
+.table-scroll table td:nth-child(4) {
+    /* Set a minimum width for the email address to reduce truncation */
+    min-width: 250px; 
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.table-scroll table th:nth-child(5), /* Actions */
+.table-scroll table td:nth-child(5) {
+    /* Set max-width for Actions to prevent it from taking too much space */
+    width: 160px;
+    min-width: 160px;
+}
+/* Name column (2nd child) remains flexible to take up maximum remaining space. */
+
+.table-scroll { overflow-x: auto; }
 </style>
 
 <section class="panel fade-in crud-header-card">
@@ -157,7 +234,6 @@ require_once __DIR__ . '/../../partials/site_header.php';
     </form>
   </div>
 
-  <!-- Filter / Sort -->
   <form method="get" class="grid filter-bar" style="margin-bottom:10px;">
     <div class="field" style="grid-column: span 5">
       <label>Name</label>
@@ -198,7 +274,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
 
     <div class="field" style="grid-column: span 6">
       <label>Name</label>
-      <input class="input" name="AGENCY_NAME" required>
+      <input class="input" name="AGENCY_NAME" required maxlength="255">
     </div>
     <div class="field" style="grid-column: span 3">
       <label>Type</label>
@@ -209,8 +285,8 @@ require_once __DIR__ . '/../../partials/site_header.php';
       </select>
     </div>
     <div class="field" style="grid-column: span 3">
-      <label>Contact</label>
-      <input class="input" name="AGENCY_CONTACTINFO" required>
+      <label>Contact (Email)</label>
+      <input class="input" type="email" name="AGENCY_CONTACTINFO" required maxlength="100">
     </div>
 
     <div class="field" style="grid-column: span 12; display:flex; justify-content:flex-end;">
@@ -258,11 +334,13 @@ require_once __DIR__ . '/../../partials/site_header.php';
           </td>
         </tr>
       <?php endforeach; ?>
+      <?php if (!$rows): ?>
+        <tr><td colspan="5" style="text-align:center;color:#666;">No records found.</td></tr>
+      <?php endif; ?>
       </tbody>
     </table>
   </div>
 
-  <!-- Pagination -->
   <div class="pagination">
     <?php
       // keep q/type/sort when paging
@@ -283,7 +361,6 @@ require_once __DIR__ . '/../../partials/site_header.php';
   </div>
 </section>
 
-<!-- --------- Modal HTML --------- -->
 <div class="admin-modal" id="agencyModal" hidden>
   <div class="admin-modal__backdrop" data-close="1"></div>
   <div class="admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="agencyModalTitle">
@@ -299,7 +376,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
       <div class="modal-grid">
         <div class="field">
           <label for="m_name">Name</label>
-          <input class="input" id="m_name" name="AGENCY_NAME" required>
+          <input class="input" id="m_name" name="AGENCY_NAME" required maxlength="255">
         </div>
         <div class="field">
           <label for="m_type">Type</label>
@@ -310,8 +387,8 @@ require_once __DIR__ . '/../../partials/site_header.php';
           </select>
         </div>
         <div class="field">
-          <label for="m_contact">Contact</label>
-          <input class="input" id="m_contact" name="AGENCY_CONTACTINFO" required>
+          <label for="m_contact">Contact (Email)</label>
+          <input class="input" id="m_contact" type="email" name="AGENCY_CONTACTINFO" required maxlength="100">
         </div>
       </div>
 
@@ -331,13 +408,17 @@ require_once __DIR__ . '/../../partials/site_header.php';
   const id    = document.getElementById('m_id');
   const nameI = document.getElementById('m_name');
   const typeI = document.getElementById('m_type');
-  const contI = document.getElementById('m_contact');
+  const contI = document.getElementById('m_contact'); // Contact field
 
   function open(payload){
     id.value    = payload.id;
     nameI.value = payload.name || '';
     typeI.value = payload.type || '';
     contI.value = payload.contact || '';
+
+    // Clear any previous error states for the contact field
+    contI.classList.remove('input-error');
+
     modal.hidden = false;
   }
   function close(){ modal.hidden = true; }

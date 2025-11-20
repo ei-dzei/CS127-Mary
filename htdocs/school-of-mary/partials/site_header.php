@@ -9,6 +9,12 @@ $uri  = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 $path = preg_replace('#^' . preg_quote(BASE_URL, '#') . '#', '', $uri);
 $path = $path === '' ? '/' : $path;
 
+// Assuming you have a function to get the current path for active links
+if (!function_exists('current_path')) {
+    function current_path() {
+        return parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
+    }
+}
 ?>
 <!doctype html>
 <html lang="en">
@@ -25,22 +31,24 @@ $path = $path === '' ? '/' : $path;
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
   <style>
-    /* ----------------------------------------------------------------- */
-    /* INLINE STYLES (REQUIRED FOR TOGGLE FUNCTIONALITY)                  */
-    /* NOTE: MOST STYLES SHOULD BE MOVED TO styles.css (See Section 2)   */
-    /* ----------------------------------------------------------------- */
+    /* ---------------------------------------------------------------- */
+    /* INLINE STYLES (MODIFIED FOR CORRECT MAXIMIZED LAYOUT)            */
+    /* ---------------------------------------------------------------- */
     
     body {
         margin: 0;
         font-family: Arial, sans-serif;
         background: #f8f9fa;
+        /* Ensures the viewport height is used */
+        min-height: 100vh; 
+        position: relative;
     }
 
     /* === 1. Layout Container === */
     .app-wrapper {
-        display: flex;
+        /* This Flex container holds the fixed sidebar and the growing content area */
+        display: flex; 
         min-height: 100vh;
-        position: relative;
     }
 
     /* === 2. Sidebar (Desktop View) === */
@@ -61,15 +69,24 @@ $path = $path === '' ? '/' : $path;
         transition: transform 0.3s ease-in-out;
     }
 
-    /* === 3. Main Content Shift (Desktop View) === */
-    main.container {
-        flex-grow: 1;
-        margin-left: 230px; /* Space for the fixed sidebar */
-        padding: 20px;
+    /* === 3. Main Content Area (NEW/FIXED) === */
+    .main-content-area {
+        /* The key to shifting and maximizing the height */
+        flex-grow: 1; /* Occupy remaining horizontal space */
+        margin-left: 230px; /* Shift content area over by sidebar width */
         min-height: 100vh;
+        display: flex;
+        flex-direction: column; /* Allows main content and footer to stack and stretch */
     }
 
-    /* === 4. Sidebar Styles (Moved from your inline PHP) === */
+    /* === 4. Main Content Container (inside the new area) === */
+    main.container {
+        flex-grow: 1; /* Content area takes available vertical space */
+        padding: 20px;
+        width: 100%; 
+    }
+
+    /* === 5. Sidebar Styles (Keep as originally defined) === */
     .sidebar .brand {
         display: flex;
         align-items: center;
@@ -111,7 +128,7 @@ $path = $path === '' ? '/' : $path;
       text-align: center;
     }
     
-    /* === 5. Mobile/Toggle Styles (CRITICAL) === */
+    /* === 6. Mobile/Toggle Styles (CRITICAL) === */
     #sidebar-toggle {
         display: none; /* Hidden by default */
         position: fixed;
@@ -137,12 +154,9 @@ $path = $path === '' ? '/' : $path;
         .app-wrapper.sidebar-open .sidebar {
             transform: translateX(0); /* Show sidebar when class is applied */
         }
-        main.container {
-            margin-left: 0; /* Content is full width on mobile */
-            width: 100%;
-        }
-        .admin-stripe {
-          margin-left: 0; /* Stripe is full width on mobile */
+        /* Remove margin shift on mobile */
+        .main-content-area {
+            margin-left: 0; 
         }
     }
     /* ----------------------------------------------------------------- */
@@ -222,8 +236,10 @@ $path = $path === '' ? '/' : $path;
 
     </aside>
 
-    <?php if ($inAdmin): ?>
-      <div class="admin-stripe">Admin Area</div>
-    <?php endif; ?>
+    <div class="main-content-area">
 
-    <main class="container">
+        <?php if ($inAdmin): ?>
+          <div class="admin-stripe">Admin Area</div>
+        <?php endif; ?>
+
+        <main class="container">

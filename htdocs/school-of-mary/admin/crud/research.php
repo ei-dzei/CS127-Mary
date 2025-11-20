@@ -196,6 +196,53 @@ $CSRF = csrf_token();
   border-color: rgba(11,83,148,.35);
 }
 .btn-ghost:hover{ background: rgba(11,83,148,.05); }
+
+/* --- Table Optimization (Maximization Fix for Research) --- */
+.table-scroll table {
+    table-layout: fixed; 
+    width: 100%;
+}
+
+.table-scroll table td {
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+}
+
+/* Set explicit widths for non-flexible columns */
+.table-scroll table th:nth-child(1), /* ID column */
+.table-scroll table td:nth-child(1) {
+    width: 60px; /* ID width fixed */
+    text-align: left;
+    white-space: normal; 
+    overflow: visible; 
+    text-overflow: clip; 
+}
+.table-scroll table th:nth-child(3), /* Status column */
+.table-scroll table td:nth-child(3) {
+    width: 100px; /* Status width fixed */
+    text-align: center;
+}
+.table-scroll table th:nth-child(4), /* Start Date column */
+.table-scroll table td:nth-child(4) {
+    width: 100px; /* Start Date width fixed */
+    text-align: center;
+}
+.table-scroll table th:nth-child(5), /* End Date column */
+.table-scroll table td:nth-child(5) {
+    width: 100px; /* End Date width fixed */
+    text-align: center;
+}
+.table-scroll table th:nth-child(6), /* Actions column */
+.table-scroll table td:nth-child(6) {
+    width: 160px; /* Actions width fixed */
+}
+/* Title column (2nd child) is left flexible to take up maximum remaining space. */
+.table-scroll table th:nth-child(2),
+.table-scroll table td:nth-child(2) {
+    text-align: left;
+}
+/* --- End of Fix --- */
 </style>
 
 <section class="panel fade-in crud-header-card">
@@ -252,7 +299,7 @@ $CSRF = csrf_token();
     <input type="hidden" name="csrf" value="<?= $CSRF; ?>">
     <input type="hidden" name="action" value="create">
 
-    <div class="field" style="grid-column: span 8"><label>Title</label><input class="input" name="RESEARCH_TITLE" required></div>
+    <div class="field" style="grid-column: span 8"><label>Title</label><input class="input" name="RESEARCH_TITLE" required maxlength="255"></div>
     <div class="field" style="grid-column: span 2"><label>Start</label><input class="input" type="date" name="RESEARCH_STARTDATE" id="research_startdate" required></div>
     <div class="field" style="grid-column: span 2"><label>End</label><input class="input" type="date" name="RESEARCH_ENDDATE" id="research_enddate"></div>
     <div class="field" style="grid-column: span 3">
@@ -350,7 +397,7 @@ $CSRF = csrf_token();
       <div class="modal-grid">
         <div class="field">
           <label for="m_title">Title</label>
-          <input class="input" id="m_title" name="RESEARCH_TITLE" required>
+          <input class="input" id="m_title" name="RESEARCH_TITLE" required maxlength="255">
         </div>
         <div class="field">
           <label for="m_start">Start</label>
@@ -381,6 +428,60 @@ $CSRF = csrf_token();
 </div>
 
 <script>
+// --- START: CLIENT-SIDE DATE VALIDATION ---
+
+// Function to handle validation on Create/Edit forms
+function validateResearchDates(startInput, endInput, event) {
+    const startDate = startInput.value;
+    const endDate = endInput.value;
+
+    // Check only if both dates are provided
+    if (startDate && endDate && (new Date(endDate) < new Date(startDate))) {
+        alert('The End Date cannot be earlier than the Start Date.');
+        event.preventDefault(); // Stop form submission
+        return false;
+    }
+    return true;
+}
+
+// Function to handle validation on the Filter form
+function validateFilterDates(startInput, endInput, event) {
+    const startDate = startInput.value;
+    const endDate = endInput.value;
+
+    if (startDate && endDate && (new Date(startDate) > new Date(endDate))) {
+        alert("The 'Start from' date cannot be later than the 'End by' date.");
+        event.preventDefault(); // Stop form submission
+        return false;
+    }
+    return true;
+}
+
+
+// 1. Attach validation to CREATE FORM submission
+document.querySelector('section.crud-form-card form').addEventListener('submit', function(e) {
+    const startInput = document.getElementById('research_startdate');
+    const endInput = document.getElementById('research_enddate');
+    validateResearchDates(startInput, endInput, e);
+});
+
+// 2. Attach validation to EDIT MODAL submission
+document.querySelector('#researchModal form').addEventListener('submit', function(e) {
+    const startInput = document.getElementById('m_start');
+    const endInput = document.getElementById('m_end');
+    validateResearchDates(startInput, endInput, e);
+});
+
+// 3. Attach validation to FILTER BAR submission
+document.querySelector('form.filter-bar').addEventListener('submit', function(e) {
+    // Get inputs directly by name for the filter bar
+    const startInput = this.querySelector('input[name="from"]');
+    const endInput = this.querySelector('input[name="to"]');
+    validateFilterDates(startInput, endInput, e);
+});
+
+// --- END: CLIENT-SIDE DATE VALIDATION ---
+
 // Modal controller (Existing JS, handles opening/closing and data transfer)
 (function(){
   const modal = document.getElementById('researchModal');
@@ -397,6 +498,10 @@ $CSRF = csrf_token();
     sI.value  = payload.start || '';
     eI.value  = payload.end || '';
     stI.value = payload.status || '';
+    
+    // Clear any previous error states (best practice)
+    tI.classList.remove('input-error');
+    
     modal.hidden = false;
   }
   function close(){ modal.hidden = true; }
