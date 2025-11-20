@@ -1,4 +1,19 @@
 <?php 
+    [$AUDIT_ID, $AUDIT_TIME] = audit_resolve_cols($pdo);
+    // Resolve audit table PK/timestamp columns
+    function audit_resolve_cols(PDO $pdo): array {
+    $idCandidates   = ['ID','id','log_id','audit_id'];
+    $timeCandidates = ['CREATED_AT','created_at','logged_at','timestamp','createdOn'];
+    foreach ($idCandidates as $idCol) {
+        foreach ($timeCandidates as $tCol) {
+        try {
+            $pdo->query("SELECT {$idCol} AS ID, {$tCol} AS CREATED_AT FROM AUDIT_LOG ORDER BY {$idCol} DESC LIMIT 1");
+            return [$idCol, $tCol];
+        } catch (Throwable $e) {}
+        }
+    }
+        return ['ID', 'CREATED_AT'];
+    }
     /* --- Filters --- */
     $actor  = trim($_GET['actor'] ?? '');
     $action = trim($_GET['action'] ?? '');
@@ -12,10 +27,10 @@
     $offset = ($page - 1) * $PAGE_SIZE;
     $base = app_url('/admin/audit_print.php');
 
-    $sortMap = [
-        'asc'    => 'audit_id asc',
-        'desc'     => 'audit_id desc',
-    ];
+    // $sortMap = [
+    //     'asc'    => 'audit_id asc',
+    //     'desc'     => 'audit_id desc',
+    // ];
     // $orderSql = $sortMap[$sort] ?? $sortMap['asc'];
     /* Named parameters only */
     $sqlBase = " FROM AUDIT_LOG WHERE 1=1 ";
