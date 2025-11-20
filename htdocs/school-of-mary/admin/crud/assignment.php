@@ -77,49 +77,8 @@ $sort   = $_GET['sort'] ?? 'id_desc'; // id_desc|id_asc|date_desc|date_asc|facul
 $page   = max(1, (int)($_GET['page'] ?? 1));
 $per    = 5;
 $offset = ($page - 1) * $per;
-
-$sortMap = [
-  'id_desc'        => 'a.ASSIGNMENT_ID DESC',
-  'id_asc'         => 'a.ASSIGNMENT_ID ASC',
-  'date_desc'      => 'a.DATE_ASSIGNED DESC, a.ASSIGNMENT_ID DESC',
-  'date_asc'       => 'a.DATE_ASSIGNED ASC, a.ASSIGNMENT_ID ASC',
-  'faculty_asc'    => 'f.FACULTY_LNAME ASC, f.FACULTY_FNAME ASC, a.ASSIGNMENT_ID DESC',
-  'faculty_desc'   => 'f.FACULTY_LNAME DESC, f.FACULTY_FNAME DESC, a.ASSIGNMENT_ID DESC',
-  'research_asc'   => 'r.RESEARCH_TITLE ASC, a.ASSIGNMENT_ID DESC',
-  'research_desc'  => 'r.RESEARCH_TITLE DESC, a.ASSIGNMENT_ID DESC',
-];
-$orderSql = $sortMap[$sort] ?? $sortMap['id_desc'];
-
-$baseSql = "FROM ASSIGNMENT a
-            JOIN FACULTY f ON a.FACULTY_ID = f.FACULTY_ID
-            JOIN RESEARCH r ON a.RESEARCH_ID = r.RESEARCH_ID
-            WHERE 1=1";
-$params = [];
-if ($q !== '') {
-  $baseSql .= " AND (f.FACULTY_LNAME LIKE ? OR f.FACULTY_FNAME LIKE ? OR r.RESEARCH_TITLE LIKE ?)";
-  $params = ["%$q%", "%$q%", "%$q%"];
-}
-
-// total
-$stmtCount = $pdo->prepare("SELECT COUNT(*) ".$baseSql);
-$stmtCount->execute($params);
-$total = (int)$stmtCount->fetchColumn();
-
-// rows
-$sql = "SELECT a.ASSIGNMENT_ID, a.FACULTY_ID, a.RESEARCH_ID, a.ROLE_ID, a.DATE_ASSIGNED,
-               CONCAT(f.FACULTY_LNAME, ', ', f.FACULTY_FNAME) AS FACULTY_NAME,
-               r.RESEARCH_TITLE
-        $baseSql
-        ORDER BY $orderSql
-        LIMIT $per OFFSET $offset";
-$stmt = $pdo->prepare($sql);
-$stmt->execute($params);
-$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-$totalPages = max(1, (int)ceil($total / $per));
-
-require_once __DIR__ . '/../../partials/site_header.php';
 $CSRF = csrf_token();
+require_once __DIR__ . '/../../partials/site_header.php';
 ?>
 
 <style>
@@ -173,6 +132,7 @@ $CSRF = csrf_token();
 </style>
 
 <section class="panel fade-in crud-header-card">
+  <button class="btn btn-action" id="create-assignment" >+ Create Assignment</button>
   <h1 style="margin-bottom:8px;">Assignments</h1>
   <p class="muted" style="margin-bottom:10px;">Manage who is assigned to which research and in what role. CSV import/export below.</p>
 
@@ -205,161 +165,60 @@ $CSRF = csrf_token();
     </div>
   </form>
 </section>
-
-<section class="panel crud-form-card" style="margin-bottom:16px;">
-  <h3 style="margin-top:0">Create Assignment</h3>
-  <form method="post" class="grid">
-    <input type="hidden" name="csrf" value="<?= $CSRF; ?>">
-    <input type="hidden" name="action" value="create">
-
-    <div class="field" style="grid-column: span 4">
-      <label>Faculty</label>
-      <select class="input" name="FACULTY_ID" required>
-        <?php foreach ($fac as $f): ?>
-          <option value="<?= (int)$f['FACULTY_ID']; ?>">
-            <?= htmlspecialchars($f['FACULTY_LNAME'].', '.$f['FACULTY_FNAME']); ?>
-          </option>
-        <?php endforeach; ?>
-      </select>
+<section class="panel" id="panel"></section>
+<!-- Create Agency Modal -->
+<div class="admin-modal" id="createAssignmentModal" hidden>
+  <div class="admin-modal__backdrop" data-close="1"></div>
+  <div class="admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="createAssignmentTitle">
+    <div class="admin-modal__head">
+      <h3 class="admin-modal__title" id="createAssignmentTitle">Create New Assignment</h3>
+      <button class="admin-modal__close" type="button" data-close="1">✕</button>
     </div>
+    <form class="admin-modal__body" method="post">
+      <input type="hidden" name="csrf" value="<?=  $CSRF;?>">
+      <input type="hidden" name="action" value="create">
 
-    <div class="field" style="grid-column: span 6">
-      <label>Research</label>
-      <select class="input" name="RESEARCH_ID" required>
-        <?php foreach ($res as $r): ?>
-          <option value="<?= (int)$r['RESEARCH_ID']; ?>"><?= htmlspecialchars($r['RESEARCH_TITLE']); ?></option>
-        <?php endforeach; ?>
-      </select>
-    </div>
-
-    <div class="field" style="grid-column: span 2">
-      <label>Role</label>
-      <select class="input" name="ROLE_ID" required>
-        <?php foreach ($roles as $r): ?>
-          <option value="<?= htmlspecialchars($r['ROLE_ID'], ENT_QUOTES); ?>">
-            <?= htmlspecialchars($r['ROLE_ID']); ?>
-          </option>
-        <?php endforeach; ?>
-      </select>
-    </div>
-
-    <div class="field" style="grid-column: span 3">
-      <label>Date Assigned</label>
-      <input class="input" type="date" name="DATE_ASSIGNED" required>
-    </div>
-
-    <div class="field" style="grid-column: span 12; display:flex; justify-content:flex-end;">
-      <button class="btn wide">Add</button>
-    </div>
-  </form>
-</section>
-
-<section class="panel">
-  <h3 style="margin-top:0">Records</h3>
-  <div class="table-scroll">
-    <table>
-      <thead>
-      <tr>
-        <th>ID</th>
-        <th>Faculty</th>
-        <th>Research</th>
-        <th>Role</th>
-        <th>Date</th>
-        <th>Actions</th>
-      </tr>
-      </thead>
-      <tbody>
-      <?php foreach ($rows as $row): ?>
-        <tr>
-          <td><?= (int)$row['ASSIGNMENT_ID']; ?></td>
-          <td><?= htmlspecialchars($row['FACULTY_NAME']); ?></td>
-          <td><?= htmlspecialchars($row['RESEARCH_TITLE']); ?></td>
-          <td><?= htmlspecialchars($row['ROLE_ID']); ?></td>
-          <td><?= htmlspecialchars($row['DATE_ASSIGNED']); ?></td>
-          <td class="actions-cell">
-            <button
-              type="button"
-              class="btn small js-edit"
-              data-id="<?= (int)$row['ASSIGNMENT_ID']; ?>"
-              data-faculty="<?= (int)$row['FACULTY_ID']; ?>"
-              data-research="<?= (int)$row['RESEARCH_ID']; ?>"
-              data-role="<?= htmlspecialchars($row['ROLE_ID'], ENT_QUOTES); ?>"
-              data-date="<?= htmlspecialchars($row['DATE_ASSIGNED'], ENT_QUOTES); ?>"
-            >Edit</button>
-
-            <form method="post" onsubmit="return confirm('Delete this record?');" style="display:inline">
-              <input type="hidden" name="csrf" value="<?= $CSRF; ?>">
-              <input type="hidden" name="action" value="delete">
-              <input type="hidden" name="ASSIGNMENT_ID" value="<?= (int)$row['ASSIGNMENT_ID']; ?>">
-              <button class="btn small" style="background:#b91c1c;border-color:#b91c1c">Delete</button>
-            </form>
-          </td>
-        </tr>
-      <?php endforeach; ?>
-      <?php if (!$rows): ?>
-        <tr><td colspan="6" style="text-align:center;color:#666;">No records found.</td></tr>
-      <?php endif; ?>
-      </tbody>
-    </table>
+      <div class="modal-grid">
+        <div class="field">
+          <label for="a_faculty">Faculty</label>
+          <select class="input" id="a_faculty" name="FACULTY_ID" required>
+            <?php foreach ($fac as $f): ?>
+              <option value="<?= (int)$f['FACULTY_ID']; ?>">
+                <?= htmlspecialchars($f['FACULTY_LNAME'].', '.$f['FACULTY_FNAME']); ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        <div class="field">
+          <label for="a_research">Research</label>
+          <select class="input" id="a_research" name="RESEARCH_ID" required>
+            <?php foreach ($res as $r): ?>
+              <option value="<?= (int)$r['RESEARCH_ID']; ?>"><?= htmlspecialchars($r['RESEARCH_TITLE']); ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        <div class="field">
+          <label for="a_role">Role</label>
+          <select class="input" id="a_role" name="ROLE_ID" required>
+            <?php foreach ($roles as $r): ?>
+              <option value="<?= htmlspecialchars($r['ROLE_ID'], ENT_QUOTES); ?>">
+                <?= htmlspecialchars($r['ROLE_ID']); ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        <div class="field">
+          <label for="a_date">Date Assigned</label>
+          <input class="input" id="a_date" type="date" name="DATE_ASSIGNED" required>
+        </div>
+      </div>
+      <div class="admin-modal__actions">
+        <button class="btn wide" type="submit">Create Assignment</button>
+        <button class="btn wide" type="button" data-close="1" style="background:#6b7280;border-color:#6b7280">Cancel</button>
+      </div>
+    </form>
   </div>
-
-  <!-- Pagination -->
-  <div class="pagination">
-    <?php
-      // keep q/sort when paging
-      $qs = function($p) use ($q, $sort) {
-        $parts = ['page='.$p];
-        if ($q !== '')   $parts[]='q='.rawurlencode($q);
-        if ($sort !== '')$parts[]='sort='.rawurlencode($sort);
-        return implode('&',$parts);
-      };
-      $base = app_url('/admin/crud/assignment.php');
-    ?>
-    <?php if ($page > 1): ?>
-      <a class="page-btn" href="<?= $base.'?'.$qs(max(1,$page-1)); ?>" title = "Previous Page">&#x276E;</a>
-    <?php endif; ?>
-
-    <?php
-      $maxPage = 5;
-      $start = max(1, $page - floor($maxPage / 2));
-      $end = min($totalPages, $start + $maxPage - 1);
-
-      if ($end - $start < $maxPage - 1) {
-        $start = max(1, $end - $maxPage + 1);
-      } 
-    ?>
-    <!-- 1 + ...  -->
-    <?php if ($start > 1): ?>
-      <a href="<?= $base.'?'.$qs(1); ?>" class="page-btn" >1</a>
-      <?php if ($start > 3): ?>
-        <a href="<?= $base.'?'.$qs(max(1,$page - 5)) ?>" class="page-btn" title="Jump backward 5 pages">...</a>        
-      <?php endif; ?>
-      <?php if ($start == 3): ?>
-              <a href="<?= $base.'?'.$qs(2); ?>" class="page-btn" >2</a>       
-      <?php endif; ?>
-    <?php endif; ?>
-
-    <?php for ($i = $start;$i <= $end;$i++): ?>
-      <a class="page-btn <?= $i== $page?'active':''; ?>" href="<?= $base.'?'.$qs($i); ?>"><?= $i; ?></a>
-    <?php endfor; ?>
-    
-    <!-- ... + lastPage -->
-    <?php if ($end < $totalPages): ?>
-      <?php if ($end == $totalPages - 2):?>
-        <a href="<?= $base.'?'.$qs($totalPages - 1); ?>" class="page-btn" > <?=$totalPages - 1?></a>
-      <?php endif; ?>
-      <?php if ($end < $totalPages - 2): ?>
-        <a href="<?= $base.'?'.$qs(min($totalPages,$page + 5)); ?>"class="page-btn" title="Jump forward 5 pages">...</a>
-      <?php endif; ?>
-        <a href="<?= $base.'?'.$qs($totalPages); ?>" class="page-btn" > <?=$totalPages?></a>
-    <?php endif; ?>
-
-    <?php  if ($page < $totalPages): ?>
-    <a class="page-btn" href="<?= $base.'?'.$qs(min($totalPages,$page+1)); ?>" title = "Next Page">&#x276F;</a>
-    <?php  endif;?>
-  </div>
-</section>
-
+</div>
 <!-- --------- Modal HTML --------- -->
 <div class="admin-modal" id="assignModal" hidden>
   <div class="admin-modal__backdrop" data-close="1"></div>
@@ -397,7 +256,7 @@ $CSRF = csrf_token();
           <select class="input" id="m_role" name="ROLE_ID" required>
             <?php foreach ($roles as $r): ?>
               <option value="<?= htmlspecialchars($r['ROLE_ID'], ENT_QUOTES); ?>">
-                <?= htmlspecialchars($r['ROLE_ID']); ?>
+                <?= htmlspecialchars($r['ROLE_DESCRIPTION']); ?>
               </option>
             <?php endforeach; ?>
           </select>
@@ -417,8 +276,85 @@ $CSRF = csrf_token();
 </div>
 
 <script>
-// Modal controller
-(function(){
+  const assignmentPanel = document.querySelector('#panel');
+  const queryInput = document.querySelector('input[name="q"]');
+  const sortSelect = document.querySelector('select[name="sort"]');
+  let timer = null;
+  
+  // fetch func
+  function fetchResults(page) {
+    const q = queryInput.value;
+    const sort = sortSelect.value;
+    const url = `../api/search_assignment.php?q=${encodeURIComponent(q)}&sort=${encodeURIComponent(sort)}&page=${page}`;
+    
+    assignmentPanel.innerHTML = "<div class='loading'>Loading...</div>";
+    
+    fetch(url)
+      .then(res => res.text())
+      .then(html => {
+        assignmentPanel.innerHTML = html;
+        attachPaginationEvents();
+        attachEditButtons(); 
+      })
+      .catch(err => {
+        assignmentPanel.innerHTML = "<div class='error'>Failed to load results.</div>";
+        console.error("Error:", err);
+      });
+  }
+  
+  // debounced input
+  function handleLiveInput() {
+    clearTimeout(timer);
+    timer = setTimeout(() => fetchResults(1), 300);
+  }
+  
+  queryInput.addEventListener('input', handleLiveInput);
+  sortSelect.addEventListener('change', () => fetchResults(1));
+  
+  // Attach pagination events
+  function attachPaginationEvents() {
+    const links = document.querySelectorAll('.page-btn');
+    
+    links.forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const url = new URL(this.href);
+        const page = url.searchParams.get('page') || 1;
+        fetchResults(page);
+      });
+    });
+  }
+  //Create Modal
+  const createAssignmentModal = document.getElementById('createAssignmentModal');
+  const a_faculty = document.getElementById('a_faculty');
+  const a_research = document.getElementById('a_research');
+  const a_role = document.getElementById('a_role');
+  const a_date = document.getElementById('a_date');
+  
+  function openAssignmentModal() {
+    a_faculty.value = '';
+    a_type.value = '';
+    a_role.value = '';
+    a_date.value = '';
+  
+    createAssignmentModal.hidden = false; 
+  }
+
+  function closeAssignmentModal() { 
+    createAssignmentModal.hidden = true; 
+  }
+  
+  document.getElementById('create-assignment').addEventListener('click', function() {
+    openAssignmentModal();  
+  });
+      createAssignmentModal.addEventListener('click', e => {
+    if (e.target.dataset.close) closeAssignmentModal();
+  });
+  
+  window.addEventListener('keydown', e => {
+    if (!createAssignmentModal.hidden && e.key === 'Escape') closeAssignmentModal();
+  });
+  // Edit Modal 
   const modal = document.getElementById('assignModal');
   const form  = modal.querySelector('form');
   const idI   = document.getElementById('m_id');
@@ -437,21 +373,31 @@ $CSRF = csrf_token();
   }
   function close(){ modal.hidden = true; }
 
-  document.querySelectorAll('.js-edit').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      open({
-        id: btn.dataset.id,
-        faculty: btn.dataset.faculty,
-        research: btn.dataset.research,
-        role: btn.dataset.role,
-        date: btn.dataset.date
+  function attachEditButtons() {
+    const editButtons = document.querySelectorAll('.js-edit');
+    
+    editButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        open({
+          id: this.dataset.id,
+          faculty: this.dataset.faculty,
+          research: this.dataset.research,
+          role: this.dataset.role,
+          date: this.dataset.date
+        });
       });
     });
-  });
+  }
 
-  modal.addEventListener('click', e=>{ if (e.target.dataset.close) close(); });
-  window.addEventListener('keydown', e=>{ if (!modal.hidden && e.key === 'Escape') close(); });
-})();
+  
+  modal.addEventListener('click', e => {
+    if (e.target.dataset.close) close();
+  });
+  
+  window.addEventListener('keydown', e => {
+    if (!modal.hidden && e.key === 'Escape') close();
+  });
+  fetchResults(1);
 </script>
 
 <?php require_once __DIR__ . '/../../partials/site_footer.php'; ?>
