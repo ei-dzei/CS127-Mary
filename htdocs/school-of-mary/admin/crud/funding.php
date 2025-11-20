@@ -95,43 +95,6 @@ $page = max(1, (int)($_GET['page'] ?? 1));
 $per  = 5;
 $offset = ($page - 1) * $per;
 
-$sortMap = [
-  'date_desc'    => 'fu.DATE_FUNDED DESC, fu.FUNDING_ID DESC',
-  'date_asc'     => 'fu.DATE_FUNDED ASC, fu.FUNDING_ID ASC',
-  'amount_desc'  => 'fu.FUNDING_AMOUNT DESC, fu.FUNDING_ID DESC',
-  'amount_asc'   => 'fu.FUNDING_AMOUNT ASC, fu.FUNDING_ID ASC',
-  'title_asc'    => 're.RESEARCH_TITLE ASC, fu.FUNDING_ID DESC',
-  'agency_asc'   => 'ag.AGENCY_NAME ASC, fu.FUNDING_ID DESC',
-  'id_desc'      => 'fu.FUNDING_ID DESC',
-  'id_asc'       => 'fu.FUNDING_ID ASC',
-];
-$orderSql = $sortMap[$sort] ?? $sortMap['date_desc'];
-
-$baseSql = "FROM FUNDING fu
-            JOIN RESEARCH re ON fu.RESEARCH_ID=re.RESEARCH_ID
-            JOIN AGENCY  ag ON fu.AGENCY_ID  =ag.AGENCY_ID
-            WHERE 1=1";
-$params = [];
-if ($q !== '') {
-  $baseSql .= " AND (re.RESEARCH_TITLE LIKE ? OR ag.AGENCY_NAME LIKE ?)";
-  $params = ["%$q%","%$q%"];
-}
-
-/* Count for pagination */
-$stmtCnt = $pdo->prepare("SELECT COUNT(*) ".$baseSql);
-$stmtCnt->execute($params);
-$total = (int)$stmtCnt->fetchColumn();
-$totalPages = max(1, (int)ceil($total / $per));
-
-/* Page rows */
-$sql = "SELECT fu.*, re.RESEARCH_TITLE, ag.AGENCY_NAME
-        $baseSql
-        ORDER BY $orderSql
-        LIMIT $per OFFSET $offset";
-$stmt = $pdo->prepare($sql);
-$stmt->execute($params);
-$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
 /* Header after handlers */
 require_once __DIR__ . '/../../partials/site_header.php';
 $CSRF = csrf_token();
@@ -199,17 +162,12 @@ $CSRF = csrf_token();
 </style>
 
 <section class="panel fade-in crud-header-card">
+  <button class="btn btn-action" id="create-funding" >+ Create Funding</button>
   <h1 style="margin-bottom:8px;">Funding</h1>
   <p class="muted" style="margin-bottom:10px;">Manage funding rows. CSV import/export below.</p>
 
   <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
     <a class="btn small" href="<?= app_url('/admin/api/export.php'); ?>?table=FUNDING">Export CSV</a>
-    <form method="post" action="<?= app_url('/admin/api/import.php'); ?>" enctype="multipart/form-data" style="display:inline-flex; gap:6px;">
-      <input type="hidden" name="csrf" value="<?= $CSRF; ?>">
-      <input type="hidden" name="table" value="FUNDING">
-      <input class="input" type="file" name="file" accept=".csv" required>
-      <button class="btn small">Import CSV</button>
-    </form>
   </div>
 
   <form method="get" class="grid filter-bar" style="margin-bottom:10px;">
@@ -237,110 +195,54 @@ $CSRF = csrf_token();
   </form>
 </section>
 
-<section class="panel crud-form-card" style="margin-bottom:16px;">
-  <h3 style="margin-top:0">Create Funding</h3>
-  <form method="post" class="grid">
-    <input type="hidden" name="csrf" value="<?= $CSRF; ?>">
-    <input type="hidden" name="action" value="create">
+<section class="panel" id="panel"></section>
 
-    <div class="field" style="grid-column: span 6">
-      <label>Research</label>
-      <select class="input" name="RESEARCH_ID" required>
-        <?php foreach($research as $r): ?>
-          <option value="<?= (int)$r['RESEARCH_ID']; ?>"><?= htmlspecialchars($r['RESEARCH_TITLE']); ?></option>
-        <?php endforeach; ?>
-      </select>
+<!-- Create FUnding Modal -->
+<div class="admin-modal" id="createFundingModal" hidden>
+  <div class="admin-modal__backdrop" data-close="1"></div>
+  <div class="admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="createFundingTitle">
+    <div class="admin-modal__head">
+      <h3 class="admin-modal__title" id="createFundingTitle">Create New Funding</h3>
+      <button class="admin-modal__close" type="button" data-close="1">✕</button>
     </div>
+    <form class="admin-modal__body" method="post">
+      <input type="hidden" name="csrf" value="<?= $CSRF; ?>">
+      <input type="hidden" name="action" value="create">
 
-    <div class="field" style="grid-column: span 4">
-      <label>Agency</label>
-      <select class="input" name="AGENCY_ID" required>
-        <?php foreach($agencies as $a): ?>
-          <option value="<?= (int)$a['AGENCY_ID']; ?>"><?= htmlspecialchars($a['AGENCY_NAME']); ?></option>
-        <?php endforeach; ?>
-      </select>
-    </div>
-
-    <div class="field" style="grid-column: span 2">
-      <label>Amount (₱)</label>
-      <input class="input" type="number" step="0.01" name="FUNDING_AMOUNT">
-    </div>
-
-    <div class="field" style="grid-column: span 3">
-      <label>Date Funded</label>
-      <input class="input" type="date" name="DATE_FUNDED">
-    </div>
-
-    <div class="field" style="grid-column: span 12; display:flex; justify-content:flex-end;">
-      <button class="btn wide">Add</button>
-    </div>
-  </form>
-</section>
-
-<section class="panel">
-  <h3 style="margin-top:0">Records</h3>
-  <div class="table-scroll">
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th><th>Research</th><th>Agency</th><th>Amount</th><th>Date</th><th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <?php foreach($rows as $row):
-          // FIX: Ensure null amount is treated as an empty string for data attributes
-          $data_amount = ($row['FUNDING_AMOUNT'] !== null) ? htmlspecialchars((string)$row['FUNDING_AMOUNT'], ENT_QUOTES) : '';
-        ?>
-          <tr>
-            <td><?= (int)$row['FUNDING_ID']; ?></td>
-            <td><?= htmlspecialchars($row['RESEARCH_TITLE']); ?></td>
-            <td><?= htmlspecialchars($row['AGENCY_NAME']); ?></td>
-            <td><?= $row['FUNDING_AMOUNT'] !== null ? '₱' . number_format((float)$row['FUNDING_AMOUNT'], 2) : '—'; ?></td>
-            <td><?= htmlspecialchars((string)$row['DATE_FUNDED']); ?></td>
-            <td class="actions-cell">
-              <button
-                type="button"
-                class="btn small js-edit"
-                data-id="<?= (int)$row['FUNDING_ID']; ?>"
-                data-research="<?= (int)$row['RESEARCH_ID']; ?>"
-                data-agency="<?= (int)$row['AGENCY_ID']; ?>"
-                data-amount="<?= $data_amount; ?>" data-date="<?= htmlspecialchars((string)$row['DATE_FUNDED'], ENT_QUOTES); ?>"
-              >Edit</button>
-
-              <form method="post" onsubmit="return confirm('Delete funding row?');" style="display:inline">
-                <input type="hidden" name="csrf" value="<?= $CSRF; ?>">
-                <input type="hidden" name="action" value="delete">
-                <input type="hidden" name="FUNDING_ID" value="<?= (int)$row['FUNDING_ID']; ?>">
-                <button class="btn small" style="background:#b91c1c;border-color:#b91c1c">Delete</button>
-              </form>
-            </td>
-          </tr>
-        <?php endforeach; ?>
-        <?php if (!$rows): ?>
-          <tr><td colspan="6" style="text-align:center;color:#666;">No records found.</td></tr>
-        <?php endif; ?>
-      </tbody>
-    </table>
+      <div class="modal-grid">
+        <div class="field">
+          <label for="f_research">Research</label>
+          <select class="input" id="f_research" name="RESEARCH_ID" required>
+            <?php foreach($research as $r): ?>
+              <option value="<?= (int)$r['RESEARCH_ID']; ?>"><?= htmlspecialchars($r['RESEARCH_TITLE']); ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f_agency">Funding Agency</label>
+          <select class="input" id="f_agency" name="AGENCY_ID" required>
+            <?php foreach($agencies as $a): ?>
+            <option value="<?= (int)$a['AGENCY_ID']; ?>"><?= htmlspecialchars($a['AGENCY_NAME']); ?></option>
+          <?php endforeach; ?>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f_amt">Amount (₱)</label>
+          <input class="input" id="f_amt" type="number" step="0.01" name="FUNDING_AMOUNT">
+        </div>
+        <div class="field">
+          <label for="f_date">Date Funded</label>
+          <input class="input" id="f_date" type="date" name="DATE_FUNDED">
+        </div>
+      </div>
+      <div class="admin-modal__actions">
+        <button class="btn wide" type="submit">Create Funding</button>
+        <button class="btn wide" type="button" data-close="1" style="background:#6b7280;border-color:#6b7280">Cancel</button>
+      </div>
+    </form>
   </div>
-
-  <div class="pagination">
-    <?php
-      $qs = function($p) use ($q, $sort) {
-        $parts = ['page='.$p];
-        if ($q   !== '') $parts[]='q='.rawurlencode($q);
-        if ($sort!== '') $parts[]='sort='.rawurlencode($sort);
-        return implode('&',$parts);
-      };
-      $base = app_url('/admin/crud/funding.php');
-    ?>
-    <a class="page-btn" href="<?= $base.'?'.$qs(max(1,$page-1)); ?>">&laquo;</a>
-    <?php for ($i=1;$i<=$totalPages;$i++): ?>
-      <a class="page-btn <?= $i===$page?'active':''; ?>" href="<?= $base.'?'.$qs($i); ?>"><?= $i; ?></a>
-    <?php endfor; ?>
-    <a class="page-btn" href="<?= $base.'?'.$qs(min($totalPages,$page+1)); ?>">&raquo;</a>
-  </div>
-</section>
-
+</div>
+<!-- --------- Modal HTML --------- -->
 <div class="admin-modal" id="fundingModal" hidden>
   <div class="admin-modal__backdrop" data-close="1"></div>
   <div class="admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="fundingModalTitle">
@@ -392,8 +294,82 @@ $CSRF = csrf_token();
 </div>
 
 <script>
-// Modal controller
-(function(){
+  //Search
+  const fundingPanel = document.querySelector('#panel');
+  const queryInput = document.querySelector('input[name="q"]');
+  const sortSelect = document.querySelector('select[name="sort"]');
+  let timer = null;
+  
+  // fetch func
+  function fetchResults(page) {
+    const q = queryInput.value;
+    const sort = sortSelect.value;
+    const url = `../api/search_funding.php?q=${encodeURIComponent(q)}&sort=${encodeURIComponent(sort)}&page=${page}`;
+    
+    fundingPanel.innerHTML = "<div class='loading'>Loading...</div>";
+    
+    fetch(url)
+      .then(res => res.text())
+      .then(html => {
+        fundingPanel.innerHTML = html;
+        attachPaginationEvents();
+        attachEditButtons(); 
+      })
+      .catch(err => {
+        fundingPanel.innerHTML = "<div class='error'>Failed to load results.</div>";
+        console.error("Error:", err);
+      });
+  }
+  
+  // debounced input
+  function handleLiveInput() {
+    clearTimeout(timer);
+    timer = setTimeout(() => fetchResults(1), 300);
+  }
+  queryInput.addEventListener('input', handleLiveInput);
+  sortSelect.addEventListener('change', () => fetchResults(1));
+  
+  function attachPaginationEvents() {
+    const links = document.querySelectorAll('.page-btn');
+    
+    links.forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const url = new URL(this.href);
+        const page = url.searchParams.get('page') || 1;
+        fetchResults(page);
+      });
+    });
+  }
+  //Create Modal
+  const createFundingModal = document.getElementById('createFundingModal');
+  const f_research = document.getElementById('f_research');
+  const f_agency = document.getElementById('f_agency');
+  const f_amt = document.getElementById('f_amt');
+  const f_date = document.getElementById('f_date');
+  function openFundingModal() {
+    f_research.value = '';
+    f_agency.value = '';
+    f_amt.value = '';
+    f_date.value = '';
+    createFundingModal.hidden = false; 
+  }
+
+  function closeFundingModal() { 
+    createFundingModal.hidden = true; 
+  }
+  
+  document.getElementById('create-funding').addEventListener('click', function() {
+    openFundingModal();  
+  });
+      createFundingModal.addEventListener('click', e => {
+    if (e.target.dataset.close) closeFundingModal();
+  });
+  
+  window.addEventListener('keydown', e => {
+    if (!createFundingModal.hidden && e.key === 'Escape') closeFundingModal();
+  });
+// Edit Modal 
   const modal = document.getElementById('fundingModal');
   const form  = modal.querySelector('form');
   const idI   = document.getElementById('m_id');
@@ -414,21 +390,28 @@ $CSRF = csrf_token();
   }
   function close(){ modal.hidden = true; }
 
-  document.querySelectorAll('.js-edit').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      open({
-        id: btn.dataset.id,
-        research: btn.dataset.research,
-        agency: btn.dataset.agency,
-        amount: btn.dataset.amount,
-        date: btn.dataset.date
+  function attachEditButtons() {
+    const editButtons = document.querySelectorAll('.js-edit');
+    
+    editButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        open({
+          id: this.dataset.id,
+        research: this.dataset.research,
+        agency: this.dataset.agency,
+        amount: this.dataset.amount,
+        date: this.dataset.date
+        });
       });
     });
-  });
+  }
+
 
   modal.addEventListener('click', e=>{ if (e.target.dataset.close) close(); });
   window.addEventListener('keydown', e=>{ if (!modal.hidden && e.key === 'Escape') close(); });
-})();
+  // Initial load
+  fetchResults(1);
+
 </script>
 
 <?php require_once __DIR__ . '/../../partials/site_footer.php'; ?>

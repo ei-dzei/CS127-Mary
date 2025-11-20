@@ -111,41 +111,10 @@ $sort   = $_GET['sort'] ?? 'start_desc';
 $page   = max(1, (int)($_GET['page'] ?? 1));
 $per    = 5;
 $offset = ($page - 1) * $per;
-
-$sortMap = [
-  'title_asc'  => 'RESEARCH_TITLE ASC, RESEARCH_ID DESC',
-  'status_asc' => 'RESEARCH_STATUS ASC, RESEARCH_TITLE ASC',
-  'start_desc' => 'RESEARCH_STARTDATE DESC, RESEARCH_ID DESC',
-  'start_asc'  => 'RESEARCH_STARTDATE ASC, RESEARCH_ID ASC',
-  'end_desc'   => 'RESEARCH_ENDDATE DESC, RESEARCH_ID DESC',
-  'end_asc'    => 'RESEARCH_ENDDATE ASC, RESEARCH_ID ASC',
-  'id_desc'    => 'RESEARCH_ID DESC',
-  'id_asc'     => 'RESEARCH_ID ASC',
-];
-$orderSql = $sortMap[$sort] ?? $sortMap['start_desc'];
-
-$baseSql = "FROM RESEARCH WHERE 1=1";
-$params  = [];
-if ($q !== '')      { $baseSql .= " AND RESEARCH_TITLE LIKE ?";       $params[] = "%$q%"; }
-if ($status !== '') { $baseSql .= " AND RESEARCH_STATUS = ?";         $params[] = $status; }
-if ($from !== '')   { $baseSql .= " AND RESEARCH_STARTDATE >= ?";     $params[] = $from; }
-if ($to !== '')     { $baseSql .= " AND (RESEARCH_ENDDATE <= ? OR (RESEARCH_ENDDATE IS NULL AND RESEARCH_STARTDATE <= ?))"; array_push($params, $to, $to); }
-
-/* Count */
-$stmtCnt = $pdo->prepare("SELECT COUNT(*) $baseSql");
-$stmtCnt->execute($params);
-$total = (int)$stmtCnt->fetchColumn();
-$totalPages = max(1, (int)ceil($total / $per));
-
-/* Page rows */
-$sql = "SELECT * $baseSql ORDER BY $orderSql LIMIT $per OFFSET $offset";
-$stmt = $pdo->prepare($sql);
-$stmt->execute($params);
-$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$CSRF = csrf_token();
 
 /* View header */
 require_once __DIR__ . '/../../partials/site_header.php';
-$CSRF = csrf_token();
 ?>
 
 <style>
@@ -246,21 +215,18 @@ $CSRF = csrf_token();
 </style>
 
 <section class="panel fade-in crud-header-card">
+  <button class="btn btn-action" id="create-research" >+ Create Research</button>
   <h1 style="margin-bottom:8px;">Research</h1>
-  <p class="muted" style="margin-bottom:10px;">Manage research, status, and dates. CSV import/export below.</p>
+  <p class="muted" style="margin-bottom:10px;">Manage research, status, and dates. CSV export below.</p>
 
   <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
     <a class="btn small" href="<?= app_url('/admin/api/export.php'); ?>?table=RESEARCH">Export CSV</a>
-    <form method="post" action="<?= app_url('/admin/api/import.php'); ?>" enctype="multipart/form-data" style="display:inline-flex; gap:6px;">
-      <input type="hidden" name="csrf" value="<?= $CSRF; ?>">
-      <input type="hidden" name="table" value="RESEARCH">
-      <input class="input" type="file" name="file" accept=".csv" required>
-      <button class="btn small">Import CSV</button>
-    </form>
   </div>
 
   <form method="get" class="grid filter-bar" style="margin-bottom:10px;">
-    <div class="field" style="grid-column: span 4"><label>Title</label><input class="input" name="q" value="<?= htmlspecialchars($q); ?>"></div>
+    <div class="field" style="grid-column: span 4">
+      <label>Title</label>
+      <input class="input" name="q" value="<?= htmlspecialchars($q); ?>"></div>
     <div class="field" style="grid-column: span 3">
       <label>Status</label>
       <select class="input" name="status">
@@ -271,8 +237,13 @@ $CSRF = csrf_token();
         endforeach; ?>
       </select>
     </div>
-    <div class="field" style="grid-column: span 2"><label>Start from</label><input class="input" type="date" name="from" value="<?= htmlspecialchars($from); ?>"></div>
-    <div class="field" style="grid-column: span 2"><label>End by</label><input class="input" type="date" name="to" value="<?= htmlspecialchars($to); ?>"></div>
+    <div class="field" style="grid-column: span 2">
+      <label>Start from</label>
+      <input class="input" type="date" name="from" value="<?= htmlspecialchars($from); ?>">
+    </div>
+    <div class="field" style="grid-column: span 2">
+      <label>End by</label>
+      <input class="input" type="date" name="to" value="<?= htmlspecialchars($to); ?>"></div>
     <div class="field" style="grid-column: span 1">
       <label>Order</label>
       <select class="input" name="sort">
@@ -293,95 +264,50 @@ $CSRF = csrf_token();
   </form>
 </section>
 
-<section class="panel crud-form-card" style="margin-bottom:16px;">
-  <h3 style="margin-top:0">Create Research</h3>
-  <form method="post" class="grid">
-    <input type="hidden" name="csrf" value="<?= $CSRF; ?>">
-    <input type="hidden" name="action" value="create">
-
-    <div class="field" style="grid-column: span 8"><label>Title</label><input class="input" name="RESEARCH_TITLE" required maxlength="255"></div>
-    <div class="field" style="grid-column: span 2"><label>Start</label><input class="input" type="date" name="RESEARCH_STARTDATE" id="research_startdate" required></div>
-    <div class="field" style="grid-column: span 2"><label>End</label><input class="input" type="date" name="RESEARCH_ENDDATE" id="research_enddate"></div>
-    <div class="field" style="grid-column: span 3">
-      <label>Status</label>
-      <select class="input" name="RESEARCH_STATUS" required>
-        <?php foreach ($statuses as $s): ?>
-          <option value="<?= htmlspecialchars($s['STATUS_CODE'], ENT_QUOTES); ?>"><?= htmlspecialchars($s['STATUS_LABEL']); ?></option>
-        <?php endforeach; ?>
-      </select>
+<section class="panel" id="panel"></section>
+<!-- Create Research Modal -->
+<div class="admin-modal" id="createResearchModal" hidden>
+  <div class="admin-modal__backdrop" data-close="1"></div>
+  <div class="admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="createResearchTitle">
+    <div class="admin-modal__head">
+      <h3 class="admin-modal__title" id="createResearchTitle">Create New Research</h3>
+      <button class="admin-modal__close" type="button" data-close="1">✕</button>
     </div>
+    <form class="admin-modal__body" method="post">
+      <input type="hidden" name="csrf" value="<?= csrf_token(); ?>">
+      <input type="hidden" name="action" value="create">
 
-    <div class="field" style="grid-column: span 12; display:flex; justify-content:flex-end;">
-      <button class="btn wide">Add</button>
-    </div>
-  </form>
-</section>
+      <div class="modal-grid">
+        <div class="field">
+          <label for="r_title"> Title</label>
+          <input class="input" id="r_title" name="RESEARCH_TITLE" required>
+        </div>
+        <div class="field">
+          <label for="r_start">Start Date</label>
+          <input class="input" id="r_start" type="date" name="RESEARCH_STARTDATE" required>
+        </div>
+        <div class="field">
+          <label for="r_end">End Date</label>
+          <input class="input" id="r_end" type="date" name="RESEARCH_ENDDATE">
+        </div>
+      </div>
+      <div class="field">
+        <label for="r_status">Status</label>
+        <select class="input" id="r_status" name="RESEARCH_STATUS" required>
+          <?php foreach ($statuses as $s): ?>
+            <option value="<?= htmlspecialchars($s['STATUS_CODE'], ENT_QUOTES); ?>"><?= htmlspecialchars($s['STATUS_LABEL']); ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
 
-<section class="panel">
-  <h3 style="margin-top:0">Records</h3>
-  <div class="table-scroll">
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th><th>Title</th><th>Status</th><th>Start</th><th>End</th><th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <?php foreach ($rows as $row): ?>
-          <tr>
-            <td><?= (int)$row['RESEARCH_ID']; ?></td>
-            <td><?= htmlspecialchars($row['RESEARCH_TITLE']); ?></td>
-            <td><?= htmlspecialchars($row['RESEARCH_STATUS']); ?></td>
-            <td><?= htmlspecialchars($row['RESEARCH_STARTDATE']); ?></td>
-            <td><?= htmlspecialchars((string)$row['RESEARCH_ENDDATE']); ?></td>
-            <td class="actions-cell">
-              <button
-                type="button"
-                class="btn small js-edit"
-                data-id="<?= (int)$row['RESEARCH_ID']; ?>"
-                data-title="<?= htmlspecialchars($row['RESEARCH_TITLE'], ENT_QUOTES); ?>"
-                data-start="<?= htmlspecialchars($row['RESEARCH_STARTDATE'], ENT_QUOTES); ?>"
-                data-end="<?= htmlspecialchars((string)$row['RESEARCH_ENDDATE'], ENT_QUOTES); ?>"
-                data-status="<?= htmlspecialchars($row['RESEARCH_STATUS'], ENT_QUOTES); ?>"
-              >Edit</button>
-
-              <form method="post" onsubmit="return confirm('Delete research?');" style="display:inline">
-                <input type="hidden" name="csrf" value="<?= $CSRF; ?>">
-                <input type="hidden" name="action" value="delete">
-                <input type="hidden" name="RESEARCH_ID" value="<?= (int)$row['RESEARCH_ID']; ?>">
-                <button class="btn small" style="background:#b91c1c;border-color:#b91c1c">Delete</button>
-              </form>
-            </td>
-          </tr>
-        <?php endforeach; ?>
-        <?php if (!$rows): ?>
-          <tr><td colspan="6" style="text-align:center;color:#666;">No records found.</td></tr>
-        <?php endif; ?>
-      </tbody>
-    </table>
+      <div class="admin-modal__actions">
+        <button class="btn wide" type="submit">Create Research</button>
+        <button class="btn wide" type="button" data-close="1" style="background:#6b7280;border-color:#6b7280">Cancel</button>
+      </div>
+    </form>
   </div>
-
-  <div class="pagination">
-    <?php
-      $qs = function($p) use ($q, $status, $from, $to, $sort) {
-        $parts = ['page='.$p];
-        if ($q      !== '') $parts[]='q='.rawurlencode($q);
-        if ($status !== '') $parts[]='status='.rawurlencode($status);
-        if ($from   !== '') $parts[]='from='.rawurlencode($from);
-        if ($to     !== '') $parts[]='to='.rawurlencode($to);
-        if ($sort   !== '') $parts[]='sort='.rawurlencode($sort);
-        return implode('&',$parts);
-      };
-      $base = app_url('/admin/crud/research.php');
-    ?>
-    <a class="page-btn" href="<?= $base.'?'.$qs(max(1,$page-1)); ?>">&laquo;</a>
-    <?php for ($i=1;$i<=$totalPages;$i++): ?>
-      <a class="page-btn <?= $i===$page?'active':''; ?>" href="<?= $base.'?'.$qs($i); ?>"><?= $i; ?></a>
-    <?php endfor; ?>
-    <a class="page-btn" href="<?= $base.'?'.$qs(min($totalPages,$page+1)); ?>">&raquo;</a>
-  </div>
-</section>
-
+</div>
+<!-- --------- Modal HTML --------- -->
 <div class="admin-modal" id="researchModal" hidden>
   <div class="admin-modal__backdrop" data-close="1"></div>
   <div class="admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="researchModalTitle">
@@ -428,6 +354,95 @@ $CSRF = csrf_token();
 </div>
 
 <script>
+  const researchPanel = document.querySelector('#panel');
+  const queryInput = document.querySelector('input[name="q"]');
+  const statusSelect = document.querySelector('select[name="status"]');
+  const fromInput = document.querySelector('input[name="from"]');
+  const toInput = document.querySelector('input[name="to"]');
+  const sortSelect = document.querySelector('select[name="sort"]');
+  let timer = null;
+
+  // fetch func
+  function fetchResults(page) {
+    const q = queryInput.value;
+    const status = statusSelect.value;
+    const from = fromInput.value;
+    const to = toInput.value;
+    const sort = sortSelect.value;
+    const url = `../api/search_research.php?q=${encodeURIComponent(q)}&status=${encodeURIComponent(status)}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&sort=${encodeURIComponent(sort)}&page=${page}`;    
+    
+    researchPanel.innerHTML = "<div class='loading'>Loading...</div>";
+    
+    fetch(url)
+      .then(res => res.text())
+      .then(html => {
+        researchPanel.innerHTML = html;
+        attachPaginationEvents();
+        attachEditButtons(); 
+      })
+      .catch(err => {
+        researchPanel.innerHTML = "<div class='error'>Failed to load results.</div>";
+        console.error("Error:", err);
+      });
+  }
+  
+  // debounced input
+  function handleLiveInput() {
+    clearTimeout(timer);
+    timer = setTimeout(() => fetchResults(1), 300);
+  }
+  queryInput.addEventListener('input', handleLiveInput);
+  statusSelect.addEventListener('change', () => fetchResults(1));
+  fromInput.addEventListener('input', handleLiveInput);
+  toInput.addEventListener('input', handleLiveInput);
+  sortSelect.addEventListener('change', () => fetchResults(1));
+  
+  // Attach pagination events
+  function attachPaginationEvents() {
+    const links = document.querySelectorAll('.page-btn');
+    
+    links.forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const url = new URL(this.href);
+        const page = url.searchParams.get('page') || 1;
+        fetchResults(page);
+      });
+    });
+  }
+  //Create Research
+  const createResearchModal = document.getElementById('createResearchModal');
+  //const createAgencyForm = createAgencyModal.querySelector('form');
+  const r_title = document.getElementById('r_title');
+  const r_start = document.getElementById('r_start');
+  const r_end = document.getElementById('r_end');
+  const r_status = document.getElementById('r_status');
+  
+  function openResearchModal() {
+    r_title.value = '';
+    r_start.value = '';
+    r_end.value = '';
+    r_status.value = '';
+  
+    createResearchModal.hidden = false; 
+  }
+
+  function closeResearchModal() { 
+    createResearchModal.hidden = true; 
+  }
+  
+  document.getElementById('create-research').addEventListener('click', function() {
+    openResearchModal(); 
+  });
+      
+  createResearchModal.addEventListener('click', e => {
+    if (e.target.dataset.close) closeResearchModal();
+  });
+  
+  window.addEventListener('keydown', e => {
+    if (!createResearchModal.hidden && e.key === 'Escape') closeResearchModal();
+  });
+// Edit Modal controller
 // --- START: CLIENT-SIDE DATE VALIDATION ---
 
 // Function to handle validation on Create/Edit forms
@@ -505,22 +520,31 @@ document.querySelector('form.filter-bar').addEventListener('submit', function(e)
     modal.hidden = false;
   }
   function close(){ modal.hidden = true; }
-
-  document.querySelectorAll('.js-edit').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      open({
-        id: btn.dataset.id,
-        title: btn.dataset.title,
-        start: btn.dataset.start,
-        end: btn.dataset.end,
-        status: btn.dataset.status
+  
+  function attachEditButtons() {
+    const editButtons = document.querySelectorAll('.js-edit');
+    
+    editButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        open({
+          id: this.dataset.id,
+          title: this.dataset.title,
+          start: this.dataset.start,
+          end: this.dataset.end,
+          status: this.dataset.status
+        });
       });
     });
-  });
+  }
 
-  modal.addEventListener('click', e=>{ if (e.target.dataset.close) close(); });
-  window.addEventListener('keydown', e=>{ if (!modal.hidden && e.key === 'Escape') close(); });
-})();
+  modal.addEventListener('click', e => {
+    if (e.target.dataset.close) close();
+  });
+  
+  window.addEventListener('keydown', e => {
+    if (!modal.hidden && e.key === 'Escape') close();
+  });
+  fetchResults(1);
 </script>
 
 <?php require_once __DIR__ . '/../../partials/site_footer.php'; ?>

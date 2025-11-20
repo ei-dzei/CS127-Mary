@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../../config/db.php';
 
 $id = (int)($_GET['id'] ?? 0);
 if (!$id) {
@@ -45,7 +45,7 @@ $projects = $rs->fetchAll(PDO::FETCH_ASSOC);
 
 /* --- Optional computed name for readability --- */
 $faculty['FULL_NAME'] = $faculty['FACULTY_LNAME'] . ', ' . $faculty['FACULTY_FNAME'] .
-  (!empty($faculty['FACULTY_INITIAL']) ? ' ' . $faculty['FACULTY_INITIAL'] . '.' : '');
+  (!empty($faculty['FACULTY_INITIAL']) ? ' ' . $faculty['FACULTY_INITIAL'] : '');//(!empty($faculty['FACULTY_INITIAL']) ? ' ' . $faculty['FACULTY_INITIAL'] . '.' : ''); removed dot since may dot na sa database, need to fix database if ever
 
 /* --- Return structured JSON --- */
 header('Content-Type: application/json');

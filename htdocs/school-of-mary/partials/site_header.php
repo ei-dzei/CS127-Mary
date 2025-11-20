@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/init.php';
-$pageTitle = $pageTitle ?? 'School of Mary';
+$pageTitle = $pageTitle ?? 'Mary ';
 $isAdmin   = is_admin();
 $inAdmin   = in_admin_area();
 
