@@ -5,18 +5,18 @@
     $table  = trim($_GET['table'] ?? '');
     $from   = trim($_GET['from'] ?? '');
     $to     = trim($_GET['to'] ?? '');
-    $sort   = trim($_GET['sort'] ?? 'ASC'); 
+    // $sort   = trim($_GET['sort'] ?? 'ASC'); 
 
     $page   = max(1, (int)($_GET['page'] ?? 1));
-    $PAGE_SIZE = 100;
+    $PAGE_SIZE = 5;
     $offset = ($page - 1) * $PAGE_SIZE;
     $base = app_url('/admin/audit_print.php');
-    
+
     $sortMap = [
         'asc'    => 'audit_id asc',
         'desc'     => 'audit_id desc',
     ];
-    $orderSql = $sortMap[$sort] ?? $sortMap['asc'];
+    // $orderSql = $sortMap[$sort] ?? $sortMap['asc'];
     /* Named parameters only */
     $sqlBase = " FROM AUDIT_LOG WHERE 1=1 ";
     $params = [];
@@ -110,14 +110,14 @@
             </table>
         </div>';
     $pagination = '';
-        $qs = function($p) use ($actor,$action,$table, $from, $to, $sort) {
+        $qs = function($p) use ($actor,$action,$table, $from, $to) {
         $parts = ['page='.$p];
         if ($actor   !== '') $parts[]='actor='.rawurlencode($actor);
         if ($action   !== '') $parts[]='action='.rawurlencode($action);
         if ($table   !== '') $parts[]='table='.rawurlencode($table);
         if ($from   !== '') $parts[]='from='.rawurlencode($from);
         if ($to   !== '') $parts[]='to='.rawurlencode($to);
-        if ($sort!== '') $parts[]='sort='.rawurlencode($sort);
+        //if ($sort!== '') $parts[]='sort='.rawurlencode($sort);
         return implode('&',$parts);
         };
         
