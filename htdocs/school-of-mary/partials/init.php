@@ -30,7 +30,7 @@ function app_base(): string {
   }
 
   // Default hardcoded base (project folder)
-  $base = '/CS127-Mary/htdocs/school-of-mary'; //Original: $base = '/school-of-mary';
+  $base = '/school-of-mary';
   return $base;
 }
 
