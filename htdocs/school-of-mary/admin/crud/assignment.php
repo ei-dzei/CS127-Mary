@@ -184,13 +184,14 @@ require_once __DIR__ . '/../../partials/site_header.php';
 </style>
 
 <section class="panel fade-in crud-header-card">
-  <button class="btn btn-action" id="create-assignment" >+ Create Assignment</button>
+  <button class="btn btn-action" id="create-assignment" style="float:inline-end" >+ Create Assignment</button>
+  <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; float: inline-end">
+    <a class="btn small" href="<?= app_url('/admin/api/export.php'); ?>?table=ASSIGNMENT">Export CSV</a>
+  </div>
   <h1 style="margin-bottom:8px;">Assignments</h1>
   <p class="muted" style="margin-bottom:10px;">Manage who is assigned to which research and in what role. CSV import/export below.</p>
 
-  <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
-    <a class="btn small" href="<?= app_url('/admin/api/export.php'); ?>?table=ASSIGNMENT">Export CSV</a>
-  </div>
+  
 
   <form method="get" class="grid filter-bar" style="margin-bottom:10px;">
     <div class="field" style="grid-column: span 5">

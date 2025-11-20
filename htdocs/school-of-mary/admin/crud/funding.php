@@ -162,13 +162,14 @@ $CSRF = csrf_token();
 </style>
 
 <section class="panel fade-in crud-header-card">
-  <button class="btn btn-action" id="create-funding" >+ Create Funding</button>
+  <button class="btn btn-action" id="create-funding" style="float:inline-end" >+ Create Funding</button>
+  <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; float:inline-end">
+    <a class="btn small" href="<?= app_url('/admin/api/export.php'); ?>?table=FUNDING">Export CSV</a>
+  </div>
   <h1 style="margin-bottom:8px;">Funding</h1>
   <p class="muted" style="margin-bottom:10px;">Manage funding rows. CSV import/export below.</p>
 
-  <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
-    <a class="btn small" href="<?= app_url('/admin/api/export.php'); ?>?table=FUNDING">Export CSV</a>
-  </div>
+  
 
   <form method="get" class="grid filter-bar" style="margin-bottom:10px;">
     <div class="field" style="grid-column: span 7">

@@ -883,6 +883,7 @@ th {
 #clear-btn{height: 34.4px;margin-bottom: 10px; vertical-align: bottom;display: relativex;}
 #filter-dropdown  {display: none; width: 100%; padding: 10px;}
 #filter-btn {
+  border: none;
   float: inline-end;
   top: 0;
   padding: 8px 14px;

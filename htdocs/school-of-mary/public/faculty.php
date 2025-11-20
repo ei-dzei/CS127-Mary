@@ -116,9 +116,9 @@
         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M10 18a8 8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/>
         </svg>
-        <input type="search" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search by name or email…" />
+        <input type="search" name="q" type="search" value="<?= htmlspecialchars($q) ?>" style="width: 85%;"placeholder="Search by name or email…" />
         <!-- <input type="reset" value="X" alt="Clear the search form"> -->
-        <button class="filter-btn" id="filter-btn" type="button" onclick="showHide()">
+        <button class="filter-btn" id="filter-btn" type="button" style="border: none; "onclick="showHide()">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-filter" viewBox="0 0 16 16">
             <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5"/>
           </svg>
@@ -158,11 +158,6 @@
       
       
     </div>
-
-    <div class="filter-actions">
-      <button class="btn" type="submit">Apply</button>
-      <a class="clear-btn" href="<?= BASE_URL ?>/public/faculty.php">Clear</a>
-    </div> -->
   </form>
 
   <div id="faculty-results" class="fade-in"></div>

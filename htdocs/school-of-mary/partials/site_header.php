@@ -27,7 +27,6 @@ if (!function_exists('current_path')) {
   <link rel="shortcut icon" href="<?= BASE_URL ?>/public/smlogo.ico" />
 
   <link rel="stylesheet" href="<?= BASE_URL ?>/assets/styles.css" />
-  <link rel="stylesheet" href="<?= BASE_URL ?>/assets/modal.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
   <style>

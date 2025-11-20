@@ -476,8 +476,6 @@ $CSRF = csrf_token();
 
   modal.addEventListener('click', e=>{ if (e.target.dataset.close) close(); });
   window.addEventListener('keydown', e=>{ if (!modal.hidden && e.key === 'Escape') close(); });
-})();
-
 
 (function(){
   const errorModal = document.getElementById('errorModal');

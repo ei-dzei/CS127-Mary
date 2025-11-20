@@ -378,120 +378,125 @@ require_once __DIR__ . '/../partials/site_header.php';
     </div>
 
     <!-- Top Research by Total Funding -->
-        <div class="section-card research-col">
-          <div class="section-header">
-            <div class="section-emoji"><i class="bi bi-trophy"></i></div>
-            <h3 style="margin:0;">Top Research by Total Funding</h3>
-          </div>
-          <?php if (!$topResearch): ?>
-            <div class="muted">No data.</div>
-          <?php else: ?>
-            <table class="list">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Research</th>
-                  <th>Total Funding</th>
-                </tr>
-              </thead>
-              <tbody>
-                <?php
-                  $rankStart = $tr_offset + 1;
-                  foreach ($topResearch as $idx => $tr):
-                ?>
-                  <tr>
-                    <td><?= $rankStart + $idx; ?></td>
-                    <td>
-                      <a href="<?= app_url('/public/research.php'); ?>?id=<?= (int)$tr['RESEARCH_ID']; ?>">
-                        <?= htmlspecialchars($tr['RESEARCH_TITLE']); ?>
-                      </a>
-                    </td>
-                    <td><?= '₱' . number_format((float)$tr['total'], 2); ?></td>
-                  </tr>
-                <?php endforeach; ?>
-              </tbody>
-            </table>
-            <!-- Pagination -->
-        <div class="pagination">
-          <?php
-            $base  = app_url('/admin/dashboard.php');
-            $qs_tr = function($p) use ($tf_page, $log_page) {
-              return 'tr_page='.$p.'&tf_page='.$tf_page.'&log_page='.$log_page;
-            };
-          ?>
-          <?php if ($tr_page > 1): ?>
-          <a class="page-btn" href="<?= $base.'?'.$qs_tr(max(1,$tr_page-1)); ?>#research-section" title = "Previous Page">&#x276E;</a>
-          <?php endif; ?>
-          <?php
-            $tr_maxPage = 5;
-            $tr_start = max(1, $tr_page - floor($tr_maxPage / 2));
-            $tr_end = min($tr_pages, $tr_start + $tr_maxPage - 1);
-
-            if ($tr_end - $tr_start < $tr_maxPage - 1) {
-              $tr_start = max(1, $tr_end - $tr_maxPage + 1);
-            } 
-          ?>
-          <!-- 1 + ...  -->
-          <?php if ($tr_start > 1): ?>
-            <a href="<?= $base.'?'.$qs_tr(1); ?>#research-section" class="page-btn" >1</a>
-            <?php if ($tr_start > 3): ?>
-              <a href="<?= $base.'?'.$qs_tr(max(1,$tr_page - 5)) ?>#research-section" class="page-btn" title="Jump backward 5 pages">...</a>        
-            <?php endif; ?>
-            <?php if ($tr_start == 3): ?>
-                    <a href="<?= $base.'?'.$qs_tr(2); ?>#research-section" class="page-btn" >2</a>       
-            <?php endif; ?>
-          <?php endif; ?>
-          
-          <?php for ($i = $tr_start; $i <= $tr_end; $i++): ?>
-            <a class="page-btn <?= $i == $tr_page ? 'active' : '' ?>" href="<?= $base.'?'.$qs_tr($i); ?>#research-section"><?= $i ?></a>
-          <?php endfor; ?>
-          <!-- ... + lastPage -->
-          <?php if ($tr_end < $tr_pages): ?>
-            <?php if ($tr_end == $tr_pages - 2):?>
-              <a href="<?= $base.'?'.$qs_tr($tr_pages - 1); ?>#research-section" class="page-btn" > <?=$tr_pages - 1?></a>
-            <?php endif; ?>
-            <?php if ($tr_end < $tr_pages - 2): ?>
-              <a href="<?= $base.'?'.$qs_tr(min($tr_pages,$tr_page + 5)); ?>#research-section"class="page-btn" title="Jump forward 5 pages">...</a>
-            <?php endif; ?>
-              <a href="<?= $base.'?'.$qs_tr($tr_pages); ?>#research-section" class="page-btn" > <?=$tr_pages?></a>
-          <?php endif; ?>
-          <?php  if ($tr_page < $tr_pages): ?>
-            <a class="page-btn" href="<?= $base.'?'.$qs_tr(min($tr_pages,$tr_page+1)); ?>#research-section" title = "Next Page">&#x276F;</a>
-          <?php  endif;?>
     <div class="dual-column-layout">
+      <div class="section-card research-col" id="research-section">
+        <div class="section-header">
+          <div class="section-emoji"><i class="bi bi-trophy"></i></div>
+          <h3 style="margin:0;">Top Research by Total Funding</h3>
         </div>
-
-        <div class="section-card calendar-col">
-          <div class="section-header">
-              <div class="section-emoji"><i class="bi bi-calendar-check"></i></div>
-              <h3 style="margin:0;">Calendar</h3>
-          </div>
+        <?php if (!$topResearch): ?>
+          <div class="muted">No data.</div>
+        <?php else: ?>
+          <table class="list">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Research</th>
+                <th>Total Funding</th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php
+                $rankStart = $tr_offset + 1;
+                foreach ($topResearch as $idx => $tr):
+              ?>
+                <tr>
+                  <td><?= $rankStart + $idx; ?></td>
+                  <td>
+                    <a href="<?= app_url('/public/research.php'); ?>?id=<?= (int)$tr['RESEARCH_ID']; ?>">
+                      <?= htmlspecialchars($tr['RESEARCH_TITLE']); ?>
+                    </a>
+                  </td>
+                  <td><?= '₱' . number_format((float)$tr['total'], 2); ?></td>
+                </tr>
+              <?php endforeach; ?>
+            </tbody>
+          </table>
           
-          <div id="calendar-app" class="panel" style="padding: 0; border: none; box-shadow: none;">
-              <div class="calendar-header">
-                  <button id="prev-month" class="btn small">←</button>
-                  <h2 id="current-month-year">Loading...</h2>
-                  <button id="next-month" class="btn small">→</button>
-              </div>
-              
-              <div class="calendar-grid-header">
-                  <div>S</div>
-                  <div>M</div>
-                  <div>T</div>
-                  <div>W</div>
-                  <div>T</div>
-                  <div>F</div>
-                  <div>S</div>
-              </div>
+          <!-- Pagination INSIDE the section-card -->
+          <div class="pagination">
+            <?php
+              $base  = app_url('/admin/dashboard.php');
+              $qs_tr = function($p) use ($tf_page, $log_page) {
+                return 'tr_page='.$p.'&tf_page='.$tf_page.'&log_page='.$log_page;
+              };
+            ?>
+            <?php if ($tr_page > 1): ?>
+            <a class="page-btn" href="<?= $base.'?'.$qs_tr(max(1,$tr_page-1)); ?>#research-section" title = "Previous Page">&#x276E;</a>
+            <?php endif; ?>
+            <?php
+              $tr_maxPage = 5;
+              $tr_start = max(1, $tr_page - floor($tr_maxPage / 2));
+              $tr_end = min($tr_pages, $tr_start + $tr_maxPage - 1);
 
-              <div id="calendar-days" class="calendar-grid">
-              </div>
-              
-              <span id="live-clock">Loading Time...</span>
+              if ($tr_end - $tr_start < $tr_maxPage - 1) {
+                $tr_start = max(1, $tr_end - $tr_maxPage + 1);
+              } 
+            ?>
+            <!-- 1 + ...  -->
+            <?php if ($tr_start > 1): ?>
+              <a href="<?= $base.'?'.$qs_tr(1); ?>#research-section" class="page-btn" >1</a>
+              <?php if ($tr_start > 3): ?>
+                <a href="<?= $base.'?'.$qs_tr(max(1,$tr_page - 5)) ?>#research-section" class="page-btn" title="Jump backward 5 pages">...</a>        
+              <?php endif; ?>
+              <?php if ($tr_start == 3): ?>
+                      <a href="<?= $base.'?'.$qs_tr(2); ?>#research-section" class="page-btn" >2</a>       
+              <?php endif; ?>
+            <?php endif; ?>
+            
+            <?php for ($i = $tr_start; $i <= $tr_end; $i++): ?>
+              <a class="page-btn <?= $i == $tr_page ? 'active' : '' ?>" href="<?= $base.'?'.$qs_tr($i); ?>#research-section"><?= $i ?></a>
+            <?php endfor; ?>
+            <!-- ... + lastPage -->
+            <?php if ($tr_end < $tr_pages): ?>
+              <?php if ($tr_end == $tr_pages - 2):?>
+                <a href="<?= $base.'?'.$qs_tr($tr_pages - 1); ?>#research-section" class="page-btn" > <?=$tr_pages - 1?></a>
+              <?php endif; ?>
+              <?php if ($tr_end < $tr_pages - 2): ?>
+                <a href="<?= $base.'?'.$qs_tr(min($tr_pages,$tr_page + 5)); ?>#research-section"class="page-btn" title="Jump forward 5 pages">...</a>
+              <?php endif; ?>
+                <a href="<?= $base.'?'.$qs_tr($tr_pages); ?>#research-section" class="page-btn" > <?=$tr_pages?></a>
+            <?php endif; ?>
+            <?php  if ($tr_page < $tr_pages): ?>
+              <a class="page-btn" href="<?= $base.'?'.$qs_tr(min($tr_pages,$tr_page+1)); ?>#research-section" title = "Next Page">&#x276F;</a>
+            <?php  endif;?>
           </div>
+        <?php endif; ?>  
+      </div>
+
+      <!-- Calendar Col -->
+      <div class="section-card calendar-col">
+        <div class="section-header">
+            <div class="section-emoji"><i class="bi bi-calendar-check"></i></div>
+            <h3 style="margin:0;">Calendar</h3>
         </div>
-    </div>
-    <div class="section-card">
+        
+        <div id="calendar-app" class="panel" style="padding: 0; border: none; box-shadow: none;">
+            <div class="calendar-header">
+                <button id="prev-month" class="btn small">←</button>
+                <h2 id="current-month-year">Loading...</h2>
+                <button id="next-month" class="btn small">→</button>
+            </div>
+            
+            <div class="calendar-grid-header">
+                <div>S</div>
+                <div>M</div>
+                <div>T</div>
+                <div>W</div>
+                <div>T</div>
+                <div>F</div>
+                <div>S</div>
+            </div>
+
+            <div id="calendar-days" class="calendar-grid">
+            </div>
+            
+            <span id="live-clock">Loading Time...</span>
+        </div>
+      </div>  
+    </div> 
+    
+    <div class="section-card" id="faculty-section">
       <div class="section-header">
         <div class="section-emoji"><i class="bi bi-people"></i></div>
         <h3 style="margin:0;">Top Faculty by Total Assignments</h3>
@@ -642,13 +647,13 @@ require_once __DIR__ . '/../partials/site_header.php';
           <?php endfor; ?>
           <!-- ... + lastPage -->
           <?php if ($log_end < $log_pages): ?>
-            <?php if ($log_end == $log_pages - 2):?>
-              <a href="<?= $base.'?'.$qs_tf($log_pages - 1); ?>#audit-section" class="page-btn" > <?=$log_pages - 1?></a>
+            <?php if ($log_end == $log_pages - 2): ?>
+              <a href="<?= $base.'?'.$qs_log($log_pages - 1); ?>#audit-section" class="page-btn"><?= $log_pages - 1 ?></a>
             <?php endif; ?>
             <?php if ($log_end < $log_pages - 2): ?>
-              <a href="<?= $base.'?'.$qs_tf(min($log_pages,$tf_page + 5)); ?>#audit-section"class="page-btn" title="Jump forward 5 pages">...</a>
+              <a href="<?= $base.'?'.$qs_log(min($log_pages,$tf_page + 5)); ?>#audit-section"class="page-btn" title="Jump forward 5 pages">...</a>
             <?php endif; ?>
-              <a href="<?= $base.'?'.$qs_tf($log_pages); ?>#audit-section" class="page-btn" > <?=$log_pages?></a>
+              <a href="<?= $base.'?'.$qs_log($log_pages); ?>#audit-section" class="page-btn" > <?=$log_pages?></a>
           <?php endif; ?>
           <?php  if ($log_page < $log_pages): ?>
             <a class="page-btn" href="<?= $base.'?'.$qs_log(min($log_pages,$log_page+1)); ?>#audit-section" title = "Next Page">&#x276F;</a>

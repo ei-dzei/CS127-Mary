@@ -36,7 +36,7 @@ if ($action === 'create') {
 
   if (!empty($endDate) && (strtotime($endDate) < strtotime($startDate))) {
     // MODIFIED: Use set_flash_message for toast popup display
-    set_flash_message('error', 'The End Date cannot be earlier than the Start Date.');
+    //set_flash_message('error', 'The End Date cannot be earlier than the Start Date.');
     redirect_to('/admin/crud/research.php');
     exit;
   }
@@ -69,7 +69,7 @@ if ($action === 'update') {
 
   if (!empty($endDate) && (strtotime($endDate) < strtotime($startDate))) {
     // MODIFIED: Use set_flash_message for toast popup display
-    set_flash_message('error', 'The End Date cannot be earlier than the Start Date (Update Failed).');
+    //set_flash_message('error', 'The End Date cannot be earlier than the Start Date (Update Failed).');
     redirect_to('/admin/crud/research.php');
     exit;
   }
@@ -215,13 +215,14 @@ require_once __DIR__ . '/../../partials/site_header.php';
 </style>
 
 <section class="panel fade-in crud-header-card">
-  <button class="btn btn-action" id="create-research" >+ Create Research</button>
+  <button class="btn btn-action" id="create-research" style="float:inline-end">+ Create Research</button>
+  <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; float: inline-end">
+    <a class="btn small" href="<?= app_url('/admin/api/export.php'); ?>?table=RESEARCH">Export CSV</a>
+  </div>
   <h1 style="margin-bottom:8px;">Research</h1>
   <p class="muted" style="margin-bottom:10px;">Manage research, status, and dates. CSV export below.</p>
 
-  <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
-    <a class="btn small" href="<?= app_url('/admin/api/export.php'); ?>?table=RESEARCH">Export CSV</a>
-  </div>
+  
 
   <form method="get" class="grid filter-bar" style="margin-bottom:10px;">
     <div class="field" style="grid-column: span 4">
