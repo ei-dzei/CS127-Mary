@@ -172,8 +172,8 @@ require_once __DIR__ . '/../../partials/site_header.php';
 
 /* Filter Bar: All inputs on one line */
 .filter-bar {
-  /* Define one row with 6 columns (Title, Status, From, To, Order, Clear) */
-  grid-template-columns: 3fr 2fr 1fr 1fr 2fr 1fr; 
+  /* MODIFIED: Using 12-column grid for precise placement */
+  grid-template-columns: repeat(12, 1fr); 
   gap: 10px;
 }
 .filter-bar .field {
@@ -182,28 +182,29 @@ require_once __DIR__ . '/../../partials/site_header.php';
     flex-direction: column;
     gap: 6px;
 }
-.filter-bar .field:nth-child(1) { grid-column: span 3; } /* Title */
-.filter-bar .field:nth-child(2) { grid-column: span 2; } /* Status */
-.filter-bar .field:nth-child(3) { grid-column: span 1; } /* Start from */
-.filter-bar .field:nth-child(4) { grid-column: span 1; } /* End by */
-.filter-bar .field:nth-child(5) { grid-column: span 2; } /* Order */
 
-/* MODIFIED: Fix for Clear button alignment - adds padding equivalent to label + gap */
+/* Column Spans for desktop view (12 columns total) */
+.filter-bar .field:nth-child(1) { grid-column: span 3; } /* Title (3/12) */
+.filter-bar .field:nth-child(2) { grid-column: span 2; } /* Status (2/12) */
+.filter-bar .field:nth-child(3) { grid-column: span 2; } /* Start from (2/12) */
+.filter-bar .field:nth-child(4) { grid-column: span 2; } /* End by (2/12) */
+.filter-bar .field:nth-child(5) { grid-column: span 2; } /* Order (2/12) */
+
+/* MODIFIED: Clear button placement and alignment */
 .filter-bar .filter-actions { 
-    grid-column: span 1; 
-    padding-top: 20px; /* Adjust this value if the input height/label gap changes */
-    /* NEW: Right-align the content inside the cell */
+    grid-column: 12 / 13; /* Places the button in the very last column (column 12) */
+    padding-top: 20px; /* Vertical alignment with inputs */
     display: flex; 
-    justify-content: flex-end;
+    justify-content: flex-end; /* Push the button to the right edge */
+    align-items: flex-start; 
 }
 .filter-bar .filter-actions .btn-action {
-    /* REMOVED: width: 100%; since we want it right-aligned and not stretched */
-    min-width: 130px; /* Keep standard button width */
+    min-width: 100px; /* Tweak width to fit neatly in the smaller column */
     height: 40px; 
 }
 
 @media (max-width: 992px) {
-  /* Smaller screens: stack Title/Status, then Dates/Order/Clear */
+  /* Tablet View: Stacking layout */
   .filter-bar { grid-template-columns: repeat(12, 1fr); align-items: stretch; }
   .filter-bar .field:nth-child(1) { grid-column: span 6; }
   .filter-bar .field:nth-child(2) { grid-column: span 6; }
@@ -212,17 +213,15 @@ require_once __DIR__ . '/../../partials/site_header.php';
   .filter-bar .field:nth-child(5) { grid-column: span 4; }
   .filter-bar .filter-actions { 
       grid-column: span 2; 
-      padding-top: 0; /* Remove top padding on smaller screens */
-      /* NEW: Align to the right in the mobile view too */
+      padding-top: 0; 
       justify-content: flex-end; 
   }
 }
 
 @media (max-width: 720px){ 
-  /* Mobile: stack all fields */
+  /* Mobile: Full-width stacking */
   .filter-bar .field, .filter-bar .filter-actions { 
       grid-column: span 12 !important; 
-      /* Center button when it takes full width on smallest screens */
       justify-content: center;
   }
 }
