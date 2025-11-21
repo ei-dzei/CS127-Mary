@@ -172,9 +172,11 @@ require_once __DIR__ . '/../../partials/site_header.php';
 
 /* Filter Bar: All inputs on one line */
 .filter-bar {
-  /* MODIFIED: Using 12-column grid for precise placement */
+  /* Using 12-column grid for precise placement */
   grid-template-columns: repeat(12, 1fr); 
   gap: 10px;
+  /* ADDED: Align items to the bottom baseline */
+  align-items: flex-end; 
 }
 .filter-bar .field {
     /* Ensure label and input stack within the field container */
@@ -193,14 +195,16 @@ require_once __DIR__ . '/../../partials/site_header.php';
 /* MODIFIED: Clear button placement and alignment */
 .filter-bar .filter-actions { 
     grid-column: 12 / 13; /* Places the button in the very last column (column 12) */
-    padding-top: 20px; /* Vertical alignment with inputs */
+    padding-top: 0; /* Clear previous manual adjustment */
     display: flex; 
     justify-content: flex-end; /* Push the button to the right edge */
-    align-items: flex-start; 
+    /* Removed align-items: flex-start; as align-items: flex-end on parent takes care of bottom alignment */
 }
 .filter-bar .filter-actions .btn-action {
-    min-width: 100px; /* Tweak width to fit neatly in the smaller column */
+    min-width: 100px; 
     height: 40px; 
+    /* ADDED: Push the button down by the label height + gap (20px) to align its top edge with the inputs' top edge. */
+    margin-top: 20px; 
 }
 
 @media (max-width: 992px) {
@@ -215,6 +219,9 @@ require_once __DIR__ . '/../../partials/site_header.php';
       grid-column: span 2; 
       padding-top: 0; 
       justify-content: flex-end; 
+  }
+  .filter-bar .filter-actions .btn-action {
+      margin-top: 0; /* Remove manual margin in stacked layout */
   }
 }
 
