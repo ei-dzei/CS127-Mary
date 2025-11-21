@@ -99,18 +99,77 @@ require_once __DIR__ . '/../../partials/site_header.php';
 .admin-modal__close{position:absolute; right:12px; top:10px; width:36px; height:36px; border-radius:10px; border:1px solid #e5eaf0; background:#fff;}
 .admin-modal__close:hover{background:#f4f7fb}
 .admin-modal__body{padding:18px;}
+
+/* MODIFIED: Modal grid for 4 fields */
 .modal-grid{
-  display:grid; grid-template-columns: 1fr 1fr 1fr; gap:16px;
+  display:grid; 
+  /* NEW: Use 4 equal columns for the four fields (Faculty, Research, Role, Date) */
+  grid-template-columns: repeat(4, 1fr); 
+  gap:16px;
 }
-@media (max-width: 900px){ .modal-grid{ grid-template-columns: 1fr; } }
+@media (max-width: 900px){ 
+  /* Ensure stacking for smaller screens */
+  .modal-grid{ grid-template-columns: 1fr; } 
+}
+
 .modal-grid .field{display:flex; flex-direction:column; gap:6px;}
 .modal-grid .input, .modal-grid select{width:100%; padding:12px 14px; font-size:16px;}
 .admin-modal__actions{display:flex; gap:10px; justify-content:flex-end; padding:12px 18px; border-top:1px solid #eef2f6;}
 .btn.wide { min-width: 160px; }
-.filter-bar .btn, .filter-bar .clear-btn { min-width: 140px; }
-@media (max-width: 720px){
-  .filter-bar .btn, .filter-bar .clear-btn { width:100%; }
+
+
+/* MODIFIED: Filter Bar Styles for Alignment and Grid */
+.filter-bar {
+  /* Use 12 columns for more flexible layout control */
+  grid-template-columns: repeat(12, 1fr); 
+  gap: 10px;
+  /* Align all content items to the bottom baseline for vertical alignment */
+  align-items: flex-end; 
 }
+.filter-bar .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+/* Assign column spans for desktop (Search, Order, Buttons) */
+.filter-bar .field:nth-child(1) { grid-column: span 7; } /* Search: 7/12 columns */
+.filter-bar .field:nth-child(2) { grid-column: span 3; } /* Order: 3/12 columns */
+
+/* Container for Filter and Clear buttons */
+.filter-bar .filter-actions {
+    grid-column: span 2; /* Buttons: 2/12 columns (Remaining space) */
+    display: flex;
+    justify-content: flex-end; /* Push buttons to the right edge of their 2 columns */
+    gap: 10px;
+}
+.filter-bar .btn-action { 
+    min-width: 100px; 
+    height: 40px; 
+    /* Push buttons down by the label height + gap (approx 20px) for vertical alignment */
+    margin-top: 20px; 
+}
+
+
+/* Tablet/Mobile Adjustments */
+@media (max-width: 992px) {
+  /* Tablet: Search full width, Order and Buttons share the next row */
+  .filter-bar .field:nth-child(1) { grid-column: span 12; }
+  .filter-bar .field:nth-child(2) { grid-column: span 6; } /* Order takes half */
+  .filter-bar .filter-actions { 
+      grid-column: span 6; /* Buttons take other half */
+      /* Remove the top margin hack in the stacked layout */
+      margin-top: 0; 
+  }
+  .filter-bar .btn-action {
+      margin-top: 0; /* Clear manual top margin */
+  }
+}
+@media (max-width: 720px){
+  .filter-bar .field, .filter-bar .filter-actions { grid-column: span 12 !important; }
+  .filter-bar .filter-actions { justify-content: center; } /* Center buttons when full width */
+}
+/* END: MODIFIED Filter Bar Styles */
+
 
 /* Action buttons parity */
 .btn-action{
@@ -184,21 +243,22 @@ require_once __DIR__ . '/../../partials/site_header.php';
 </style>
 
 <section class="panel fade-in crud-header-card">
-  <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; float:inline-end">
-    <a class="btn-action btn-ghost" href="<?= app_url('/admin/api/export.php'); ?>?table=ASSIGNMENT">Export CSV</a>
-    <button class="btn-action btn-primary" id="create-assignment">+ Create Assignment</button>
+  <div class="crud-header-top" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+    <div class="crud-header-text">
+        <h1 style="margin: 0;">Assignments</h1>
+        <p class="muted" style="margin: 4px 0 0 0;">Manage who is assigned to which research and in what role. CSV import/export below.</p>
+    </div>
+    <div class="crud-header-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <a class="btn-action btn-ghost" href="<?= app_url('/admin/api/export.php'); ?>?table=ASSIGNMENT">Export CSV</a>
+        <button class="btn-action btn-primary" id="create-assignment">+ Create Assignment</button>
+    </div>
   </div>
-  <h1 style="margin-bottom:8px;">Assignments</h1>
-  <p class="muted" style="margin-bottom:10px;">Manage who is assigned to which research and in what role. CSV import/export below.</p>
-
-  
-
-  <form method="get" class="grid filter-bar" style="margin-bottom:10px;">
-    <div class="field" style="grid-column: span 5">
+  <form method="get" class="grid filter-bar" style="margin-top:10px; margin-bottom:10px;">
+    <div class="field">
       <label>Search (faculty or research title)</label>
       <input class="input" name="q" value="<?= htmlspecialchars($q); ?>">
     </div>
-    <div class="field" style="grid-column: span 3">
+    <div class="field">
       <label>Order</label>
       <select class="input" name="sort">
         <option value="id_desc"       <?= $sort==='id_desc'?'selected':''; ?>>ID (Newest First)</option>
@@ -211,7 +271,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
         <option value="research_desc" <?= $sort==='research_desc'?'selected':''; ?>>Research (Z–A)</option>
       </select>
     </div>
-    <div class="field" style="grid-column: span 2; display:flex; align-items:flex-end; gap:10px">
+    <div class="filter-actions">
       <button class="btn-action btn-primary" type="submit">Filter</button>
       <a class="btn-action btn-ghost" href="<?= app_url('/admin/crud/assignment.php'); ?>">Clear</a>
     </div>
@@ -233,6 +293,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
         <div class="field">
           <label for="a_faculty">Faculty</label>
           <select class="input" id="a_faculty" name="FACULTY_ID" required>
+            <option value="" disabled selected>Select Faculty</option>
             <?php foreach ($fac as $f): ?>
               <option value="<?= (int)$f['FACULTY_ID']; ?>">
                 <?= htmlspecialchars($f['FACULTY_LNAME'].', '.$f['FACULTY_FNAME']); ?>
@@ -243,6 +304,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
         <div class="field">
           <label for="a_research">Research</label>
           <select class="input" id="a_research" name="RESEARCH_ID" required>
+            <option value="" disabled selected>Select Research</option>
             <?php foreach ($res as $r): ?>
               <option value="<?= (int)$r['RESEARCH_ID']; ?>"><?= htmlspecialchars($r['RESEARCH_TITLE']); ?></option>
             <?php endforeach; ?>
@@ -251,9 +313,10 @@ require_once __DIR__ . '/../../partials/site_header.php';
         <div class="field">
           <label for="a_role">Role</label>
           <select class="input" id="a_role" name="ROLE_ID" required>
+            <option value="" disabled selected>Select Role</option>
             <?php foreach ($roles as $r): ?>
               <option value="<?= htmlspecialchars($r['ROLE_ID'], ENT_QUOTES); ?>">
-                <?= htmlspecialchars($r['ROLE_ID']); ?>
+                <?= htmlspecialchars($r['ROLE_DESCRIPTION']); ?>
               </option>
             <?php endforeach; ?>
           </select>
@@ -264,7 +327,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
         </div>
       </div>
       <div class="admin-modal__actions">
-        <button class="btn wide" type="submit">Create Assignment</button>
+        <button class="btn wide btn-primary" type="submit">Create Assignment</button>
         <button class="btn wide" type="button" data-close="1" style="background:#6b7280;border-color:#6b7280">Cancel</button>
       </div>
     </form>
@@ -318,7 +381,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
       </div>
 
       <div class="admin-modal__actions">
-        <button class="btn wide" type="submit">Save</button>
+        <button class="btn wide btn-primary" type="submit">Save</button>
         <button class="btn wide" type="button" data-close="1" style="background:#6b7280;border-color:#6b7280">Cancel</button>
       </div>
     </form>
@@ -382,8 +445,9 @@ require_once __DIR__ . '/../../partials/site_header.php';
   const a_date = document.getElementById('a_date');
   
   function openAssignmentModal() {
-    a_faculty.value = '';
-    a_research.value = ''; // Corrected variable name from a_type to a_research
+    // Reset selections to the default 'Select X' options (assuming the options list starts with a disabled/selected placeholder)
+    a_faculty.value = ''; 
+    a_research.value = ''; 
     a_role.value = '';
     a_date.value = '';
   
