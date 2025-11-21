@@ -106,7 +106,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
 /* Action buttons in the filter row */
   .btn-action{
     display:inline-flex;align-items:center;justify-content:center;
-    min-width:30px;height:40px;padding:0 16px;
+    min-width:130px;height:40px;padding:0 16px; /* Increased min-width for consistency */
     border-radius:8px;border:1px solid var(--color-accent);
     font-weight:600;text-decoration:none;cursor:pointer;
     transition:background .2s ease,color .2s ease,transform .06s ease,box-shadow .15s ease;
@@ -123,7 +123,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
     border-color: rgba(11,83,148,.35);
   }
   .btn-ghost:hover{ background: rgba(11,83,148,.05); }
-  #create-agency{display: flex; flex: 1; float: right;}
+  /* Removed #create-agency specific styling that broke the float */
 
 /* ======================================= ADMIN CRUD PAGES (FIXED ALIGNMENT) ======================================= */
 
@@ -195,9 +195,9 @@ td:has(.actions-cell) {
 </style>
 
 <section class="panel fade-in crud-header-card">
-    <button class="btn btn-action" id="create-agency" >+ Create Agency</button>
-  <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; flex: 1; float: right;">
-    <a class="btn small" href="<?= app_url('/admin/api/export.php'); ?>?table=AGENCY">Export CSV</a>
+  <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; float:inline-end">
+    <a class="btn-action btn-ghost" href="<?= app_url('/admin/api/export.php'); ?>?table=AGENCY">Export CSV</a>
+    <button class="btn-action btn-primary" id="create-agency">+ Create Agency</button>
   </div>
   <h1 style="margin-bottom:8px;">Agencies</h1>
   <p class="muted" style="margin-bottom:10px;">Manage agencies and their types.</p>
@@ -206,7 +206,7 @@ td:has(.actions-cell) {
   <form method="get" class="grid filter-bar" style="margin-bottom:10px;">
     <div class="searchbox" style="grid-column: span 11" >
       <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M10 18a8 8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/>
+          <path d="M10 18a8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/>
         </svg>
       <input class="input" type="search" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search agency..." style="width:70%" />
       <button class="btn-action btn-primary" type="button" id="filter-btn" onclick="showHide()">
@@ -231,7 +231,6 @@ td:has(.actions-cell) {
       </div>
     </div>
     <div class="field" style="grid-column: span 1; float: right; top: 0; margin: bottom 150px; vertical-align:text-top">
-      <!-- <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-arrows-sort"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 9l4 -4l4 4m-4 -4v14" /><path d="M21 15l-4 4l-4 -4m4 4v-14" /></svg> -->
       <select class="input" name="sort">
         <option>
           <label>Order</label>
@@ -248,7 +247,6 @@ td:has(.actions-cell) {
 </section>
 
 <section class="panel" id="panel"></section>
-<!-- Create Agency Modal -->
 <div class="admin-modal" id="createAgencyModal" hidden>
   <div class="admin-modal__backdrop" data-close="1"></div>
   <div class="admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="createAgencyTitle">
@@ -286,7 +284,6 @@ td:has(.actions-cell) {
     </form>
   </div>
 </div>
-<!-- --------- Modal HTML --------- -->
 <div class="admin-modal" id="agencyModal" hidden>
   <div class="admin-modal__backdrop" data-close="1"></div>
   <div class="admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="agencyModalTitle">

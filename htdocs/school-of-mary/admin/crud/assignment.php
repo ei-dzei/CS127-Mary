@@ -184,9 +184,9 @@ require_once __DIR__ . '/../../partials/site_header.php';
 </style>
 
 <section class="panel fade-in crud-header-card">
-  <button class="btn btn-action" id="create-assignment" style="float:inline-end" >+ Create Assignment</button>
-  <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; float: inline-end">
-    <a class="btn small" href="<?= app_url('/admin/api/export.php'); ?>?table=ASSIGNMENT">Export CSV</a>
+  <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; float:inline-end">
+    <a class="btn-action btn-ghost" href="<?= app_url('/admin/api/export.php'); ?>?table=ASSIGNMENT">Export CSV</a>
+    <button class="btn-action btn-primary" id="create-assignment">+ Create Assignment</button>
   </div>
   <h1 style="margin-bottom:8px;">Assignments</h1>
   <p class="muted" style="margin-bottom:10px;">Manage who is assigned to which research and in what role. CSV import/export below.</p>
@@ -218,7 +218,6 @@ require_once __DIR__ . '/../../partials/site_header.php';
   </form>
 </section>
 <section class="panel" id="panel"></section>
-<!-- Create Agency Modal -->
 <div class="admin-modal" id="createAssignmentModal" hidden>
   <div class="admin-modal__backdrop" data-close="1"></div>
   <div class="admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="createAssignmentTitle">
@@ -271,7 +270,6 @@ require_once __DIR__ . '/../../partials/site_header.php';
     </form>
   </div>
 </div>
-<!-- --------- Modal HTML --------- -->
 <div class="admin-modal" id="assignModal" hidden>
   <div class="admin-modal__backdrop" data-close="1"></div>
   <div class="admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="assignModalTitle">
@@ -385,7 +383,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
   
   function openAssignmentModal() {
     a_faculty.value = '';
-    a_type.value = '';
+    a_research.value = ''; // Corrected variable name from a_type to a_research
     a_role.value = '';
     a_date.value = '';
   

@@ -162,9 +162,9 @@ $CSRF = csrf_token();
 </style>
 
 <section class="panel fade-in crud-header-card">
-  <button class="btn btn-action" id="create-funding" style="float:inline-end" >+ Create Funding</button>
-  <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; float:inline-end">
-    <a class="btn small" href="<?= app_url('/admin/api/export.php'); ?>?table=FUNDING">Export CSV</a>
+  <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; float:inline-end">
+    <a class="btn-action btn-ghost" href="<?= app_url('/admin/api/export.php'); ?>?table=FUNDING">Export CSV</a>
+    <button class="btn-action btn-primary" id="create-funding">+ Create Funding</button>
   </div>
   <h1 style="margin-bottom:8px;">Funding</h1>
   <p class="muted" style="margin-bottom:10px;">Manage funding rows. CSV import/export below.</p>
@@ -198,7 +198,6 @@ $CSRF = csrf_token();
 
 <section class="panel" id="panel"></section>
 
-<!-- Create FUnding Modal -->
 <div class="admin-modal" id="createFundingModal" hidden>
   <div class="admin-modal__backdrop" data-close="1"></div>
   <div class="admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="createFundingTitle">
@@ -243,7 +242,6 @@ $CSRF = csrf_token();
     </form>
   </div>
 </div>
-<!-- --------- Modal HTML --------- -->
 <div class="admin-modal" id="fundingModal" hidden>
   <div class="admin-modal__backdrop" data-close="1"></div>
   <div class="admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="fundingModalTitle">
