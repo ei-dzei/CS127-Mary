@@ -249,16 +249,17 @@ require_once __DIR__ . '/../../partials/site_header.php';
 
       <div class="modal-grid">
         <div class="field">
+          <label for="r_title"> Title</label>
+          <input class="input" id="r_title" name="RESEARCH_TITLE" required autofocus>
+        </div>
+        <div class="field">
           <label for="r_status">Status</label>
-          <select class="input" id="r_status" name="RESEARCH_STATUS" required>
-            <option value="" disabled selected>Select Status</option> <?php foreach ($statuses as $s): ?>
+          <select class="input" id="r_status" name="RESEARCH_STATUS" required disabled>
+            <option value="" disabled selected>Select Status</option>
+            <?php foreach ($statuses as $s): ?>
               <option value="<?= htmlspecialchars($s['STATUS_CODE'], ENT_QUOTES); ?>"><?= htmlspecialchars($s['STATUS_LABEL']); ?></option>
             <?php endforeach; ?>
           </select>
-        </div>
-        <div class="field">
-          <label for="r_title"> Title</label>
-          <input class="input" id="r_title" name="RESEARCH_TITLE" required disabled>
         </div>
         <div class="field">
           <label for="r_start">Start Date</label>
@@ -332,7 +333,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
   const sortSelect = document.querySelector('select[name="sort"]');
   let timer = null;
   
-  // START: NEW CLIENT-SIDE DATE VALIDATION FUNCTION
+  // CLIENT-SIDE DATE VALIDATION FUNCTION
   function validateDates(startDateId, endDateId, formEvent) {
     const startInput = document.getElementById(startDateId);
     const endInput = document.getElementById(endDateId);
@@ -352,56 +353,45 @@ require_once __DIR__ . '/../../partials/site_header.php';
     }
     return true;
   }
-  // END: NEW CLIENT-SIDE DATE VALIDATION FUNCTION
-
-  // START: NEW LOGIC FOR FIELD ENABLING/DISABLING AND MIN/MAX DATES
+  
+  // LOGIC FOR FIELD ENABLING/DISABLING AND MIN/MAX DATES
   function applyResearchConstraints(statusSelectElement, titleInput, startInput, endInput, isNewRecord) {
     const status = statusSelectElement.value;
     const isOngoing = status === 'ONGOING';
     const isStatusSelected = status !== '';
 
-    // 1. Title is enabled when a status is selected (only for Create)
+    // In Edit mode, Title is always enabled. In Create mode, Title enabling is handled by the title listener (see below)
+
     if (isNewRecord) {
-        titleInput.disabled = !isStatusSelected;
+        startInput.disabled = !isStatusSelected;
+    } else {
+        startInput.disabled = !isStatusSelected;
     }
 
-    // 2. Start Date is enabled when a status is selected
-    startInput.disabled = !isStatusSelected;
-
-    // 3. End Date logic based on status
     if (isOngoing) {
-        // Case 1: Ongoing -> End Date is not clickable
         endInput.disabled = true;
         endInput.value = ''; // Clear value for ongoing
+        endInput.removeAttribute('min'); // Clear min constraint
     } else if (isStatusSelected) {
-        // Cases 2, 3, 4: Completed, Cancelled, Suspended -> Both dates clickable
         endInput.disabled = false;
     } else {
-        // No status selected (shouldn't happen after selection, but for safety)
+        // No status selected 
         endInput.disabled = true;
+        endInput.removeAttribute('min');
     }
 
-    // 4. End Date constraint: cannot be earlier than Start Date
     startInput.addEventListener('input', () => {
         // Set the min attribute on End Date to the value of Start Date
-        endInput.setAttribute('min', startInput.value);
+        if (startInput.value) {
+           endInput.setAttribute('min', startInput.value);
+        } else {
+           endInput.removeAttribute('min');
+        }
     });
     
     // Initial check in case the status is changed
-    endInput.setAttribute('min', startInput.value);
-
-    // If no status is selected initially (for Create), disable everything but status
-    if (!isStatusSelected && isNewRecord) {
-      titleInput.disabled = true;
-      startInput.disabled = true;
-      endInput.disabled = true;
-    }
-
-    // Ensure status is selected on first load for the Create modal if isNewRecord is true
-    if (isNewRecord && status === '') {
-        titleInput.value = '';
-        startInput.value = '';
-        endInput.value = '';
+    if (startInput.value) {
+       endInput.setAttribute('min', startInput.value);
     }
   }
 
@@ -413,13 +403,27 @@ require_once __DIR__ . '/../../partials/site_header.php';
   const r_status = document.getElementById('r_status');
   const createResearchForm = createResearchModal.querySelector('form');
 
-  // Initial setup for create modal (everything disabled except status)
-  r_title.disabled = true;
+  // Initial setup for create modal: Title is ENABLED, everything else DISABLED
+  r_status.disabled = true;
   r_start.disabled = true;
   r_end.disabled = true;
+  
+  // NEW: Title input listener to enable Status
+  r_title.addEventListener('input', () => {
+      const titleHasText = r_title.value.trim() !== '';
+      r_status.disabled = !titleHasText;
+      
+      // If title is cleared, disable everything downstream
+      if (!titleHasText) {
+          r_status.value = '';
+          r_start.disabled = true;
+          r_end.disabled = true;
+      }
+  });
 
-  // Add change listener to r_status
+  // Status change listener to enable/disable dates
   r_status.addEventListener('change', () => {
+      // isNewRecord is true for the Create modal
       applyResearchConstraints(r_status, r_title, r_start, r_end, true);
   });
   
@@ -430,8 +434,9 @@ require_once __DIR__ . '/../../partials/site_header.php';
     r_end.value = '';
     r_status.value = ''; // Forces 'Select Status' option
     
-    // Reset disabled states to initial state
-    r_title.disabled = true;
+    // Reset disabled states to initial state: Title ENABLED, rest DISABLED
+    r_title.disabled = false;
+    r_status.disabled = true;
     r_start.disabled = true;
     r_end.disabled = true;
     r_end.removeAttribute('min');
@@ -461,7 +466,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
   });
 
 
-  // --- Edit Modal Logic ---
+  // --- Edit Modal Logic (No change needed here, sequential rule only applies to Create) ---
   const modal = document.getElementById('researchModal');
   const form  = modal.querySelector('form');
   const idI   = document.getElementById('m_id');
@@ -476,9 +481,13 @@ require_once __DIR__ . '/../../partials/site_header.php';
       applyResearchConstraints(stI, tI, sI, eI, false); 
   });
   
-  // Add input listener to m_start for dynamic min date on m_end
+  // Add input listener to m_start for dynamic min date on m_end (already present)
   sI.addEventListener('input', () => {
-      eI.setAttribute('min', sI.value);
+      if (sI.value) {
+         eI.setAttribute('min', sI.value);
+      } else {
+         eI.removeAttribute('min');
+      }
   });
   
   function open(payload){
@@ -488,7 +497,6 @@ require_once __DIR__ . '/../../partials/site_header.php';
     eI.value  = payload.end || '';
     stI.value = payload.status || '';
 
-    // Apply constraints immediately upon opening to set correct disabled states
     applyResearchConstraints(stI, tI, sI, eI, false); 
     
     modal.hidden = false;
@@ -499,7 +507,6 @@ require_once __DIR__ . '/../../partials/site_header.php';
   form.addEventListener('submit', function(e) {
     validateDates('m_start', 'm_end', e);
   });
-  // END: NEW LOGIC FOR FIELD ENABLING/DISABLING AND MIN/MAX DATES
   
   
   // fetch func
