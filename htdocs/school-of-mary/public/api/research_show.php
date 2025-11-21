@@ -15,8 +15,13 @@
 
 <style>
 /* ------------------------------------------- */
-/* --- CSS for Filter Bar Alignment (Aligned to Faculty Page) --- */
+/* --- CSS for Filter Bar Alignment --- */
 /* ------------------------------------------- */
+:root {
+    /* Define color-accent if not already defined in site_header */
+    --color-accent: #007bff; 
+}
+
 .filterbar {
     display: flex;
     flex-direction: column;
@@ -36,9 +41,9 @@
     background: #fff;
     border: 1px solid #c7d2e4;
     border-radius: 8px;
-    flex: 1 1 360px;
+    flex: 1 1 360px; /* Allows search box to grow and maintain minimum width */
 }
-.searchbox i:first-child { /* Targets the search icon (bi-search) */
+.searchbox i:first-child { 
     color: #6b7280;
 }
 .searchbox input[type="search"] {
@@ -46,6 +51,8 @@
     border: none;
     padding: 0;
     height: 1.5em; 
+    /* Remove default focus ring if preferred */
+    outline: none; 
 }
 .searchbox .filter-btn {
     display: flex;
@@ -58,32 +65,60 @@
     color: var(--color-accent);
 }
 
+/* Dropdown Container */
 #filter-dropdown {
     position: absolute;
-    top: 100%; 
+    top: 100%; /* Position right below the searchbox */
     right: 0;
     margin-top: 8px;
-    width: min(100%, 700px); /* Adjust width for date fields */
+    width: min(100vw, 700px); /* Max width, but responsive */
     background: #fff;
     border: 1px solid #c7d2e4;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     z-index: 100;
     padding: 12px;
+    
+    /* Initially hidden */
     display: none; 
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
 }
+
+/* Class to show the dropdown */
+#filter-dropdown.is-active {
+    display: block; 
+    opacity: 1;
+    transform: translateY(0);
+}
+
 #filter-options {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
-    align-items: flex-end; 
+    align-items: flex-end; /* Align inputs/selects to the bottom */
 }
+
+/* Field styling for better structure */
 #filter-options .field {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
-/* Ensure fields have a consistent width */
+.field label {
+    font-size: 0.9em;
+    color: #4b5563;
+    font-weight: 500;
+}
+.field .input { 
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    height: 40px; /* Standard height */
+}
+
+/* Ensure fields have a consistent width (adjust based on design needs) */
 #filter-options .field:nth-child(1) {
     flex: 1 1 150px; /* Status */
 }
@@ -93,23 +128,30 @@
 }
 
 #filter-options .clear-btn {
+    /* Use 'btn' class styling if available, otherwise just use these styles */
     min-width: 100px;
     height: 40px; 
     padding: 8px 12px;
-}
-.field .input { 
-    padding: 10px;
+    background-color: #f3f4f6;
+    color: #4b5563;
     border: 1px solid #d1d5db;
     border-radius: 6px;
-}
-.searchbox .filter-btn i { 
-    color: var(--color-accent);
+    cursor: pointer;
+    margin-left: auto; /* Push clear button to the right on larger screens */
 }
 
-/* Ensure the card icon shows up if needed (for list view cards, if present) */
-.card__icon i.bi {
-    font-size: 2rem;
-    color: var(--color-accent, #007bff);
+/* Adjust layout for smaller screens */
+@media (max-width: 500px) {
+    #filter-options {
+        flex-direction: column; /* Stack fields vertically */
+        align-items: stretch;
+    }
+    #filter-options .field {
+        flex: 1 1 100%; 
+    }
+    #filter-options .clear-btn {
+        margin-left: 0;
+    }
 }
 </style>
 
@@ -123,7 +165,7 @@
         <i class="bi bi-search"></i>
         <input type="search" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search by project title…" />
         
-        <button class="filter-btn" id="filter-btn" type="button" onclick="showHide()">
+        <button class="filter-btn" id="filter-toggle-btn" type="button" aria-expanded="false" aria-controls="filter-dropdown">
           <i class="bi bi-filter"></i>
         </button>
         
@@ -131,8 +173,8 @@
             <div id="filter-options">
             
             <div class="field">
-              <label>Status</label>
-              <select class="input" name="status">
+              <label for="status-select">Status</label>
+              <select class="input" name="status" id="status-select">
                 <option value="">All</option>
                 <?php foreach ($statuses as $s): ?>
                   <option value="<?= htmlspecialchars($s) ?>"<?= $status===$s ? ' selected' : '' ?>>
@@ -143,16 +185,16 @@
             </div>
             
             <div class="field">
-                <label>Start Date (From)</label>
-                <input class="input" type="date" name="from" value="<?= htmlspecialchars($from) ?>" />
+                <label for="from-input">Start Date (From)</label>
+                <input class="input" type="date" name="from" id="from-input" value="<?= htmlspecialchars($from) ?>" />
             </div>
 
             <div class="field">
-                <label>End Date (To)</label>
-                <input class="input" type="date" name="to" value="<?= htmlspecialchars($to) ?>" />
+                <label for="to-input">End Date (To)</label>
+                <input class="input" type="date" name="to" id="to-input" value="<?= htmlspecialchars($to) ?>" />
             </div>
             
-            <button class="btn clear-btn" type="button" onclick="clearFilter()" id="clear-btn">Clear Filters</button>
+            <button class="btn clear-btn" type="button" id="clear-btn">Clear Filters</button>
           </div>
         </div>
       </div>
@@ -167,44 +209,69 @@
   const statusSelect = document.querySelector('select[name="status"]');
   const fromInput = document.querySelector('input[name="from"]'); 
   const toInput = document.querySelector('input[name="to"]'); 
+  
+  // New elements for dropdown
+  const filterDropdown = document.getElementById("filter-dropdown");
+  const filterToggleButton = document.getElementById("filter-toggle-btn");
+  const clearButton = document.getElementById("clear-btn");
+  
   let timer = null;
   
-  function showHide() {
-    var f = document.getElementById("filter-dropdown");
-    // Toggle the display property
-    if (f.style.display === "none" || f.style.display === "") {
-      f.style.display = "block";
-    } else {
-      f.style.display = "none";
-    }
+  // 1. Dropdown Toggle Function
+  function toggleFilterDropdown() {
+    const isActive = filterDropdown.classList.toggle("is-active");
+    // Update ARIA attribute for accessibility
+    filterToggleButton.setAttribute('aria-expanded', isActive);
   }
   
+  // 2. Clear Filter Function
   function clearFilter() {
-    // Check all inputs
-    if((queryInput.value == '') && (statusSelect.value == '') && (fromInput.value == '') && (toInput.value == '')) {
+    // Check if any filter is active before proceeding
+    if(queryInput.value === '' && statusSelect.value === '' && fromInput.value === '' && toInput.value === '') {
       return;
-    } else {
-      queryInput.value = ''; 
-      statusSelect.value = '';
-      fromInput.value = '';
-      toInput.value = '';
-      fetchResults(1);
     }
-    document.getElementById("filter-dropdown").style.display = "none";
+    
+    queryInput.value = ''; 
+    statusSelect.value = '';
+    fromInput.value = '';
+    toInput.value = '';
+    
+    // Trigger a new search with clear values
+    fetchResults(1);
+    
+    // Close the dropdown after clearing
+    if (filterDropdown.classList.contains("is-active")) {
+        toggleFilterDropdown();
+    }
   }
   
-  //fetch func
+  // 3. Main Fetch Function (Unchanged)
   function fetchResults(page) {
     const q = queryInput.value;
     const status = statusSelect.value;
     const from = fromInput.value;
     const to = toInput.value;
-    const url =  `api/search_research.php?q=${q}&status=${status}&from=${from}&to=${to}&page=${page}`;
+    
+    // Properly encode query parameters
+    const params = new URLSearchParams({
+        q: q,
+        status: status,
+        from: from,
+        to: to,
+        page: page
+    }).toString();
+    
+    const url =  `api/search_research.php?${params}`;
     
     
     researchResults.innerHTML = "<div class='loading'>Loading...</div>";
     fetch(url)
-      .then(res => res.text())
+      .then(res => {
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.text();
+      })
       .then(html => {
         researchResults.innerHTML = html;
         attachPaginationEvents();
@@ -215,17 +282,22 @@
       })
   }
   
-  //Debounced input
+  // 4. Debounced Input Handler (Unchanged)
   function handleLiveInput() {
     clearTimeout(timer);
     timer = setTimeout(() => fetchResults(1), 300);//300ms
   }
+  
+  // 5. Attach Event Listeners
+  filterToggleButton.addEventListener('click', toggleFilterDropdown);
+  clearButton.addEventListener('click', clearFilter);
   
   queryInput.addEventListener('input', handleLiveInput);
   statusSelect.addEventListener('change', () => fetchResults(1));
   fromInput.addEventListener('change', () => fetchResults(1));
   toInput.addEventListener('change', () => fetchResults(1));
   
+  // 6. Pagination Event Listener (Unchanged)
   function attachPaginationEvents() {
     const links = document.querySelectorAll('.page-btn');
 
@@ -240,6 +312,7 @@
         });
     });
   }
+  
   // Load initial results
   fetchResults(1);
 </script>
