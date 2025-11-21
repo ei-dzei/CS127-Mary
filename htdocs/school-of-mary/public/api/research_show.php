@@ -13,7 +13,9 @@
 ?>
 
 <style>
-
+/* ------------------------------------------- */
+/* --- CSS for Filter Bar Alignment (Aligned to Faculty Page) --- */
+/* ------------------------------------------- */
 .filterbar {
     display: flex;
     flex-direction: column;
@@ -35,7 +37,7 @@
     border-radius: 8px;
     flex: 1 1 360px;
 }
-.searchbox i:first-child { 
+.searchbox i:first-child { /* Targets the search icon */
     color: #6b7280;
 }
 .searchbox input[type="search"] {
@@ -60,7 +62,7 @@
     top: 100%; 
     right: 0;
     margin-top: 8px;
-    width: min(100%, 700px); 
+    width: min(100%, 700px); /* Slightly wider for date fields */
     background: #fff;
     border: 1px solid #c7d2e4;
     border-radius: 8px;
@@ -80,7 +82,7 @@
     flex-direction: column;
     gap: 4px;
 }
-
+/* Ensure date fields and select fields have a consistent width */
 #filter-options .field:nth-child(1), 
 #filter-options .field:nth-child(2) {
     flex: 1 1 150px; 
