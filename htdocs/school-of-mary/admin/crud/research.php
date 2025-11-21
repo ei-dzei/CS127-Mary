@@ -143,10 +143,38 @@ require_once __DIR__ . '/../../partials/site_header.php';
 .modal-grid .input, .modal-grid select{width:100%; padding:12px 14px; font-size:16px;}
 .admin-modal__actions{display:flex; gap:10px; justify-content:flex-end; padding:12px 18px; border-top:1px solid #eef2f6;}
 .btn.wide { min-width: 160px; }
-.filter-bar .btn, .filter-bar .clear-btn { min-width: 140px; }
-@media (max-width: 720px){
-  .filter-bar .btn, .filter-bar .clear-btn { width:100%; }
+
+/* START: NEW FILTER BAR STYLES for better responsiveness and clarity */
+.filter-bar {
+  /* MODIFIED: Set a clearer grid for larger screens (e.g., 5 columns: 4 for title/status/dates, 1 for sort) */
+  grid-template-columns: 3fr 2fr 1.5fr 1.5fr 2fr 1fr; /* Total 11 columns for inputs, 1 for clear */
+  gap: 10px;
 }
+.filter-bar .field:nth-child(1) { grid-column: span 3; } /* Title: 3/11 */
+.filter-bar .field:nth-child(2) { grid-column: span 2; } /* Status: 2/11 */
+.filter-bar .field:nth-child(3) { grid-column: span 1.5; } /* Start: 1.5/11 */
+.filter-bar .field:nth-child(4) { grid-column: span 1.5; } /* End: 1.5/11 */
+.filter-bar .field:nth-child(5) { grid-column: span 2; } /* Order: 2/11 */
+.filter-bar .filter-actions { grid-column: span 1; display: flex; align-items: flex-end; } /* Clear: 1/11 */
+
+@media (max-width: 992px) {
+  /* Smaller screens: stack Title/Status, then Dates/Order/Clear */
+  .filter-bar { grid-template-columns: repeat(12, 1fr); }
+  .filter-bar .field:nth-child(1) { grid-column: span 6; }
+  .filter-bar .field:nth-child(2) { grid-column: span 6; }
+  .filter-bar .field:nth-child(3) { grid-column: span 3; }
+  .filter-bar .field:nth-child(4) { grid-column: span 3; }
+  .filter-bar .field:nth-child(5) { grid-column: span 4; }
+  .filter-bar .filter-actions { grid-column: span 2; }
+}
+
+@media (max-width: 720px){ 
+  /* Mobile: stack all fields */
+  .filter-bar .field, .filter-bar .filter-actions { grid-column: span 12 !important; }
+}
+
+/* END: NEW FILTER BAR STYLES */
+
 
 /* Action buttons parity */
 .btn-action{
@@ -185,20 +213,20 @@ require_once __DIR__ . '/../../partials/site_header.php';
 </style>
 
 <section class="panel fade-in crud-header-card">
-  <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; float:inline-end">
+  <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; justify-content: flex-end;">
     <a class="btn-action btn-ghost" href="<?= app_url('/admin/api/export.php'); ?>?table=RESEARCH">Export CSV</a>
     <button class="btn btn-action btn-primary" id="create-research">+ Create Research</button>
   </div>
   <h1 style="margin-bottom:8px;">Research</h1>
-  <p class="muted" style="margin-bottom:10px;">Manage research, status, and dates. CSV export below.</p>
+  <p class="muted" style="margin-bottom:10px;">Manage research, status, and dates. Use the fields below to filter the list.</p>
 
   
 
   <form method="get" class="grid filter-bar" style="margin-bottom:10px;">
-    <div class="field" style="grid-column: span 4">
-      <label>Title</label>
+    <div class="field">
+      <label>Title (Live Search)</label>
       <input class="input" name="q" value="<?= htmlspecialchars($q); ?>"></div>
-    <div class="field" style="grid-column: span 3">
+    <div class="field">
       <label>Status</label>
       <select class="input" name="status">
         <option value="">All</option>
@@ -208,14 +236,14 @@ require_once __DIR__ . '/../../partials/site_header.php';
         endforeach; ?>
       </select>
     </div>
-    <div class="field" style="grid-column: span 2">
+    <div class="field">
       <label>Start from</label>
       <input class="input" type="date" name="from" value="<?= htmlspecialchars($from); ?>">
     </div>
-    <div class="field" style="grid-column: span 2">
+    <div class="field">
       <label>End by</label>
       <input class="input" type="date" name="to" value="<?= htmlspecialchars($to); ?>"></div>
-    <div class="field" style="grid-column: span 1">
+    <div class="field">
       <label>Order</label>
       <select class="input" name="sort">
         <option value="start_desc" <?= $sort==='start_desc'?'selected':''; ?>>Start (Newest)</option>
@@ -228,8 +256,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
         <option value="id_asc"     <?= $sort==='id_asc'?'selected':''; ?>>ID (Oldest)</option>
       </select>
     </div>
-    <div class="field" style="grid-column: span 12; display:flex; gap:10px; justify-content:flex-end; align-items:flex-end;">
-      <button class="btn-action btn-primary" type="submit">Filter</button>
+    <div class="filter-actions">
       <a class="btn-action btn-ghost" href="<?= app_url('/admin/crud/research.php'); ?>">Clear</a>
     </div>
   </form>
@@ -273,8 +300,8 @@ require_once __DIR__ . '/../../partials/site_header.php';
       </div>
 
       <div class="admin-modal__actions">
-        <button class="btn wide" type="submit">Create Research</button>
         <button class="btn wide" type="button" data-close="1" style="background:#6b7280;border-color:#6b7280">Cancel</button>
+        <button class="btn wide btn-primary" type="submit">Create Research</button>
       </div>
     </form>
   </div>
@@ -317,8 +344,8 @@ require_once __DIR__ . '/../../partials/site_header.php';
       </div>
 
       <div class="admin-modal__actions">
-        <button class="btn wide" type="submit">Save</button>
         <button class="btn wide" type="button" data-close="1" style="background:#6b7280;border-color:#6b7280">Cancel</button>
+        <button class="btn wide btn-primary" type="submit">Save</button>
       </div>
     </form>
   </div>
