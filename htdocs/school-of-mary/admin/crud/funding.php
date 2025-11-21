@@ -34,14 +34,21 @@ $action = $_POST['action'] ?? '';
 
 if ($action === 'create') {
   if (!v_int($_POST['RESEARCH_ID'] ?? '') || !v_int($_POST['AGENCY_ID'] ?? '')) guardFail('Missing foreign keys');
-  if (!v_decimal_nullable($_POST['FUNDING_AMOUNT'] ?? '')) guardFail('Invalid amount');
+  if (!v_decimal_nullable($_POST['FUNDING_AMOUNT'] ?? '')) guardFail('Invalid amount format');
+  
+  // *** NEW VALIDATION: Check for negative amount ***
+  $amount = $_POST['FUNDING_AMOUNT'] ?? '';
+  if ($amount !== '' && (float)$amount < 0) {
+    guardFail('Funding amount cannot be negative');
+  }
+  
   if (!v_date_nullable($_POST['DATE_FUNDED'] ?? '')) guardFail('Invalid date');
 
   $sql = "INSERT INTO FUNDING (RESEARCH_ID, AGENCY_ID, FUNDING_AMOUNT, DATE_FUNDED) VALUES (?,?,?,?)";
   $pdo->prepare($sql)->execute([
     $_POST['RESEARCH_ID'],
     $_POST['AGENCY_ID'],
-    ($_POST['FUNDING_AMOUNT'] ?? '') !== '' ? $_POST['FUNDING_AMOUNT'] : null,
+    $amount !== '' ? $amount : null,
     ($_POST['DATE_FUNDED'] ?? '')   !== '' ? $_POST['DATE_FUNDED']   : null
   ]);
 
@@ -54,7 +61,14 @@ if ($action === 'create') {
 if ($action === 'update') {
   if (!v_int($_POST['FUNDING_ID'] ?? '')) guardFail('Missing ID');
   if (!v_int($_POST['RESEARCH_ID'] ?? '') || !v_int($_POST['AGENCY_ID'] ?? '')) guardFail('Missing foreign keys');
-  if (!v_decimal_nullable($_POST['FUNDING_AMOUNT'] ?? '')) guardFail('Invalid amount');
+  if (!v_decimal_nullable($_POST['FUNDING_AMOUNT'] ?? '')) guardFail('Invalid amount format');
+  
+  // *** NEW VALIDATION: Check for negative amount ***
+  $amount = $_POST['FUNDING_AMOUNT'] ?? '';
+  if ($amount !== '' && (float)$amount < 0) {
+    guardFail('Funding amount cannot be negative');
+  }
+
   if (!v_date_nullable($_POST['DATE_FUNDED'] ?? '')) guardFail('Invalid date');
 
   $sql = "UPDATE FUNDING
@@ -63,7 +77,7 @@ if ($action === 'update') {
   $pdo->prepare($sql)->execute([
     $_POST['RESEARCH_ID'],
     $_POST['AGENCY_ID'],
-    ($_POST['FUNDING_AMOUNT'] ?? '') !== '' ? $_POST['FUNDING_AMOUNT'] : null,
+    $amount !== '' ? $amount : null,
     ($_POST['DATE_FUNDED'] ?? '')   !== '' ? $_POST['DATE_FUNDED']   : null,
     $_POST['FUNDING_ID']
   ]);
@@ -228,7 +242,7 @@ $CSRF = csrf_token();
         </div>
         <div class="field">
           <label for="f_amt">Amount (₱)</label>
-          <input class="input" id="f_amt" type="number" step="0.01" name="FUNDING_AMOUNT">
+          <input class="input" id="f_amt" type="number" step="0.01" name="FUNDING_AMOUNT" min="0">
         </div>
         <div class="field">
           <label for="f_date">Date Funded</label>
@@ -275,7 +289,7 @@ $CSRF = csrf_token();
 
         <div class="field">
           <label for="m_amount">Amount (₱)</label>
-          <input class="input" id="m_amount" type="number" step="0.01" name="FUNDING_AMOUNT">
+          <input class="input" id="m_amount" type="number" step="0.01" name="FUNDING_AMOUNT" min="0">
         </div>
 
         <div class="field">
