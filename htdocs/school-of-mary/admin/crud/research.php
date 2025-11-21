@@ -30,6 +30,14 @@ if ($action === 'create') {
   if (!v_date_nullable($_POST['RESEARCH_ENDDATE'] ?? '')) guardFail('Invalid end date');
   if (!v_enum_exists($pdo, 'RESEARCH_STATUS', 'STATUS_CODE', $_POST['RESEARCH_STATUS'] ?? null)) guardFail('Invalid status');
 
+  // START: NEW SERVER-SIDE DATE VALIDATION
+  $startDate = $_POST['RESEARCH_STARTDATE'] ?? '';
+  $endDate = $_POST['RESEARCH_ENDDATE'] ?? '';
+  if ($endDate !== '' && strtotime($endDate) < strtotime($startDate)) {
+      guardFail('End Date cannot be earlier than Start Date.');
+  }
+  // END: NEW SERVER-SIDE DATE VALIDATION
+
   $pdo->prepare("INSERT INTO RESEARCH (RESEARCH_TITLE, RESEARCH_STARTDATE, RESEARCH_ENDDATE, RESEARCH_STATUS) VALUES (?,?,?,?)")
       ->execute([
         $_POST['RESEARCH_TITLE'],
@@ -50,6 +58,14 @@ if ($action === 'update') {
   if (!v_date($_POST['RESEARCH_STARTDATE'] ?? ''))     guardFail('Invalid start date');
   if (!v_date_nullable($_POST['RESEARCH_ENDDATE'] ?? '')) guardFail('Invalid end date');
   if (!v_enum_exists($pdo, 'RESEARCH_STATUS', 'STATUS_CODE', $_POST['RESEARCH_STATUS'] ?? null)) guardFail('Invalid status');
+
+  // START: NEW SERVER-SIDE DATE VALIDATION
+  $startDate = $_POST['RESEARCH_STARTDATE'] ?? '';
+  $endDate = $_POST['RESEARCH_ENDDATE'] ?? '';
+  if ($endDate !== '' && strtotime($endDate) < strtotime($startDate)) {
+      guardFail('End Date cannot be earlier than Start Date.');
+  }
+  // END: NEW SERVER-SIDE DATE VALIDATION
 
   $pdo->prepare("UPDATE RESEARCH SET RESEARCH_TITLE=?, RESEARCH_STARTDATE=?, RESEARCH_ENDDATE=?, RESEARCH_STATUS=? WHERE RESEARCH_ID=?")
       ->execute([
@@ -102,7 +118,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
 }
 .admin-modal__backdrop{position:absolute; inset:0; background:rgba(0,0,0,.45); backdrop-filter:blur(2px);}
 .admin-modal__dialog{
-  /* CHANGED: Increased max width to 1200px */
+  /* MODIFIED: Increased max width to 1200px */
   position:relative; width:min(1200px, 92%); max-height:84vh; overflow:auto;
   background:#fff; border:1px solid rgba(11,83,148,.18); border-radius:16px;
   box-shadow:0 30px 60px rgba(0,0,0,.25);
@@ -113,7 +129,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
 .admin-modal__close:hover{background:#f4f7fb}
 .admin-modal__body{padding:18px;}
 .modal-grid{
-  /* CHANGED: Adjusted column ratios to give the title more space */
+  /* MODIFIED: Adjusted column ratios to give the title more space */
   display:grid; grid-template-columns: 3fr 1fr 1fr 1fr; gap:16px;
 }
 @media (max-width: 900px){ .modal-grid{ grid-template-columns: 1fr; } }
@@ -143,6 +159,23 @@ require_once __DIR__ . '/../../partials/site_header.php';
   border-color: rgba(11,83,148,.35);
 }
 .btn-ghost:hover{ background: rgba(11,83,148,.05); }
+
+/* START: MODIFIED FOR ACTIONS COLUMN COMPACTNESS */
+.crud-table td:last-child {
+  /* Ensure the content is left-aligned and compact */
+  text-align: left; 
+  padding: 8px 10px; /* Reduced padding */
+}
+
+/* Tighter action buttons */
+.crud-table .btn-action {
+  min-width: 60px; /* Reduced min width */
+  height: 32px; /* Reduced height */
+  padding: 0 10px; /* Reduced padding inside */
+  font-size: 0.9em; /* Smaller font */
+  margin-right: 4px; /* Space between buttons */
+}
+/* END: MODIFIED FOR ACTIONS COLUMN COMPACTNESS */
 </style>
 
 <section class="panel fade-in crud-header-card">
@@ -291,6 +324,29 @@ require_once __DIR__ . '/../../partials/site_header.php';
   const toInput = document.querySelector('input[name="to"]');
   const sortSelect = document.querySelector('select[name="sort"]');
   let timer = null;
+  
+  // START: NEW CLIENT-SIDE DATE VALIDATION FUNCTION
+  function validateDates(startDateId, endDateId, formEvent) {
+    const startInput = document.getElementById(startDateId);
+    const endInput = document.getElementById(endDateId);
+    
+    // Only compare if an end date is present
+    if (endInput.value && startInput.value) {
+      const startDate = new Date(startInput.value);
+      const endDate = new Date(endInput.value);
+      
+      // Compare dates. Using getTime() ensures comparison is numerical
+      if (endDate.getTime() < startDate.getTime()) {
+        alert('Error: End Date cannot be earlier than the Start Date.');
+        formEvent.preventDefault(); // Stop form submission
+        endInput.focus();
+        return false;
+      }
+    }
+    return true;
+  }
+  // END: NEW CLIENT-SIDE DATE VALIDATION FUNCTION
+
 
   // fetch func
   function fetchResults(page) {
@@ -342,7 +398,6 @@ require_once __DIR__ . '/../../partials/site_header.php';
   }
   //Create Research
   const createResearchModal = document.getElementById('createResearchModal');
-  //const createAgencyForm = createAgencyModal.querySelector('form');
   const r_title = document.getElementById('r_title');
   const r_start = document.getElementById('r_start');
   const r_end = document.getElementById('r_end');
@@ -372,6 +427,14 @@ require_once __DIR__ . '/../../partials/site_header.php';
   window.addEventListener('keydown', e => {
     if (!createResearchModal.hidden && e.key === 'Escape') closeResearchModal();
   });
+  
+  // START: ATTACH VALIDATION TO CREATE FORM
+  const createResearchForm = createResearchModal.querySelector('form');
+  createResearchForm.addEventListener('submit', function(e) {
+    validateDates('r_start', 'r_end', e);
+  });
+  // END: ATTACH VALIDATION TO CREATE FORM
+  
 // Edit Modal controller
   const modal = document.getElementById('researchModal');
   const form  = modal.querySelector('form');
@@ -380,6 +443,12 @@ require_once __DIR__ . '/../../partials/site_header.php';
   const sI    = document.getElementById('m_start');
   const eI    = document.getElementById('m_end');
   const stI   = document.getElementById('m_status');
+
+  // START: ATTACH VALIDATION TO UPDATE FORM
+  form.addEventListener('submit', function(e) {
+    validateDates('m_start', 'm_end', e);
+  });
+  // END: ATTACH VALIDATION TO UPDATE FORM
 
   function open(payload){
     idI.value = payload.id;
