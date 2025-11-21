@@ -131,33 +131,36 @@ require_once __DIR__ . '/../../partials/site_header.php';
     flex-direction: column;
     gap: 6px;
 }
-/* Assign column spans for desktop (Search, Order, Buttons) */
-.filter-bar .field:nth-child(1) { grid-column: span 7; } /* Search: 7/12 columns */
-.filter-bar .field:nth-child(2) { grid-column: span 3; } /* Order: 3/12 columns */
+/* Assign column spans for desktop (Search, Order) */
+/* Search field (1st child) */
+.filter-bar .field:nth-child(1) { grid-column: span 8; } 
+/* Order field (2nd child) */
+.filter-bar .field:nth-child(2) { grid-column: span 2; } 
 
-/* Container for Filter and Clear buttons */
+/* Container for Clear button */
 .filter-bar .filter-actions {
     grid-column: span 2; /* Buttons: 2/12 columns (Remaining space) */
     display: flex;
-    justify-content: flex-end; /* Push buttons to the right edge of their 2 columns */
+    /* Since there is only one button, justify to start, so it stays near the Order field */
+    justify-content: flex-start; 
     gap: 10px;
 }
 .filter-bar .btn-action { 
     min-width: 100px; 
     height: 40px; 
-    /* Push buttons down by the label height + gap (approx 20px) for vertical alignment */
+    /* Push button down by the label height + gap (approx 20px) for vertical alignment */
     margin-top: 20px; 
 }
 
 
 /* Tablet/Mobile Adjustments */
 @media (max-width: 992px) {
-  /* Tablet: Search full width, Order and Buttons share the next row */
+  /* Tablet: Search full width, Order and Clear button share the next row */
   .filter-bar .field:nth-child(1) { grid-column: span 12; }
-  .filter-bar .field:nth-child(2) { grid-column: span 6; } /* Order takes half */
+  .filter-bar .field:nth-child(2) { grid-column: span 9; } /* Order takes a larger portion */
   .filter-bar .filter-actions { 
-      grid-column: span 6; /* Buttons take other half */
-      /* Remove the top margin hack in the stacked layout */
+      grid-column: span 3; /* Clear button takes smaller portion */
+      justify-content: flex-end; /* Push clear button to the right */
       margin-top: 0; 
   }
   .filter-bar .btn-action {
@@ -166,7 +169,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
 }
 @media (max-width: 720px){
   .filter-bar .field, .filter-bar .filter-actions { grid-column: span 12 !important; }
-  .filter-bar .filter-actions { justify-content: center; } /* Center buttons when full width */
+  .filter-bar .filter-actions { justify-content: center; } /* Center button when full width */
 }
 /* END: MODIFIED Filter Bar Styles */
 
@@ -272,7 +275,6 @@ require_once __DIR__ . '/../../partials/site_header.php';
       </select>
     </div>
     <div class="filter-actions">
-      <button class="btn-action btn-primary" type="submit">Filter</button>
       <a class="btn-action btn-ghost" href="<?= app_url('/admin/crud/assignment.php'); ?>">Clear</a>
     </div>
   </form>
@@ -421,6 +423,8 @@ require_once __DIR__ . '/../../partials/site_header.php';
     timer = setTimeout(() => fetchResults(1), 300);
   }
   
+  // Note: The form is still submitted when Enter is pressed in the search box, 
+  // or when the Clear button is clicked, which also triggers a refresh/filter.
   queryInput.addEventListener('input', handleLiveInput);
   sortSelect.addEventListener('change', () => fetchResults(1));
   
@@ -445,7 +449,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
   const a_date = document.getElementById('a_date');
   
   function openAssignmentModal() {
-    // Reset selections to the default 'Select X' options (assuming the options list starts with a disabled/selected placeholder)
+    // Reset selections to the default 'Select X' options 
     a_faculty.value = ''; 
     a_research.value = ''; 
     a_role.value = '';
