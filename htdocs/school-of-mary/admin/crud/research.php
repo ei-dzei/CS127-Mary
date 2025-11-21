@@ -185,9 +185,9 @@ require_once __DIR__ . '/../../partials/site_header.php';
 </style>
 
 <section class="panel fade-in crud-header-card">
-  <button class="btn btn-action" id="create-research" style="float:inline-end">+ Create Research</button>
-  <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; float:inline-end">
-    <a class="btn small" href="<?= app_url('/admin/api/export.php'); ?>?table=RESEARCH">Export CSV</a>
+  <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; float:inline-end">
+    <a class="btn-action btn-ghost" href="<?= app_url('/admin/api/export.php'); ?>?table=RESEARCH">Export CSV</a>
+    <button class="btn btn-action btn-primary" id="create-research">+ Create Research</button>
   </div>
   <h1 style="margin-bottom:8px;">Research</h1>
   <p class="muted" style="margin-bottom:10px;">Manage research, status, and dates. CSV export below.</p>
@@ -362,17 +362,23 @@ require_once __DIR__ . '/../../partials/site_header.php';
 
     // In Edit mode, Title is always enabled. In Create mode, Title enabling is handled by the title listener (see below)
 
+    // 1. Start Date is enabled when a status is selected
     if (isNewRecord) {
         startInput.disabled = !isStatusSelected;
     } else {
+        // Edit mode: Start Date is enabled as long as status is selected
         startInput.disabled = !isStatusSelected;
     }
 
+
+    // 2. End Date logic based on status
     if (isOngoing) {
+        // Case 1: Ongoing -> End Date is not clickable
         endInput.disabled = true;
         endInput.value = ''; // Clear value for ongoing
         endInput.removeAttribute('min'); // Clear min constraint
     } else if (isStatusSelected) {
+        // Cases 2, 3, 4: Completed, Cancelled, Suspended -> Both dates clickable
         endInput.disabled = false;
     } else {
         // No status selected 
@@ -380,6 +386,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
         endInput.removeAttribute('min');
     }
 
+    // 3. End Date constraint: cannot be earlier than Start Date
     startInput.addEventListener('input', () => {
         // Set the min attribute on End Date to the value of Start Date
         if (startInput.value) {
@@ -497,6 +504,8 @@ require_once __DIR__ . '/../../partials/site_header.php';
     eI.value  = payload.end || '';
     stI.value = payload.status || '';
 
+    // Apply constraints immediately upon opening to set correct disabled states
+    // Edit mode constraints: Title is enabled, Dates/Status are enabled/disabled based on current status.
     applyResearchConstraints(stI, tI, sI, eI, false); 
     
     modal.hidden = false;
