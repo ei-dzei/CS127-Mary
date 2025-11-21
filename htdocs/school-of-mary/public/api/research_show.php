@@ -3,7 +3,8 @@
   require_once __DIR__ . '/../partials/site_header.php';
 
   /* --- Lookups for filters (example status) --- */
-  $statuses = ['Ongoing', 'Completed', 'Proposed', 'On Hold']; // Replace with DB query if statuses are dynamic
+  // NOTE: Replace this array with a database query if your statuses are dynamic
+  $statuses = ['Ongoing', 'Completed', 'Proposed', 'On Hold']; 
 
   /* --- List view filters (from query parameters) --- */
     $q      = trim($_GET['q'] ?? '');
@@ -37,7 +38,7 @@
     border-radius: 8px;
     flex: 1 1 360px;
 }
-.searchbox i:first-child { /* Targets the search icon */
+.searchbox i:first-child { /* Targets the search icon (bi-search) */
     color: #6b7280;
 }
 .searchbox input[type="search"] {
@@ -62,7 +63,7 @@
     top: 100%; 
     right: 0;
     margin-top: 8px;
-    width: min(100%, 700px); /* Slightly wider for date fields */
+    width: min(100%, 700px); /* Adjust width for date fields */
     background: #fff;
     border: 1px solid #c7d2e4;
     border-radius: 8px;
@@ -82,14 +83,13 @@
     flex-direction: column;
     gap: 4px;
 }
-/* Ensure date fields and select fields have a consistent width */
-#filter-options .field:nth-child(1), 
-#filter-options .field:nth-child(2) {
-    flex: 1 1 150px; 
+/* Ensure fields have a consistent width */
+#filter-options .field:nth-child(1) {
+    flex: 1 1 150px; /* Status */
 }
-#filter-options .field:nth-child(3), 
-#filter-options .field:nth-child(4) {
-    flex: 1 1 120px;
+#filter-options .field:nth-child(2), 
+#filter-options .field:nth-child(3) {
+    flex: 1 1 120px; /* Dates */
 }
 
 #filter-options .clear-btn {
@@ -104,6 +104,12 @@
 }
 .searchbox .filter-btn i { 
     color: var(--color-accent);
+}
+
+/* Ensure the card icon shows up if needed (for list view cards, if present) */
+.card__icon i.bi {
+    font-size: 2rem;
+    color: var(--color-accent, #007bff);
 }
 </style>
 
@@ -152,7 +158,6 @@
       </div>
     </div>
   </form>
-
   <div id="research-results" class="fade-in"></div>
 </section>
 
@@ -175,10 +180,11 @@
   }
   
   function clearFilter() {
+    // Check all inputs
     if((queryInput.value == '') && (statusSelect.value == '') && (fromInput.value == '') && (toInput.value == '')) {
       return;
     } else {
-      queryInput.value = ''; // Clear search query as well
+      queryInput.value = ''; 
       statusSelect.value = '';
       fromInput.value = '';
       toInput.value = '';
