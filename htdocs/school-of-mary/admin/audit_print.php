@@ -83,13 +83,18 @@ require_once __DIR__ . '/../partials/site_header.php';
 
 .filter-bar .btn-action{ min-width:140px; }
 @media (max-width: 720px){ .filter-bar .btn-action{ width:100%; } }
+
+/* === NEW: Hide Print button when printing === */
+@media print {
+  #print-button {
+    display: none;
+  }
+}
 </style>
 
-<!-- Filters -->
 <section class="panel fade-in">
   <h1 style="margin-bottom:8px;">Audit Log — Print View</h1>
   <p class="muted" style="margin-bottom:10px;">
-    Use filters then press <strong>Ctrl/Cmd + P</strong> to print. This page uses formal print styles automatically.
   </p>
   <form method="get" class="grid filter-bar">
     <div class="field" style="grid-column:span 3;">
@@ -131,7 +136,12 @@ require_once __DIR__ . '/../partials/site_header.php';
   </form>
 </section>
 
-<!-- Printable content -->
+<section class="panel fade-in" style="margin-top:-10px; margin-bottom:15px; padding:15px 20px;">
+  <button id="print-button" class="btn-action btn-primary" onclick="window.print()" style="min-width:160px;">
+    <span style="font-size:1.2em; margin-right:8px;">&#x1F5B6;&#xFE0F;</span> Print Audit Log
+  </button>
+</section>
+
 <section class="panel fade-in" style="background:#fff;">
   <div class="container" style="width:100%;">
     <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:10px;">
@@ -191,7 +201,6 @@ require_once __DIR__ . '/../partials/site_header.php';
       </table>
     <?php endif; ?>
 
-    <!-- Display pagination -->
     <div class="pagination">
       <?php
         $base = app_url('/admin/audit_print.php');
@@ -215,28 +224,23 @@ require_once __DIR__ . '/../partials/site_header.php';
         $jumpNext = min($totalPages, $page + $maxPage);
       ?>
 
-      <!-- Prev -->
       <?php if ($page > 1): ?>
         <a class="page-btn" href="<?= "{$base}?{$qs}&page={$prev}" ?>" title = "Previous Page">&#x276E;</a>
       <?php endif; ?>
 
-      <!-- Jump back by 5 -->
       <?php if ($start > 1): ?>
         <a class="page-btn" href="<?= "{$base}?{$qs}&page={$jumpBack}" ?>" title="Jump backward 5 pages">...</a>
       <?php endif; ?>
 
-      <!-- Page numbers -->
       <?php for ($i = $start; $i <= $end; $i++): ?>
         <a class="page-btn <?= $i == $page ? 'active' : '' ?>" 
           href="<?= "{$base}?{$qs}&page={$i}" ?>"><?= $i ?></a>
       <?php endfor; ?>
 
-      <!-- Jump forward by 5 -->
       <?php if ($end < $totalPages): ?>
         <a class="page-btn" href="<?= "{$base}?{$qs}&page={$jumpNext}" ?>" title="Jump forward 5 pages">...</a>
       <?php endif; ?>
 
-      <!-- Next -->
       <?php  if ($page < $totalPages): ?>
       <a class="page-btn" href="<?= "{$base}?{$qs}&page={$next}" ?>" title = "Next Page">&#x276F;</a>
       <?php  endif;?>
