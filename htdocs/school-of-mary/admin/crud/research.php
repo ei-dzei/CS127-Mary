@@ -144,22 +144,58 @@ require_once __DIR__ . '/../../partials/site_header.php';
 .admin-modal__actions{display:flex; gap:10px; justify-content:flex-end; padding:12px 18px; border-top:1px solid #eef2f6;}
 .btn.wide { min-width: 160px; }
 
-/* START: NEW FILTER BAR STYLES for better responsiveness and clarity */
-.filter-bar {
-  /* MODIFIED: Set a clearer grid for larger screens (e.g., 5 columns: 4 for title/status/dates, 1 for sort) */
-  grid-template-columns: 3fr 2fr 1.5fr 1.5fr 2fr 1fr; /* Total 11 columns for inputs, 1 for clear */
-  gap: 10px;
+/* ------------------------------------------- */
+/* START: NEW HEADER AND FILTER BAR STYLES */
+/* ------------------------------------------- */
+
+/* Alignment for Research header and Action buttons */
+.crud-header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px; /* Space between header and filter bar */
 }
-.filter-bar .field:nth-child(1) { grid-column: span 3; } /* Title: 3/11 */
-.filter-bar .field:nth-child(2) { grid-column: span 2; } /* Status: 2/11 */
-.filter-bar .field:nth-child(3) { grid-column: span 1.5; } /* Start: 1.5/11 */
-.filter-bar .field:nth-child(4) { grid-column: span 1.5; } /* End: 1.5/11 */
-.filter-bar .field:nth-child(5) { grid-column: span 2; } /* Order: 2/11 */
-.filter-bar .filter-actions { grid-column: span 1; display: flex; align-items: flex-end; } /* Clear: 1/11 */
+.crud-header-text {
+    /* Container for H1 and P tag */
+}
+.crud-header-text h1 {
+    margin: 0;
+}
+.crud-header-text p {
+    margin: 4px 0 0 0;
+}
+.crud-header-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Filter Bar: All inputs on one line */
+.filter-bar {
+  /* MODIFIED: Define one row with 6 columns (Title, Status, From, To, Order, Clear) */
+  grid-template-columns: 3fr 2fr 1fr 1fr 2fr 1fr; 
+  gap: 10px;
+  align-items: flex-end; /* Align all elements to the bottom (Clear button aligns with inputs) */
+}
+.filter-bar .field {
+    /* Ensure label and input stack within the field container */
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.filter-bar .field:nth-child(1) { grid-column: span 3; } /* Title */
+.filter-bar .field:nth-child(2) { grid-column: span 2; } /* Status */
+.filter-bar .field:nth-child(3) { grid-column: span 1; } /* Start from */
+.filter-bar .field:nth-child(4) { grid-column: span 1; } /* End by */
+.filter-bar .field:nth-child(5) { grid-column: span 2; } /* Order */
+.filter-bar .filter-actions { 
+    grid-column: span 1; 
+    /* The Clear button now sits perfectly aligned thanks to align-items: flex-end on .filter-bar */
+}
 
 @media (max-width: 992px) {
   /* Smaller screens: stack Title/Status, then Dates/Order/Clear */
-  .filter-bar { grid-template-columns: repeat(12, 1fr); }
+  .filter-bar { grid-template-columns: repeat(12, 1fr); align-items: stretch; }
   .filter-bar .field:nth-child(1) { grid-column: span 6; }
   .filter-bar .field:nth-child(2) { grid-column: span 6; }
   .filter-bar .field:nth-child(3) { grid-column: span 3; }
@@ -173,7 +209,9 @@ require_once __DIR__ . '/../../partials/site_header.php';
   .filter-bar .field, .filter-bar .filter-actions { grid-column: span 12 !important; }
 }
 
-/* END: NEW FILTER BAR STYLES */
+/* ------------------------------------------- */
+/* END: NEW HEADER AND FILTER BAR STYLES */
+/* ------------------------------------------- */
 
 
 /* Action buttons parity */
@@ -213,16 +251,17 @@ require_once __DIR__ . '/../../partials/site_header.php';
 </style>
 
 <section class="panel fade-in crud-header-card">
-  <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; justify-content: flex-end;">
-    <a class="btn-action btn-ghost" href="<?= app_url('/admin/api/export.php'); ?>?table=RESEARCH">Export CSV</a>
-    <button class="btn btn-action btn-primary" id="create-research">+ Create Research</button>
+  <div class="crud-header-top">
+    <div class="crud-header-text">
+        <h1>Research</h1>
+        <p class="muted">Manage research, status, and dates. Use the fields below to filter the list.</p>
+    </div>
+    <div class="crud-header-actions">
+        <a class="btn-action btn-ghost" href="<?= app_url('/admin/api/export.php'); ?>?table=RESEARCH">Export CSV</a>
+        <button class="btn btn-action btn-primary" id="create-research">+ Create Research</button>
+    </div>
   </div>
-  <h1 style="margin-bottom:8px;">Research</h1>
-  <p class="muted" style="margin-bottom:10px;">Manage research, status, and dates. Use the fields below to filter the list.</p>
-
-  
-
-  <form method="get" class="grid filter-bar" style="margin-bottom:10px;">
+  <form method="get" class="grid filter-bar" style="margin-top:10px; margin-bottom:10px;">
     <div class="field">
       <label>Title (Live Search)</label>
       <input class="input" name="q" value="<?= htmlspecialchars($q); ?>"></div>
