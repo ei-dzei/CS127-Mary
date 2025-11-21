@@ -5,6 +5,7 @@
     $perPage = 6;
     $page    = (isset($_GET['page']) && is_numeric($_GET['page'])) ? (int)$_GET['page'] : 1;
     $offset  = ($page - 1) * $perPage;
+
     
     /* --- List view (filters + pagination) --- */
     $q      = trim($_GET['q'] ?? '');
@@ -73,6 +74,7 @@
      $cards = '<div class="panel">No matching research.</div>';
   } else {
     foreach ($rows as $row) {
+        // Use bi-calendar-check-fill for end date icon
         $endDate = $row['RESEARCH_ENDDATE'] ? ' · <i class="bi bi-calendar-check-fill"></i> End: ' . htmlspecialchars($row['RESEARCH_ENDDATE']) : '';
 
         $cards .= '
