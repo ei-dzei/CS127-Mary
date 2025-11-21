@@ -73,7 +73,9 @@
         foreach ($rows as $row) {
             $cards .= '
             <div class="card">
-                <div class="card__icon">👩‍🏫</div>
+                <div class="card__icon">
+                    <i class="bi bi-person-circle" style="font-size: 2rem;"></i>
+                </div>
                 <div class="card__content">
                     <h3 class="card__title">' .
                         htmlspecialchars($row["FACULTY_LNAME"] . ", " . $row["FACULTY_FNAME"]) .
@@ -83,7 +85,7 @@
                         htmlspecialchars($row["DEPT_SPECIALIZATION"]) .
                     '</p>
                     <div class="card__meta">
-                        📧 ' . htmlspecialchars($row["FACULTY_EMAIL"]) . '
+                        <i class="bi bi-envelope-fill"></i> ' . htmlspecialchars($row["FACULTY_EMAIL"]) . '
                     </div>
                 </div>
                 <div class="card__actions">
@@ -153,6 +155,3 @@
     $output .='<div class = "pagination">'.$pagination.'</div>';
     echo $output;
 ?>
-
-
-    
