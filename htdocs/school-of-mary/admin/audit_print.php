@@ -84,10 +84,33 @@ require_once __DIR__ . '/../partials/site_header.php';
 .filter-bar .btn-action{ min-width:140px; }
 @media (max-width: 720px){ .filter-bar .btn-action{ width:100%; } }
 
-/* === NEW: Hide Print button when printing === */
+/* === Print View Optimization === */
 @media print {
-  #print-button {
-    display: none;
+  /* Hide the filter panel, print button section, and pagination */
+  .panel.fade-in:first-child, /* This targets the first panel (Filters) */
+  .pagination,
+  #print-button-section { /* Using an ID for the whole section for clarity */
+    display: none !important;
+  }
+
+  /* Remove margins and padding from the body/main container for better page utilization */
+  body, .container {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Ensure the printable content section starts at the top of the page */
+  .panel.fade-in:last-child {
+    margin-top: 0 !important;
+  }
+
+  /* Optional: Enhance table styling for print */
+  table {
+    page-break-inside: auto; /* Allow table to be split across pages */
+  }
+  tr {
+    page-break-inside: avoid; /* Keep table rows intact */
+    page-break-after: auto;
   }
 }
 </style>
@@ -95,6 +118,7 @@ require_once __DIR__ . '/../partials/site_header.php';
 <section class="panel fade-in">
   <h1 style="margin-bottom:8px;">Audit Log — Print View</h1>
   <p class="muted" style="margin-bottom:10px;">
+    Use filters then press the **Print** button below. This page uses formal print styles automatically.
   </p>
   <form method="get" class="grid filter-bar">
     <div class="field" style="grid-column:span 3;">
@@ -136,8 +160,8 @@ require_once __DIR__ . '/../partials/site_header.php';
   </form>
 </section>
 
-<section class="panel fade-in" style="margin-top:-10px; margin-bottom:15px; padding:15px 20px;">
-  <button id="print-button" class="btn-action btn-primary" onclick="window.print()" style="min-width:160px;">
+<section id="print-button-section" class="panel fade-in" style="margin-top:-10px; margin-bottom:15px; padding:15px 20px;">
+  <button class="btn-action btn-primary" onclick="window.print()" style="min-width:160px;">
     <span style="font-size:1.2em; margin-right:8px;">&#x1F5B6;&#xFE0F;</span> Print Audit Log
   </button>
 </section>
