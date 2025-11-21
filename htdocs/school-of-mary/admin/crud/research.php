@@ -172,10 +172,9 @@ require_once __DIR__ . '/../../partials/site_header.php';
 
 /* Filter Bar: All inputs on one line */
 .filter-bar {
-  /* MODIFIED: Define one row with 6 columns (Title, Status, From, To, Order, Clear) */
+  /* Define one row with 6 columns (Title, Status, From, To, Order, Clear) */
   grid-template-columns: 3fr 2fr 1fr 1fr 2fr 1fr; 
   gap: 10px;
-  align-items: flex-end; /* Align all elements to the bottom (Clear button aligns with inputs) */
 }
 .filter-bar .field {
     /* Ensure label and input stack within the field container */
@@ -188,9 +187,19 @@ require_once __DIR__ . '/../../partials/site_header.php';
 .filter-bar .field:nth-child(3) { grid-column: span 1; } /* Start from */
 .filter-bar .field:nth-child(4) { grid-column: span 1; } /* End by */
 .filter-bar .field:nth-child(5) { grid-column: span 2; } /* Order */
+
+/* MODIFIED: Fix for Clear button alignment - adds padding equivalent to label + gap */
 .filter-bar .filter-actions { 
     grid-column: span 1; 
-    /* The Clear button now sits perfectly aligned thanks to align-items: flex-end on .filter-bar */
+    padding-top: 20px; /* Adjust this value if the input height/label gap changes */
+    /* NEW: Right-align the content inside the cell */
+    display: flex; 
+    justify-content: flex-end;
+}
+.filter-bar .filter-actions .btn-action {
+    /* REMOVED: width: 100%; since we want it right-aligned and not stretched */
+    min-width: 130px; /* Keep standard button width */
+    height: 40px; 
 }
 
 @media (max-width: 992px) {
@@ -201,12 +210,21 @@ require_once __DIR__ . '/../../partials/site_header.php';
   .filter-bar .field:nth-child(3) { grid-column: span 3; }
   .filter-bar .field:nth-child(4) { grid-column: span 3; }
   .filter-bar .field:nth-child(5) { grid-column: span 4; }
-  .filter-bar .filter-actions { grid-column: span 2; }
+  .filter-bar .filter-actions { 
+      grid-column: span 2; 
+      padding-top: 0; /* Remove top padding on smaller screens */
+      /* NEW: Align to the right in the mobile view too */
+      justify-content: flex-end; 
+  }
 }
 
 @media (max-width: 720px){ 
   /* Mobile: stack all fields */
-  .filter-bar .field, .filter-bar .filter-actions { grid-column: span 12 !important; }
+  .filter-bar .field, .filter-bar .filter-actions { 
+      grid-column: span 12 !important; 
+      /* Center button when it takes full width on smallest screens */
+      justify-content: center;
+  }
 }
 
 /* ------------------------------------------- */
