@@ -30,6 +30,13 @@ if ($action === 'create') {
   if (!v_date_nullable($_POST['RESEARCH_ENDDATE'] ?? '')) guardFail('Invalid end date');
   if (!v_enum_exists($pdo, 'RESEARCH_STATUS', 'STATUS_CODE', $_POST['RESEARCH_STATUS'] ?? null)) guardFail('Invalid status');
 
+  // NEW SERVER-SIDE VALIDATION
+  $startDate = $_POST['RESEARCH_STARTDATE'] ?? '';
+  $endDate = $_POST['RESEARCH_ENDDATE'] ?? '';
+  if ($endDate !== '' && strtotime($endDate) < strtotime($startDate)) {
+      guardFail('End Date cannot be earlier than Start Date.');
+  }
+
   $pdo->prepare("INSERT INTO RESEARCH (RESEARCH_TITLE, RESEARCH_STARTDATE, RESEARCH_ENDDATE, RESEARCH_STATUS) VALUES (?,?,?,?)")
       ->execute([
         $_POST['RESEARCH_TITLE'],
@@ -50,6 +57,13 @@ if ($action === 'update') {
   if (!v_date($_POST['RESEARCH_STARTDATE'] ?? ''))     guardFail('Invalid start date');
   if (!v_date_nullable($_POST['RESEARCH_ENDDATE'] ?? '')) guardFail('Invalid end date');
   if (!v_enum_exists($pdo, 'RESEARCH_STATUS', 'STATUS_CODE', $_POST['RESEARCH_STATUS'] ?? null)) guardFail('Invalid status');
+
+  // NEW SERVER-SIDE VALIDATION
+  $startDate = $_POST['RESEARCH_STARTDATE'] ?? '';
+  $endDate = $_POST['RESEARCH_ENDDATE'] ?? '';
+  if ($endDate !== '' && strtotime($endDate) < strtotime($startDate)) {
+      guardFail('End Date cannot be earlier than Start Date.');
+  }
 
   $pdo->prepare("UPDATE RESEARCH SET RESEARCH_TITLE=?, RESEARCH_STARTDATE=?, RESEARCH_ENDDATE=?, RESEARCH_STATUS=? WHERE RESEARCH_ID=?")
       ->execute([
@@ -195,7 +209,6 @@ require_once __DIR__ . '/../../partials/site_header.php';
 </section>
 
 <section class="panel" id="panel"></section>
-<!-- Create Research Modal -->
 <div class="admin-modal" id="createResearchModal" hidden>
   <div class="admin-modal__backdrop" data-close="1"></div>
   <div class="admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="createResearchTitle">
@@ -237,7 +250,6 @@ require_once __DIR__ . '/../../partials/site_header.php';
     </form>
   </div>
 </div>
-<!-- --------- Modal HTML --------- -->
 <div class="admin-modal" id="researchModal" hidden>
   <div class="admin-modal__backdrop" data-close="1"></div>
   <div class="admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="researchModalTitle">
@@ -291,6 +303,27 @@ require_once __DIR__ . '/../../partials/site_header.php';
   const toInput = document.querySelector('input[name="to"]');
   const sortSelect = document.querySelector('select[name="sort"]');
   let timer = null;
+  
+  // NEW: Function to validate start and end dates
+  function validateDates(startDateId, endDateId, formEvent) {
+    const startInput = document.getElementById(startDateId);
+    const endInput = document.getElementById(endDateId);
+    
+    // Only compare if an end date is present
+    if (endInput.value && startInput.value) {
+      const startDate = new Date(startInput.value);
+      const endDate = new Date(endInput.value);
+      
+      // Compare dates. Using getTime() ensures comparison is numerical
+      if (endDate.getTime() < startDate.getTime()) {
+        alert('Error: End Date cannot be earlier than the Start Date.');
+        formEvent.preventDefault(); // Stop form submission
+        endInput.focus();
+        return false;
+      }
+    }
+    return true;
+  }
 
   // fetch func
   function fetchResults(page) {
@@ -372,6 +405,13 @@ require_once __DIR__ . '/../../partials/site_header.php';
   window.addEventListener('keydown', e => {
     if (!createResearchModal.hidden && e.key === 'Escape') closeResearchModal();
   });
+  
+  // NEW: Create Research Modal Form Submit Handler
+  const createResearchForm = createResearchModal.querySelector('form');
+  createResearchForm.addEventListener('submit', function(e) {
+    validateDates('r_start', 'r_end', e);
+  });
+  
 // Edit Modal controller
   const modal = document.getElementById('researchModal');
   const form  = modal.querySelector('form');
@@ -380,6 +420,11 @@ require_once __DIR__ . '/../../partials/site_header.php';
   const sI    = document.getElementById('m_start');
   const eI    = document.getElementById('m_end');
   const stI   = document.getElementById('m_status');
+  
+  // NEW: Edit Research Modal Form Submit Handler
+  form.addEventListener('submit', function(e) {
+    validateDates('m_start', 'm_end', e);
+  });
 
   function open(payload){
     idI.value = payload.id;

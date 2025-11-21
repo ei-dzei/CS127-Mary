@@ -86,30 +86,23 @@ require_once __DIR__ . '/../partials/site_header.php';
 
 /* === Print View Optimization === */
 @media print {
-  /* Hide the filter panel, print button section, and pagination */
-  .panel.fade-in:first-child, /* This targets the first panel (Filters) */
+  .panel.fade-in:first-child, 
   .pagination,
-  #print-button-section { /* Using an ID for the whole section for clarity */
+  #print-button-section { 
     display: none !important;
   }
-
-  /* Remove margins and padding from the body/main container for better page utilization */
   body, .container {
     margin: 0 !important;
     padding: 0 !important;
   }
-
-  /* Ensure the printable content section starts at the top of the page */
   .panel.fade-in:last-child {
     margin-top: 0 !important;
   }
-
-  /* Optional: Enhance table styling for print */
   table {
-    page-break-inside: auto; /* Allow table to be split across pages */
+    page-break-inside: auto; 
   }
   tr {
-    page-break-inside: avoid; /* Keep table rows intact */
+    page-break-inside: avoid; 
     page-break-after: auto;
   }
 }
@@ -118,7 +111,6 @@ require_once __DIR__ . '/../partials/site_header.php';
 <section class="panel fade-in">
   <h1 style="margin-bottom:8px;">Audit Log — Print View</h1>
   <p class="muted" style="margin-bottom:10px;">
-    Use filters then press the **Print** button below. This page uses formal print styles automatically.
   </p>
   <form method="get" class="grid filter-bar">
     <div class="field" style="grid-column:span 3;">
