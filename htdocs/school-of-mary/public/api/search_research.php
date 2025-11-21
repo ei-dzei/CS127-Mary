@@ -5,7 +5,6 @@
     $perPage = 6;
     $page    = (isset($_GET['page']) && is_numeric($_GET['page'])) ? (int)$_GET['page'] : 1;
     $offset  = ($page - 1) * $perPage;
-
     
     /* --- List view (filters + pagination) --- */
     $q      = trim($_GET['q'] ?? '');
@@ -74,16 +73,18 @@
      $cards = '<div class="panel">No matching research.</div>';
   } else {
     foreach ($rows as $row) {
-        $endDate = $row['RESEARCH_ENDDATE'] ? ' · End: ' . htmlspecialchars($row['RESEARCH_ENDDATE']) : '';
+        $endDate = $row['RESEARCH_ENDDATE'] ? ' · <i class="bi bi-calendar-check-fill"></i> End: ' . htmlspecialchars($row['RESEARCH_ENDDATE']) : '';
 
         $cards .= '
         <div class="card">
-            <div class="card__icon">🔬</div>
+            <div class="card__icon">
+                <i class="bi bi-journal-code" style="font-size: 2rem;"></i>
+            </div>
                 <div class="card__content">
                     <h3 class="card__title">' . htmlspecialchars($row['RESEARCH_TITLE']) .'</h3>
-                    <p class="card__desc">Status:' . htmlspecialchars($row['RESEARCH_STATUS']) . '</p>
+                    <p class="card__desc">Status: ' . htmlspecialchars($row['RESEARCH_STATUS']) . '</p>
                     <div class="card__meta">
-                    🗓 Start: ' . htmlspecialchars($row['RESEARCH_STARTDATE']) . $endDate . '
+                    <i class="bi bi-calendar-date-fill"></i> Start: ' . htmlspecialchars($row['RESEARCH_STARTDATE']) . $endDate . '
                 </div>
                 <div class="card__actions">
                     <button class="btn small"
