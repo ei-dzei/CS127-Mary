@@ -287,7 +287,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
   </div>
   <form method="get" class="grid filter-bar" style="margin-top:10px; margin-bottom:10px;">
     <div class="field">
-      <label>Title (Live Search)</label>
+      <label>Title </label>
       <input class="input" name="q" value="<?= htmlspecialchars($q); ?>"></div>
     <div class="field">
       <label>Status</label>
