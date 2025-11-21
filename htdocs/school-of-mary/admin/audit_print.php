@@ -164,7 +164,6 @@ require_once __DIR__ . '/../partials/site_header.php';
       <div>
         <h2 style="font-family:'Patua One', serif; margin:0;">School of Mary — Audit Log</h2>
         <div class="muted">
-          Generated: <?= date('Y-m-d H:i:s'); ?>
           <?php if ($actor||$action||$table||$from||$to): ?>
             · Filters:
             <?php

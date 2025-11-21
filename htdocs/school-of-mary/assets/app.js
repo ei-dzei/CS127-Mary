@@ -946,43 +946,33 @@
     const prevBtn = document.getElementById('prev-month');
     const nextBtn = document.getElementById('next-month');
     
-    // Comprehensive list of dummy events (Holidays, Meetings, Deadlines)
     const DUMMY_EVENTS = {
-        // --- November 2025 ---
         '2025-11-01': [{ title: 'All Saints Day (Holiday)', type: 'holiday' }],
         '2025-11-20': [{ title: 'Funding Deadline A', type: 'deadline' }],
         '2025-11-25': [{ title: 'Faculty Meeting', type: 'meeting' }],
         '2025-11-30': [{ title: 'Bonifacio Day (Holiday)', type: 'holiday' }],
         
-        // --- December 2025 ---
         '2025-12-10': [{ title: 'Project Review', type: 'meeting' }],
         '2025-12-24': [{ title: 'Christmas Eve (Special Holiday)', type: 'holiday' }],
         '2025-12-25': [{ title: 'Christmas Day (Holiday)', type: 'holiday' }],
         '2025-12-30': [{ title: 'Rizal Day (Holiday)', type: 'holiday' }],
         '2025-12-31': [{ title: 'New Year\'s Eve (Special Holiday)', type: 'holiday' }],
         
-        // --- January 2026 ---
         '2026-01-01': [{ title: 'New Year\'s Day (Holiday)', type: 'holiday' }],
         '2026-01-20': [{ title: 'Q1 Budget Deadline', type: 'deadline' }],
         
-        // --- February 2026 ---
         '2026-02-25': [{ title: 'EDSA Revolution Anniversary (Holiday)', type: 'holiday' }],
         
-        // --- April 2026 ---
         '2026-04-09': [{ title: 'Araw ng Kagitingan (Holiday)', type: 'holiday' }],
         '2026-04-10': [{ title: 'Good Friday (Holiday)', type: 'holiday' }],
         
-        // --- May 2026 ---
         '2026-05-01': [{ title: 'Labor Day (Holiday)', type: 'holiday' }],
         
-        // --- June 2026 ---
         '2026-06-12': [{ title: 'Independence Day (Holiday)', type: 'holiday' }],
         
-        // --- August 2026 ---
         '2026-08-21': [{ title: 'Ninoy Aquino Day (Holiday)', type: 'holiday' }],
         '2026-08-31': [{ title: 'National Heroes Day (Holiday)', type: 'holiday' }],
         
-        // --- November 2026 ---
         '2026-11-01': [{ title: 'All Saints Day (Holiday)', type: 'holiday' }],
         '2026-11-30': [{ title: 'Bonifacio Day (Holiday)', type: 'holiday' }],
     };
@@ -1082,9 +1072,6 @@
     const editStartDateEl = document.getElementById('m_start');
     const editEndDateEl = document.getElementById('m_end');
 
-    // ----------------------------------------------------
-    // Generic validation logic function
-    // ----------------------------------------------------
     function enforceDateConstraint(startEl, endEl) {
         if (!startEl || !endEl) return;
 
@@ -1093,7 +1080,6 @@
             
             endEl.min = startDateValue;
             if (endEl.value && startDateValue && endEl.value < startDateValue) {
-                // Clear value to force re-selection and prevent submission of invalid data
                 endEl.value = ''; 
             }
         }
@@ -1105,9 +1091,7 @@
         }
     }
     
-    // ----------------------------------------------------
     // Apply logic to both sets of inputs
-    // ----------------------------------------------------
     enforceDateConstraint(createStartDateEl, createEndDateEl);
     enforceDateConstraint(editStartDateEl, editEndDateEl);
 
@@ -1133,34 +1117,25 @@ document.addEventListener('DOMContentLoaded', function() {
     const appWrapper = document.getElementById('app-wrapper');
 
     if (appWrapper) {
-        
-        // --- Initialization ---
-        // On desktop load, ensure the sidebar is open by default
         if (window.innerWidth > 1024) {
              appWrapper.classList.remove('sidebar-closed'); 
         } else {
              appWrapper.classList.remove('sidebar-open');
         }
 
-
-        // --- Desktop Collapse Logic ---
         if (internalToggleButton) {
             internalToggleButton.addEventListener('click', function() {
-                // Only run desktop logic on desktop screen sizes
                 if (window.innerWidth > 1024) {
                     appWrapper.classList.toggle('sidebar-closed');
                 }
             });
         }
         
-        // --- Mobile Overlay Logic ---
         if (mobileToggleButton) {
             mobileToggleButton.addEventListener('click', function() {
-                // Only run mobile logic on mobile screen sizes
                 if (window.innerWidth <= 1024) {
                     const isNowOpen = appWrapper.classList.toggle('sidebar-open');
                     
-                    // Update button text/icon for mobile
                     if (isNowOpen) {
                         mobileToggleButton.innerHTML = '✕ Close';
                     } else {

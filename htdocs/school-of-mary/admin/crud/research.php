@@ -30,7 +30,7 @@ if ($action === 'create') {
   if (!v_date_nullable($_POST['RESEARCH_ENDDATE'] ?? '')) guardFail('Invalid end date');
   if (!v_enum_exists($pdo, 'RESEARCH_STATUS', 'STATUS_CODE', $_POST['RESEARCH_STATUS'] ?? null)) guardFail('Invalid status');
 
-  // START: NEW SERVER-SIDE DATE VALIDATION
+  // START: NEW SERVER-SIDE DATE VALIDATION (Kept for security)
   $startDate = $_POST['RESEARCH_STARTDATE'] ?? '';
   $endDate = $_POST['RESEARCH_ENDDATE'] ?? '';
   if ($endDate !== '' && strtotime($endDate) < strtotime($startDate)) {
@@ -59,7 +59,7 @@ if ($action === 'update') {
   if (!v_date_nullable($_POST['RESEARCH_ENDDATE'] ?? '')) guardFail('Invalid end date');
   if (!v_enum_exists($pdo, 'RESEARCH_STATUS', 'STATUS_CODE', $_POST['RESEARCH_STATUS'] ?? null)) guardFail('Invalid status');
 
-  // START: NEW SERVER-SIDE DATE VALIDATION
+  // START: NEW SERVER-SIDE DATE VALIDATION (Kept for security)
   $startDate = $_POST['RESEARCH_STARTDATE'] ?? '';
   $endDate = $_POST['RESEARCH_ENDDATE'] ?? '';
   if ($endDate !== '' && strtotime($endDate) < strtotime($startDate)) {
@@ -134,6 +134,12 @@ require_once __DIR__ . '/../../partials/site_header.php';
 }
 @media (max-width: 900px){ .modal-grid{ grid-template-columns: 1fr; } }
 .modal-grid .field{display:flex; flex-direction:column; gap:6px;}
+/* MODIFIED: Added style for disabled inputs */
+.modal-grid .input:disabled, .modal-grid select:disabled{
+  background-color: #e9ecef; 
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 .modal-grid .input, .modal-grid select{width:100%; padding:12px 14px; font-size:16px;}
 .admin-modal__actions{display:flex; gap:10px; justify-content:flex-end; padding:12px 18px; border-top:1px solid #eef2f6;}
 .btn.wide { min-width: 160px; }
@@ -243,25 +249,26 @@ require_once __DIR__ . '/../../partials/site_header.php';
 
       <div class="modal-grid">
         <div class="field">
-          <label for="r_title"> Title</label>
-          <input class="input" id="r_title" name="RESEARCH_TITLE" required>
-        </div>
-        <div class="field">
-          <label for="r_start">Start Date</label>
-          <input class="input" id="r_start" type="date" name="RESEARCH_STARTDATE" required>
-        </div>
-        <div class="field">
-          <label for="r_end">End Date</label>
-          <input class="input" id="r_end" type="date" name="RESEARCH_ENDDATE">
-        </div>
-        <div class="field">
           <label for="r_status">Status</label>
           <select class="input" id="r_status" name="RESEARCH_STATUS" required>
-            <?php foreach ($statuses as $s): ?>
+            <option value="" disabled selected>Select Status</option> <?php foreach ($statuses as $s): ?>
               <option value="<?= htmlspecialchars($s['STATUS_CODE'], ENT_QUOTES); ?>"><?= htmlspecialchars($s['STATUS_LABEL']); ?></option>
             <?php endforeach; ?>
           </select>
         </div>
+        <div class="field">
+          <label for="r_title"> Title</label>
+          <input class="input" id="r_title" name="RESEARCH_TITLE" required disabled>
+        </div>
+        <div class="field">
+          <label for="r_start">Start Date</label>
+          <input class="input" id="r_start" type="date" name="RESEARCH_STARTDATE" required disabled>
+        </div>
+        <div class="field">
+          <label for="r_end">End Date</label>
+          <input class="input" id="r_end" type="date" name="RESEARCH_ENDDATE" disabled>
+        </div>
+        
       </div>
 
       <div class="admin-modal__actions">
@@ -330,8 +337,8 @@ require_once __DIR__ . '/../../partials/site_header.php';
     const startInput = document.getElementById(startDateId);
     const endInput = document.getElementById(endDateId);
     
-    // Only compare if an end date is present
-    if (endInput.value && startInput.value) {
+    // Only compare if an end date is present and not disabled
+    if (endInput.value && startInput.value && !endInput.disabled) {
       const startDate = new Date(startInput.value);
       const endDate = new Date(endInput.value);
       
@@ -347,7 +354,154 @@ require_once __DIR__ . '/../../partials/site_header.php';
   }
   // END: NEW CLIENT-SIDE DATE VALIDATION FUNCTION
 
+  // START: NEW LOGIC FOR FIELD ENABLING/DISABLING AND MIN/MAX DATES
+  function applyResearchConstraints(statusSelectElement, titleInput, startInput, endInput, isNewRecord) {
+    const status = statusSelectElement.value;
+    const isOngoing = status === 'ONGOING';
+    const isStatusSelected = status !== '';
 
+    // 1. Title is enabled when a status is selected (only for Create)
+    if (isNewRecord) {
+        titleInput.disabled = !isStatusSelected;
+    }
+
+    // 2. Start Date is enabled when a status is selected
+    startInput.disabled = !isStatusSelected;
+
+    // 3. End Date logic based on status
+    if (isOngoing) {
+        // Case 1: Ongoing -> End Date is not clickable
+        endInput.disabled = true;
+        endInput.value = ''; // Clear value for ongoing
+    } else if (isStatusSelected) {
+        // Cases 2, 3, 4: Completed, Cancelled, Suspended -> Both dates clickable
+        endInput.disabled = false;
+    } else {
+        // No status selected (shouldn't happen after selection, but for safety)
+        endInput.disabled = true;
+    }
+
+    // 4. End Date constraint: cannot be earlier than Start Date
+    startInput.addEventListener('input', () => {
+        // Set the min attribute on End Date to the value of Start Date
+        endInput.setAttribute('min', startInput.value);
+    });
+    
+    // Initial check in case the status is changed
+    endInput.setAttribute('min', startInput.value);
+
+    // If no status is selected initially (for Create), disable everything but status
+    if (!isStatusSelected && isNewRecord) {
+      titleInput.disabled = true;
+      startInput.disabled = true;
+      endInput.disabled = true;
+    }
+
+    // Ensure status is selected on first load for the Create modal if isNewRecord is true
+    if (isNewRecord && status === '') {
+        titleInput.value = '';
+        startInput.value = '';
+        endInput.value = '';
+    }
+  }
+
+  // --- Create Modal Logic ---
+  const createResearchModal = document.getElementById('createResearchModal');
+  const r_title = document.getElementById('r_title');
+  const r_start = document.getElementById('r_start');
+  const r_end = document.getElementById('r_end');
+  const r_status = document.getElementById('r_status');
+  const createResearchForm = createResearchModal.querySelector('form');
+
+  // Initial setup for create modal (everything disabled except status)
+  r_title.disabled = true;
+  r_start.disabled = true;
+  r_end.disabled = true;
+
+  // Add change listener to r_status
+  r_status.addEventListener('change', () => {
+      applyResearchConstraints(r_status, r_title, r_start, r_end, true);
+  });
+  
+  function openCreateResearchModal() {
+    // Reset values
+    r_title.value = '';
+    r_start.value = '';
+    r_end.value = '';
+    r_status.value = ''; // Forces 'Select Status' option
+    
+    // Reset disabled states to initial state
+    r_title.disabled = true;
+    r_start.disabled = true;
+    r_end.disabled = true;
+    r_end.removeAttribute('min');
+
+    createResearchModal.hidden = false; 
+  }
+
+  function closeCreateResearchModal() { 
+    createResearchModal.hidden = true; 
+  }
+  
+  document.getElementById('create-research').addEventListener('click', function() {
+    openCreateResearchModal(); 
+  });
+      
+  createResearchModal.addEventListener('click', e => {
+    if (e.target.dataset.close) closeCreateResearchModal();
+  });
+  
+  window.addEventListener('keydown', e => {
+    if (!createResearchModal.hidden && e.key === 'Escape') closeCreateResearchModal();
+  });
+  
+  // Attach validation to CREATE form
+  createResearchForm.addEventListener('submit', function(e) {
+    validateDates('r_start', 'r_end', e);
+  });
+
+
+  // --- Edit Modal Logic ---
+  const modal = document.getElementById('researchModal');
+  const form  = modal.querySelector('form');
+  const idI   = document.getElementById('m_id');
+  const tI    = document.getElementById('m_title');
+  const sI    = document.getElementById('m_start');
+  const eI    = document.getElementById('m_end');
+  const stI   = document.getElementById('m_status');
+
+  // Add change listener to m_status
+  stI.addEventListener('change', () => {
+      // For Edit modal, title is always enabled, so we pass false for isNewRecord
+      applyResearchConstraints(stI, tI, sI, eI, false); 
+  });
+  
+  // Add input listener to m_start for dynamic min date on m_end
+  sI.addEventListener('input', () => {
+      eI.setAttribute('min', sI.value);
+  });
+  
+  function open(payload){
+    idI.value = payload.id;
+    tI.value  = payload.title || '';
+    sI.value  = payload.start || '';
+    eI.value  = payload.end || '';
+    stI.value = payload.status || '';
+
+    // Apply constraints immediately upon opening to set correct disabled states
+    applyResearchConstraints(stI, tI, sI, eI, false); 
+    
+    modal.hidden = false;
+  }
+  function close(){ modal.hidden = true; }
+  
+  // Attach validation to UPDATE form
+  form.addEventListener('submit', function(e) {
+    validateDates('m_start', 'm_end', e);
+  });
+  // END: NEW LOGIC FOR FIELD ENABLING/DISABLING AND MIN/MAX DATES
+  
+  
   // fetch func
   function fetchResults(page) {
     const q = queryInput.value;
@@ -396,69 +550,6 @@ require_once __DIR__ . '/../../partials/site_header.php';
       });
     });
   }
-  //Create Research
-  const createResearchModal = document.getElementById('createResearchModal');
-  const r_title = document.getElementById('r_title');
-  const r_start = document.getElementById('r_start');
-  const r_end = document.getElementById('r_end');
-  const r_status = document.getElementById('r_status');
-  
-  function openResearchModal() {
-    r_title.value = '';
-    r_start.value = '';
-    r_end.value = '';
-    r_status.value = '';
-  
-    createResearchModal.hidden = false; 
-  }
-
-  function closeResearchModal() { 
-    createResearchModal.hidden = true; 
-  }
-  
-  document.getElementById('create-research').addEventListener('click', function() {
-    openResearchModal(); 
-  });
-      
-  createResearchModal.addEventListener('click', e => {
-    if (e.target.dataset.close) closeResearchModal();
-  });
-  
-  window.addEventListener('keydown', e => {
-    if (!createResearchModal.hidden && e.key === 'Escape') closeResearchModal();
-  });
-  
-  // START: ATTACH VALIDATION TO CREATE FORM
-  const createResearchForm = createResearchModal.querySelector('form');
-  createResearchForm.addEventListener('submit', function(e) {
-    validateDates('r_start', 'r_end', e);
-  });
-  // END: ATTACH VALIDATION TO CREATE FORM
-  
-// Edit Modal controller
-  const modal = document.getElementById('researchModal');
-  const form  = modal.querySelector('form');
-  const idI   = document.getElementById('m_id');
-  const tI    = document.getElementById('m_title');
-  const sI    = document.getElementById('m_start');
-  const eI    = document.getElementById('m_end');
-  const stI   = document.getElementById('m_status');
-
-  // START: ATTACH VALIDATION TO UPDATE FORM
-  form.addEventListener('submit', function(e) {
-    validateDates('m_start', 'm_end', e);
-  });
-  // END: ATTACH VALIDATION TO UPDATE FORM
-
-  function open(payload){
-    idI.value = payload.id;
-    tI.value  = payload.title || '';
-    sI.value  = payload.start || '';
-    eI.value  = payload.end || '';
-    stI.value = payload.status || '';
-    modal.hidden = false;
-  }
-  function close(){ modal.hidden = true; }
   
   function attachEditButtons() {
     const editButtons = document.querySelectorAll('.js-edit');
