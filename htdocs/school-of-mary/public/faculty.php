@@ -104,29 +104,113 @@
 
 ?>
 
+<style>
+.filterbar {
+    display: flex;
+    flex-direction: column;
+}
+.filter-inputs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center; 
+    gap: 10px;
+}
+.searchbox {
+    position: relative; 
+    display: flex; 
+    align-items: center;
+    gap: 8px; 
+    padding: 8px 12px; 
+    background: #fff;
+    border: 1px solid #c7d2e4;
+    border-radius: 8px;
+    flex: 1 1 360px;
+}
+.searchbox svg:first-child {
+    color: #6b7280;
+}
+.searchbox input[type="search"] {
+    flex-grow: 1;
+    border: none;
+    padding: 0;
+    height: 1.5em; 
+}
+.searchbox .filter-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--color-accent);
+}
+
+#filter-dropdown {
+    position: absolute;
+    top: 100%; 
+    right: 0;
+    margin-top: 8px;
+    width: min(100%, 500px); 
+    background: #fff;
+    border: 1px solid #c7d2e4;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 100;
+    padding: 12px;
+    display: none; 
+}
+#filter-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-end; 
+}
+#filter-options .field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+#filter-options .field:first-child,
+#filter-options .field:nth-child(2) {
+    flex: 1 1 180px; 
+}
+#filter-options .clear-btn {
+    min-width: 100px;
+    height: 40px; 
+    padding: 8px 12px;
+}
+.field .input {
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+}
+.searchbox .filter-btn svg {
+    color: var(--color-accent);
+}
+</style>
+
 <section class="container fade-in" style="margin-top:6px;">
   <h1 style="margin-bottom:6px;">Faculty</h1>
   <p class="muted" style="margin-bottom:10px;">Explore the faculty of School of Mary</p>
 
-  <!-- Filter Bar -->
   <form method="get" class="filterbar" id="form" style="margin-bottom:14px;">
-    <!-- Inputs row -->
     <div class="filter-inputs">
-      <div class="searchbox" style="flex:1 1 360px;">
+      <div class="searchbox">
         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M10 18a8 8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/>
         </svg>
-        <input type="search" name="q" type="search" value="<?= htmlspecialchars($q) ?>" style="width: 85%;"placeholder="Search by name or email…" />
-        <!-- <input type="reset" value="X" alt="Clear the search form"> -->
-        <button class="filter-btn" id="filter-btn" type="button" style="border: none; "onclick="showHide()">
+        <input type="search" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search by name or email…" />
+        
+        <button class="filter-btn" id="filter-btn" type="button" onclick="showHide()">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-filter" viewBox="0 0 16 16">
             <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5"/>
           </svg>
         </button>
+        
         <div id ="filter-dropdown">
             <div id="filter-options">
-            <!-- Rank -->
-            <div class="field" style="width:200px;" display="inline-block">
+            <div class="field">
               <label>Rank</label>
               <select class="input" name="rank">
                 <option value="">All</option>
@@ -137,8 +221,7 @@
                 <?php endforeach; ?>
               </select>
             </div>
-            <!-- Department -->
-            <div class="field" style="width:200px;" display="inline-block">
+            <div class="field">
               <label>Department</label>
               <select class="input" name="dept">
                 <option value="">All</option>
@@ -153,10 +236,6 @@
           </div>
         </div>
       </div>
-      
-        
-      
-      
     </div>
   </form>
 
@@ -168,18 +247,12 @@
   const queryInput = document.querySelector('input[name="q"]');
   const rankSelect = document.querySelector('select[name="rank"]');
   const deptSelect = document.querySelector('select[name="dept"]'); 
-  // const clearQ = document.getElementById('clear-searchbar');
   let timer = null;
-  // if(queryInput.value == '') {
-  //   clearQ.style.display = "none";
-  // } else {
-  //   clearQ.style.display = "block";
-  // }
   
 
   function showHide() {
     var f = document.getElementById("filter-dropdown");
-    if (f.style.display === "none") {
+    if (f.style.display === "none" || f.style.display === "") {
       f.style.display = "block";
     } else {
       f.style.display = "none";
@@ -189,16 +262,14 @@
     if((queryInput.value == '') && (rankSelect.value == '') && (deptSelect.value == '')) {
       return;
     } else {
-      // queryInput.value = '';
       rankSelect.value = '';
       deptSelect.value = '';
       fetchResults(1);
     }
+    // Optionally close the filter dropdown after clearing
+    document.getElementById("filter-dropdown").style.display = "none";
   }
-  // function clearQuery() {
-  //   queryInput.value = '';
-  //   clearQ.style.display = "none"
-  // }
+  
   //fetch func
   function fetchResults(page) {
     const q = queryInput.value;
@@ -244,9 +315,7 @@
         });
     });
   }
-  //Load all faculty
   fetchResults(1);
-  attachPaginationEvents();
 </script>
 
 <?php require_once __DIR__ . '/../partials/site_footer.php'; ?>
