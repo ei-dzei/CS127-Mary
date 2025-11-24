@@ -217,7 +217,6 @@ $CSRF = csrf_token();
       </select>
     </div>
     <div class="field" style="grid-column: span 12; display:flex; gap:10px; justify-content:flex-end">
-      <button class="btn-action btn-primary" type="submit">Filter</button>
       <a class="btn-action btn-ghost" href="<?= app_url('/admin/crud/faculty.php'); ?>">Clear</a>
     </div>
   </form>
