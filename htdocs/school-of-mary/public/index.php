@@ -11,7 +11,7 @@ require_once __DIR__ . '/../partials/site_header.php';
 <section class="hero fade-in" aria-label="Featured highlights">
 
   <article class="hero__slide is-active"
-           style="background: url('bg1.png') center/cover no-repeat;">
+           style="background: url('bg4.png') center/cover no-repeat;">
     <div class="hero__overlay"></div>
     <div class="hero__content">
       <div class="hero__icon" aria-hidden="true"><i class="bi bi-mortarboard-fill"></i></div>
