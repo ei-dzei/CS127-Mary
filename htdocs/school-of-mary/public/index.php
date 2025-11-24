@@ -27,7 +27,7 @@ require_once __DIR__ . '/../partials/site_header.php';
   </article>
 
   <article class="hero__slide"
-           style="background: url('bg2.png') center/cover no-repeat;">
+           style="background: url('bg5.png') center/cover no-repeat;">
     <div class="hero__overlay"></div>
     <div class="hero__content">
       <div class="hero__icon" aria-hidden="true"><i class="bi bi-search"></i></div>
@@ -42,7 +42,7 @@ require_once __DIR__ . '/../partials/site_header.php';
   </article>
 
   <article class="hero__slide"
-           style="background: url('bg3.png') center/cover no-repeat;">
+           style="background: url('bg6.png') center/cover no-repeat;">
     <div class="hero__overlay"></div>
     <div class="hero__content">
       <div class="hero__icon" aria-hidden="true"><i class="bi bi-people-fill"></i></div>
