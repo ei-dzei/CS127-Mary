@@ -217,6 +217,7 @@ $CSRF = csrf_token();
       </select>
     </div>
     <div class="field" style="grid-column: span 12; display:flex; gap:10px; justify-content:flex-end">
+      <button class="btn-action btn-primary" type="submit">Filter</button>
       <a class="btn-action btn-ghost" href="<?= app_url('/admin/crud/faculty.php'); ?>">Clear</a>
     </div>
   </form>
@@ -407,7 +408,7 @@ $CSRF = csrf_token();
     createFacultyModal.hidden = true;
   }
   document.getElementById('create-faculty').addEventListener('click', function() {
-    openFacultyModal(); 
+    openFacultyModal();  // Call without payload for create mode
   });
       createFacultyModal.addEventListener('click', e => {
     if (e.target.dataset.close) closeFacultyModal();
@@ -499,3 +500,4 @@ $CSRF = csrf_token();
 </script>
 
 <?php require_once __DIR__ . '/../../partials/site_footer.php'; ?>
+
