@@ -407,7 +407,7 @@ $CSRF = csrf_token();
     createFacultyModal.hidden = true;
   }
   document.getElementById('create-faculty').addEventListener('click', function() {
-    openFacultyModal();  // Call without payload for create mode
+    openFacultyModal(); 
   });
       createFacultyModal.addEventListener('click', e => {
     if (e.target.dataset.close) closeFacultyModal();
