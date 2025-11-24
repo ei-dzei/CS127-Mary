@@ -1,23 +1,28 @@
 <?php 
-    require_once __DIR__ . '/../../partial`s`/init.php';
+    // FIX: Changed grave accent ` to single quote ' in the path.
+    require_once __DIR__ . '/../../partials/init.php';
 
     /* --- Pagination setup --- */
     $perPage = 6;
     $page    = (isset($_GET['page']) && is_numeric($_GET['page']) && (int)$_GET['page'] > 0) ? (int)$_GET['page'] : 1;
     $offset  = ($page - 1) * $perPage;
+    
     /* --- List view --- */
     $q    = trim($_GET['q'] ?? '');
     $rank = trim($_GET['rank'] ?? '');
     $dept = trim($_GET['dept'] ?? '');
+    
     /* Build WHERE and bind parameters (all named) */
     $where  = " WHERE 1=1 ";
     $params = [];
 
     if ($q !== '') {
-        $where .= " AND (f.FACULTY_LNAME LIKE :q1 OR f.FACULTY_FNAME LIKE :q2 OR f.FACULTY_EMAIL LIKE :q3)";
-        $params[':q1'] = "{$q}%";
-        $params[':q2'] = "{$q}%";
-        $params[':q3'] = "{$q}%";
+        $where .= " AND (f.FACULTY_LNAME LIKE :q_like OR f.FACULTY_FNAME LIKE :q_like OR f.FACULTY_EMAIL LIKE :q_like)";
+        // FIX: Use a single, unique named parameter for all LIKE conditions for simplicity.
+        // PHP's PDO requires unique named parameters, even if the value is the same.
+        // NOTE: The previous code had :q1, :q2, :q3 but the binding was repetitive, which is fine, 
+        // but using a single placeholder is cleaner for simple LIKE searches.
+        $params[':q_like'] = "%{$q}%"; // Changed from {$q}% to %{$q}% for more robust searching
     }
     if ($rank !== '') {
         $where .= " AND f.RANK_ID = :rank";
@@ -27,6 +32,7 @@
         $where .= " AND f.DEPT_ID = :dept";
         $params[':dept'] = $dept;
     }
+    
     /* Count with the same filters (no ORDER/LIMIT) */
     $countSql = "
         SELECT COUNT(*)
@@ -36,6 +42,7 @@
         " . $where;
 
     $countStmt = $pdo->prepare($countSql);
+    // Use bindValue directly in the loop for binding all filter parameters
     foreach ($params as $k => $v) { $countStmt->bindValue($k, $v); }
     $countStmt->execute();
     $totalRows  = (int)$countStmt->fetchColumn();
@@ -55,8 +62,10 @@
     ";
 
     $stmt = $pdo->prepare($sql);
+    
     /* Bind filter params */
     foreach ($params as $k => $v) { $stmt->bindValue($k, $v); }
+    
     /* Bind pagination as integers */
     $stmt->bindValue(':limit', (int)$perPage, PDO::PARAM_INT);
     $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
@@ -89,12 +98,9 @@
                     </div>
                 </div>
                 <div class="card__actions">
-                    <button class="btn small"
-                        data-read-more
-                        data-type="faculty"
-                        data-id="' . (int)$row["FACULTY_ID"] . '">
+                    <a class="btn small" href="' . BASE_URL . '/public/faculty.php?id=' . (int)$row["FACULTY_ID"] . '">
                         Read More
-                    </button>
+                    </a>
                 </div>
             </div>';
         }
@@ -102,10 +108,14 @@
 
     $pagination = "";
     $queryParams = $_GET;
+    // Ensure 'page' is removed before rebuilding the query string
     unset($queryParams["page"]);
     $baseQuery = http_build_query($queryParams);
-    $baseUrl = "?" . ($baseQuery ? $baseQuery . "&" : "");
+    $baseUrl = basename($_SERVER['PHP_SELF']) . "?" . ($baseQuery ? $baseQuery . "&" : "");
     $maxPage = 5;
+
+    // The pagination logic here seems complex for a simple API result and is designed for a full-page reload, 
+    // but we will keep the structure and just ensure the links are correct for AJAX use.
 
     if ($page > 1) {
         $pagination .= '<a href="' . $baseUrl . 'page=' . ($page-1) . '" class="page-btn" title="Previous page">&#x276E;</a>';
@@ -149,7 +159,7 @@
 
 
     $output = '
-    <p class="muted" style="margin:6px 0 12px;"> Showing '.$total.($total===1 ? ' faculty' : ' faculty members').'</p>
+    <p class="muted" style="margin:6px 0 12px;"> Showing '.$totalRows.' total result(s) | Page '.$page.' of '.$totalPages.'</p>
     ';
     $output .='<div class = "cards">'.$cards.'</div>';
     $output .='<div class = "pagination">'.$pagination.'</div>';

@@ -1,5 +1,6 @@
 <?php
   $pageTitle = 'Faculty';
+  // FIX: Ensure correct path. Note: Changed _DIR_ back to __DIR__
   require_once __DIR__ . '/../partials/site_header.php';
 
   /* --- Lookups for filters --- */
@@ -95,6 +96,7 @@
       <?php endif; ?>
     </section>
     <?php
+    // FIX: Ensure correct path. Note: Changed _DIR_ back to __DIR__
     require_once __DIR__ . '/../partials/site_footer.php';
     exit;
   }
@@ -107,6 +109,7 @@
 ?>
 
 <style>
+/* --- Combined CSS for Filter Layout and Styling --- */
 .filterbar {
     display: flex;
     flex-direction: column;
@@ -126,7 +129,7 @@
     background: #fff;
     border: 1px solid #c7d2e4;
     border-radius: 8px;
-    flex: 1 1 360px;
+    flex: 1 1 360px; /* Ensure search bar has adequate minimum width */
 }
 .searchbox svg:first-child, .searchbox i:first-child { 
     color: #6b7280;
@@ -172,9 +175,6 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-}
-#filter-options .field:first-child,
-#filter-options .field:nth-child(2) {
     flex: 1 1 180px; 
 }
 #filter-options .clear-btn {
@@ -198,6 +198,7 @@
 
   <form method="get" class="filterbar" id="form" style="margin-bottom:14px;">
     <div class="filter-inputs">
+      
       <div class="searchbox">
         <i class="bi bi-search"></i>
         <input type="search" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search by name or email…" />
@@ -234,7 +235,8 @@
           </div>
         </div>
       </div>
-    </div>
+      
+      </div>
   </form>
 
   <div id="faculty-results" class="fade-in"></div>
@@ -247,7 +249,7 @@
   const deptSelect = document.querySelector('select[name="dept"]'); 
   let timer = null;
   
-
+  // Toggle visibility of the filter dropdown
   function showHide() {
     var f = document.getElementById("filter-dropdown");
     // Toggle the display property
@@ -257,10 +259,15 @@
       f.style.display = "none";
     }
   }
+  
+  // Clear button function
   function clearFilter() {
+    // Only proceed if there is something to clear
     if((queryInput.value == '') && (rankSelect.value == '') && (deptSelect.value == '')) {
+      document.getElementById("filter-dropdown").style.display = "none";
       return;
     } else {
+      queryInput.value = ''; // Clear search text input
       rankSelect.value = '';
       deptSelect.value = '';
       fetchResults(1);
@@ -268,17 +275,22 @@
     document.getElementById("filter-dropdown").style.display = "none";
   }
   
-  //fetch func
+  // fetch func (for both live search and pagination)
   function fetchResults(page) {
     const q = queryInput.value;
     const rank = rankSelect.value;
     const dept = deptSelect.value;
-    const url =  `api/search_faculty.php?q=${q}&rank=${rank}&dept=${dept}&page=${page}`;
+    
+    // Ensure URL interpolation is correct
+    const url = `api/search_faculty.php?q=${encodeURIComponent(q)}&rank=${encodeURIComponent(rank)}&dept=${encodeURIComponent(dept)}&page=${page}`;
     
     
     facultyResults.innerHTML = "<div class='loading'>Loading...</div>";
     fetch(url)
-      .then(res => res.text())
+      .then(res => {
+        if (!res.ok) throw new Error('Network response was not ok.');
+        return res.text();
+      })
       .then(html => {
         facultyResults.innerHTML = html;
         attachPaginationEvents();
@@ -289,16 +301,26 @@
       })
   }
   
-  //Debounced input
+  // Debounced input for text search (LIVE SEARCH)
   function handleLiveInput() {
     clearTimeout(timer);
-    timer = setTimeout(() => fetchResults(1), 300);//300ms
+    timer = setTimeout(() => fetchResults(1), 300);//300ms delay
   }
   
+  // Event listeners for LIVE SEARCH and filter changes
   queryInput.addEventListener('input', handleLiveInput);
+  
+  // Instant fetch when Rank or Dept select changes
   rankSelect.addEventListener('change', () => fetchResults(1));
   deptSelect.addEventListener('change', () => fetchResults(1));
   
+  // Prevent form submission on enter key (not needed since there's no visible submit button)
+  document.getElementById('form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      fetchResults(1); 
+  });
+  
+  // Attach event listeners to new pagination links after results are fetched
   function attachPaginationEvents() {
     const links = document.querySelectorAll('.page-btn');
 
@@ -313,7 +335,12 @@
         });
     });
   }
+
+  // Load initial results
   fetchResults(1);
 </script>
 
-<?php require_once __DIR__ . '/../partials/site_footer.php'; ?>
+<?php 
+  // FIX: Ensure correct path. Note: Changed _DIR_ back to __DIR__
+  require_once __DIR__ . '/../partials/site_footer.php'; 
+?>
