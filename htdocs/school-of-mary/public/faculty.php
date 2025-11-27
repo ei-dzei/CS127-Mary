@@ -1,6 +1,5 @@
 <?php
   $pageTitle = 'Faculty';
-  // FIX: Ensure correct path. Note: Changed _DIR_ back to __DIR__
   require_once __DIR__ . '/../partials/site_header.php';
 
   /* --- Lookups for filters --- */
@@ -85,9 +84,7 @@
                     Start: <?= htmlspecialchars($p['RESEARCH_STARTDATE']); ?>
                     <?php if (!empty($p['RESEARCH_ENDDATE'])) echo " · End: ".htmlspecialchars($p['RESEARCH_ENDDATE']); ?>
                   </span>
-                  <span style="margin-left:6px;">
-                    <i class="bi bi-person-badge-fill"></i> Role: <?= htmlspecialchars($p['ROLE_ID']); ?>
-                  </span>
+                  <span style="margin-left:6px;">Role: <?= htmlspecialchars($p['ROLE_ID']); ?></span>
                 </div>
               </a>
             <?php endforeach; ?>
@@ -96,7 +93,6 @@
       <?php endif; ?>
     </section>
     <?php
-    // FIX: Ensure correct path. Note: Changed _DIR_ back to __DIR__
     require_once __DIR__ . '/../partials/site_footer.php';
     exit;
   }
@@ -109,107 +105,134 @@
 ?>
 
 <style>
-/* --- Combined CSS for Filter Layout and Styling --- */
+.panel {
+    background: #fff;
+    border: 1px solid #c7d2e4;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
 .filterbar {
-    display: flex;
-    flex-direction: column;
+    position: relative; /* Essential for absolute positioning of the dropdown */
+    margin-bottom: 20px;
 }
-.filter-inputs {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center; 
-    gap: 10px;
-}
-.searchbox {
-    position: relative; 
-    display: flex; 
-    align-items: center;
-    gap: 8px; 
-    padding: 8px 12px; 
-    background: #fff;
-    border: 1px solid #c7d2e4;
-    border-radius: 8px;
-    flex: 1 1 360px; /* Ensure search bar has adequate minimum width */
-}
-.searchbox svg:first-child, .searchbox i:first-child { 
-    color: #6b7280;
-}
-.searchbox input[type="search"] {
-    flex-grow: 1;
-    border: none;
-    padding: 0;
-    height: 1.5em; 
-}
-.searchbox .filter-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 6px;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    color: var(--color-accent);
-}
-
-#filter-dropdown {
-    position: absolute;
-    top: 100%; 
-    right: 0;
-    margin-top: 8px;
-    width: min(100%, 500px); 
-    background: #fff;
-    border: 1px solid #c7d2e4;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    z-index: 100;
-    padding: 12px;
-    display: none; 
-}
-#filter-options {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    align-items: flex-end; 
-}
-#filter-options .field {
+.field {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    flex: 1 1 180px; 
 }
-#filter-options .clear-btn {
-    min-width: 100px;
-    height: 40px; 
-    padding: 8px 12px;
+.field label {
+    font-weight: 500;
+    color: #4b5563;
 }
 .field .input { 
     padding: 10px;
     border: 1px solid #d1d5db;
     border-radius: 6px;
+    height: 38px; 
+    box-sizing: border-box;
 }
-.searchbox .filter-btn i { 
-    color: var(--color-accent);
+
+/* --- SEARCH BAR AND TOGGLE STYLES (Full Width, Matching Look) --- */
+.searchbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 15px;
+    background: #fff;
+    border: 1px solid #c7d2e4;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    width: 100%; /* Full width */
+    box-sizing: border-box;
+}
+.searchbox svg:first-child {
+    color: #6b7280;
+}
+.searchbox input[type="search"] { 
+    flex-grow: 1;
+    border: none;
+    padding: 0;
+    height: 1.5em; 
+    font-size: 1rem;
+}
+.filter-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #4b5563; 
+}
+.filter-toggle-btn:hover {
+    color: #1f2937;
+}
+
+/* --- ADVANCED FILTER PANEL STYLES --- */
+#filter-dropdown {
+    display: none; /* Initially hidden */
+    position: absolute;
+    top: 100%; 
+    right: 0; /* Aligned to the right edge of the filterbar/container */
+    margin-top: 8px;
+    width: min(100%, 480px); /* Max width for panel */
+    background: #fff;
+    border: 1px solid #c7d2e4;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    z-index: 100;
+    padding: 15px;
+}
+#filter-options {
+    display: grid;
+    /* 3 columns for Status, Start, End */
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 10px;
+    margin-bottom: 15px;
+}
+.clear-btn-container {
+    text-align: left;
+}
+.clear-btn-container .btn-primary {
+    background-color: #2563eb;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+.clear-btn-container .btn-primary:hover {
+    background-color: #1d4ed8;
 }
 </style>
-
 <section class="container fade-in" style="margin-top:6px;">
   <h1 style="margin-bottom:6px;">Faculty</h1>
   <p class="muted" style="margin-bottom:10px;">Explore the faculty of School of Mary</p>
 
+  <!-- Filter Bar -->
   <form method="get" class="filterbar" id="form" style="margin-bottom:14px;">
-    <div class="filter-inputs">
-      
+    <!-- Inputs row -->
+    
       <div class="searchbox">
-        <i class="bi bi-search"></i>
-        <input type="search" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search by name or email…" />
-        
-        <button class="filter-btn" id="filter-btn" type="button" onclick="showHide()">
-          <i class="bi bi-filter"></i>
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M10 18a8 8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/>
+        </svg>
+        <input type="search" name="q" value="<?= htmlspecialchars($q) ?>" style="width: 85%;"placeholder="Search by name or email…" />
+        <!-- <input type="reset" value="X" alt="Clear the search form"> -->
+        <button class="filter-toggle-btn" id="filter-btn" type="button" onclick="toggleFilters(event)">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18L12 18 3 6z"/>
+            <polyline points="7 10 12 15 17 10"></polyline>
+          </svg>
         </button>
-        
-        <div id ="filter-dropdown">
-            <div id="filter-options">
-            <div class="field">
+      </div>
+      <div id ="filter-dropdown">
+          <div id="filter-options">
+            <!-- Rank -->
+            <div class="field" style="width:200px;" display="inline-block">
               <label>Rank</label>
               <select class="input" name="rank">
                 <option value="">All</option>
@@ -220,7 +243,8 @@
                 <?php endforeach; ?>
               </select>
             </div>
-            <div class="field">
+            <!-- Department -->
+            <div class="field" style="width:200px;" display="inline-block">
               <label>Department</label>
               <select class="input" name="dept">
                 <option value="">All</option>
@@ -234,9 +258,7 @@
             <button class="btn clear-btn" type="button" onclick="clearFilter()" id="clear-btn">Clear Filters</button>
           </div>
         </div>
-      </div>
-      
-      </div>
+    
   </form>
 
   <div id="faculty-results" class="fade-in"></div>
@@ -247,50 +269,45 @@
   const queryInput = document.querySelector('input[name="q"]');
   const rankSelect = document.querySelector('select[name="rank"]');
   const deptSelect = document.querySelector('select[name="dept"]'); 
+  const filterDropdown = document.querySelector('#filter-dropdown')
   let timer = null;
-  
+
   // Toggle visibility of the filter dropdown
-  function showHide() {
-    var f = document.getElementById("filter-dropdown");
-    // Toggle the display property
-    if (f.style.display === "none" || f.style.display === "") {
-      f.style.display = "block";
-    } else {
-      f.style.display = "none";
-    }
+  function toggleFilters(e) {
+      if (e) e.preventDefault();
+      if (filterDropdown.style.display === "none" || filterDropdown.style.display === "") {
+        filterDropdown.style.display = "block";
+      } else {
+        filterDropdown.style.display = "none";
+      }
   }
-  
   // Clear button function
-  function clearFilter() {
-    // Only proceed if there is something to clear
-    if((queryInput.value == '') && (rankSelect.value == '') && (deptSelect.value == '')) {
-      document.getElementById("filter-dropdown").style.display = "none";
-      return;
-    } else {
-      queryInput.value = ''; // Clear search text input
-      rankSelect.value = '';
-      deptSelect.value = '';
+  function clearFilters(e) {
+      if (e) e.preventDefault();
+      
+      // Reset inputs
+      qInput.value = '';
+      statusSelect.value = '';
+      fromInput.value = '';
+      toInput.value = '';
+      
+      // Fetch results to show the unfiltered list
       fetchResults(1);
-    }
-    document.getElementById("filter-dropdown").style.display = "none";
+
+      // Hide the filter panel
+      filterDropdown.style.display = "none";
   }
-  
-  // fetch func (for both live search and pagination)
+  //fetch func
   function fetchResults(page) {
     const q = queryInput.value;
     const rank = rankSelect.value;
     const dept = deptSelect.value;
-    
-    // Ensure URL interpolation is correct
-    const url = `api/search_faculty.php?q=${encodeURIComponent(q)}&rank=${encodeURIComponent(rank)}&dept=${encodeURIComponent(dept)}&page=${page}`;
+    const url =  `api/search_faculty.php?q=${q}&rank=${rank}&dept=${dept}&page=${page}`;
     
     
     facultyResults.innerHTML = "<div class='loading'>Loading...</div>";
     fetch(url)
-      .then(res => {
-        if (!res.ok) throw new Error('Network response was not ok.');
-        return res.text();
-      })
+      .then(res => res.text())
       .then(html => {
         facultyResults.innerHTML = html;
         attachPaginationEvents();
@@ -301,26 +318,16 @@
       })
   }
   
-  // Debounced input for text search (LIVE SEARCH)
+  //Debounced input
   function handleLiveInput() {
     clearTimeout(timer);
-    timer = setTimeout(() => fetchResults(1), 300);//300ms delay
+    timer = setTimeout(() => fetchResults(1), 300);//300ms
   }
   
-  // Event listeners for LIVE SEARCH and filter changes
   queryInput.addEventListener('input', handleLiveInput);
-  
-  // Instant fetch when Rank or Dept select changes
   rankSelect.addEventListener('change', () => fetchResults(1));
   deptSelect.addEventListener('change', () => fetchResults(1));
   
-  // Prevent form submission on enter key (not needed since there's no visible submit button)
-  document.getElementById('form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      fetchResults(1); 
-  });
-  
-  // Attach event listeners to new pagination links after results are fetched
   function attachPaginationEvents() {
     const links = document.querySelectorAll('.page-btn');
 
@@ -335,12 +342,9 @@
         });
     });
   }
-
-  // Load initial results
+  //Load all faculty
   fetchResults(1);
+  attachPaginationEvents();
 </script>
 
-<?php 
-  // FIX: Ensure correct path. Note: Changed _DIR_ back to __DIR__
-  require_once __DIR__ . '/../partials/site_footer.php'; 
-?>
+<?php require_once __DIR__ . '/../partials/site_footer.php'; ?>

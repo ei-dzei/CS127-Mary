@@ -159,10 +159,8 @@
         $pagination .= '<a href="' . $baseUrl . 'page=' . ($page+1) . '" class="page-btn" title= "Next page ">&#x276F;</a>';
     }
 
-    // --- 5. Final Output ---
-    $output = '<p class="muted" style="margin:6px 0 12px;">Showing ' .(int)$totalRows .  ($totalRows===1 ? " project" : " projects").'</p>';
-    $output .= '<div class = "cards">' . $cards . '</div>';
-    $output .='<div class = "pagination">'.$pagination.'</div>';
-    
-    echo $output;
+  $output = '<p class="muted" style="margin:6px 0 12px;">Showing ' .(int)$total .  ($total===1 ? " project" : " projects").'</p>';
+  $output .= '<div class = "cards">' . $cards . '</div>';
+  $output .='<div class = "pagination">'.$pagination.'</div>';
+  echo $output;
 ?>

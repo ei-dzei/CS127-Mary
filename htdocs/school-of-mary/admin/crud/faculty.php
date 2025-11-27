@@ -105,6 +105,69 @@ $CSRF = csrf_token();
 ?>
 
 <style>
+/* Filter Bar: All inputs on one line */
+.filter-bar {
+  /* Using 12-column grid for precise placement */
+  grid-template-columns: repeat(12, 1fr); 
+  gap: 10px;
+  /* ADDED: Align items to the bottom baseline */
+  align-items: flex-end; 
+}
+.filter-bar .field {
+    /* Ensure label and input stack within the field container */
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* Column Spans for desktop view (12 columns total) */
+.filter-bar .field:nth-child(1) { grid-column: span 3; } /* Title (3/12) */
+.filter-bar .field:nth-child(2) { grid-column: span 2; } /* Status (2/12) */
+.filter-bar .field:nth-child(3) { grid-column: span 2; } /* Start from (2/12) */
+.filter-bar .field:nth-child(4) { grid-column: span 2; } /* End by (2/12) */
+.filter-bar .field:nth-child(5) { grid-column: span 2; } /* Order (2/12) */
+
+/* MODIFIED: Clear button placement and alignment */
+.filter-bar .filter-actions { 
+    grid-column: 12 / 13; /* Places the button in the very last column (column 12) */
+    padding-top: 0; /* Clear previous manual adjustment */
+    display: flex; 
+    justify-content: flex-end; /* Push the button to the right edge */
+    /* Removed align-items: flex-start; as align-items: flex-end on parent takes care of bottom alignment */
+}
+.filter-bar .filter-actions .btn-action {
+    min-width: 100px; 
+    height: 40px; 
+    /* ADDED: Push the button down by the label height + gap (20px) to align its top edge with the inputs' top edge. */
+    margin-top: 20px; 
+}
+
+@media (max-width: 992px) {
+  /* Tablet View: Stacking layout */
+  .filter-bar { grid-template-columns: repeat(12, 1fr); align-items: stretch; }
+  .filter-bar .field:nth-child(1) { grid-column: span 6; }
+  .filter-bar .field:nth-child(2) { grid-column: span 6; }
+  .filter-bar .field:nth-child(3) { grid-column: span 3; }
+  .filter-bar .field:nth-child(4) { grid-column: span 3; }
+  .filter-bar .field:nth-child(5) { grid-column: span 4; }
+  .filter-bar .filter-actions { 
+      grid-column: span 2; 
+      padding-top: 0; 
+      justify-content: flex-end; 
+  }
+  .filter-bar .filter-actions .btn-action {
+      margin-top: 0; /* Remove manual margin in stacked layout */
+  }
+}
+
+@media (max-width: 720px){ 
+  /* Mobile: Full-width stacking */
+  .filter-bar .field, .filter-bar .filter-actions { 
+      grid-column: span 12 !important; 
+      justify-content: center;
+  }
+}
+
 /* --------- Inline modal (Existing CSS) --------- */
 .admin-modal[hidden]{display:none!important;}
 .admin-modal{
@@ -179,47 +242,47 @@ $CSRF = csrf_token();
   <h1 style="margin-bottom:8px;">Faculty</h1>
   <p class="muted" style="margin-bottom:10px;">Create, update, delete records. CSV export also available.</p>
   <form method="get" class="grid filter-bar" style="margin-bottom:10px;">
-    <div class="field" style="grid-column: span 4">
-      <label>Search (name or email)</label>
-      <input class="input" name="q" value="<?= htmlspecialchars($q); ?>">
-    </div>
-    <div class="field" style="grid-column: span 3">
-      <label>Rank</label>
-      <select class="input" name="rank">
-        <option value="">All</option>
-        <?php foreach ($ranks as $r):
-          $sel = ($rank === $r['RANK_ID']) ? ' selected' : '';
-          echo '<option'.$sel.' value="'.htmlspecialchars($r['RANK_ID'], ENT_QUOTES).'">'.htmlspecialchars($r['RANK_DESCRIPTION']).'</option>';
-        endforeach; ?>
-      </select>
-    </div>
-    <div class="field" style="grid-column: span 3">
-      <label>Department</label>
-      <select class="input" name="dept">
-        <option value="">All</option>
-        <?php foreach ($depts as $d):
-          $sel = ($dept === $d['DEPT_ID']) ? ' selected' : '';
-          echo '<option'.$sel.' value="'.htmlspecialchars($d['DEPT_ID'], ENT_QUOTES).'">'.htmlspecialchars($d['DEPT_SPECIALIZATION']).'</option>';
-        endforeach; ?>
-      </select>
-    </div>
-    <div class="field" style="grid-column: span 2">
-      <label>Order</label>
-      <select class="input" name="sort">
-        <option value="name_asc"  <?= $sort==='name_asc'?'selected':''; ?>>Name (A–Z)</option>
-        <option value="name_desc" <?= $sort==='name_desc'?'selected':''; ?>>Name (Z–A)</option>
-        <option value="id_asc"    <?= $sort==='id_asc'?'selected':''; ?>>ID (Oldest First)</option>
-        <option value="id_desc"   <?= $sort==='id_desc'?'selected':''; ?>>ID (Newest First)</option>
-        <option value="email_asc" <?= $sort==='email_asc'?'selected':''; ?>>Email (A–Z)</option>
-        <option value="email_desc"<?= $sort==='email_desc'?'selected':''; ?>>Email (Z–A)</option>
-        <option value="rank_asc"  <?= $sort==='rank_asc'?'selected':''; ?>>Rank</option>
-        <option value="dept_asc"  <?= $sort==='dept_asc'?'selected':''; ?>>Department</option>
-      </select>
-    </div>
-    <div class="field" style="grid-column: span 12; display:flex; gap:10px; justify-content:flex-end">
-      <button class="btn-action btn-primary" type="submit">Filter</button>
-      <a class="btn-action btn-ghost" href="<?= app_url('/admin/crud/faculty.php'); ?>">Clear</a>
-    </div>
+      <div class="field" style="grid-column: span 4">
+        <label>Search (name or email)</label>
+        <input class="input" name="q" value="<?= htmlspecialchars($q); ?>">
+      </div>
+      <div class="field" style="grid-column: span 3">
+        <label>Rank</label>
+        <select class="input" name="rank">
+          <option value="">All</option>
+          <?php foreach ($ranks as $r):
+            $sel = ($rank === $r['RANK_ID']) ? ' selected' : '';
+            echo '<option'.$sel.' value="'.htmlspecialchars($r['RANK_ID'], ENT_QUOTES).'">'.htmlspecialchars($r['RANK_DESCRIPTION']).'</option>';
+          endforeach; ?>
+        </select>
+      </div>
+      <div class="field" style="grid-column: span 3">
+        <label>Department</label>
+        <select class="input" name="dept">
+          <option value="">All</option>
+          <?php foreach ($depts as $d):
+            $sel = ($dept === $d['DEPT_ID']) ? ' selected' : '';
+            echo '<option'.$sel.' value="'.htmlspecialchars($d['DEPT_ID'], ENT_QUOTES).'">'.htmlspecialchars($d['DEPT_SPECIALIZATION']).'</option>';
+          endforeach; ?>
+        </select>
+      </div>
+      <div class="field" style="grid-column: span 2">
+        <label>Order</label>
+        <select class="input" name="sort">
+          <option value="name_asc"  <?= $sort==='name_asc'?'selected':''; ?>>Name (A–Z)</option>
+          <option value="name_desc" <?= $sort==='name_desc'?'selected':''; ?>>Name (Z–A)</option>
+          <option value="id_asc"    <?= $sort==='id_asc'?'selected':''; ?>>ID (Oldest First)</option>
+          <option value="id_desc"   <?= $sort==='id_desc'?'selected':''; ?>>ID (Newest First)</option>
+          <option value="email_asc" <?= $sort==='email_asc'?'selected':''; ?>>Email (A–Z)</option>
+          <option value="email_desc"<?= $sort==='email_desc'?'selected':''; ?>>Email (Z–A)</option>
+          <option value="rank_asc"  <?= $sort==='rank_asc'?'selected':''; ?>>Rank</option>
+          <option value="dept_asc"  <?= $sort==='dept_asc'?'selected':''; ?>>Department</option>
+        </select>
+      </div>
+      <div class="field" style="grid-column: span 12; display:flex; gap:10px; justify-content:flex-end">
+        <button class="btn-action btn-primary" type="submit">Filter</button>
+        <a class="btn-action btn-ghost" href="<?= app_url('/admin/crud/faculty.php'); ?>">Clear</a>
+      </div>
   </form>
 </section>
 

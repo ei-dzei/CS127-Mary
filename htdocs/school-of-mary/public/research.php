@@ -161,12 +161,6 @@ $to     = trim($_GET['to'] ?? '');
 ?>
 
 <style>
-/* --- BASE STYLES FOR CONSISTENCY --- */
-.container { 
-    max-width: 1200px; 
-    margin: 0 auto; 
-    padding: 0 0.5rem; /* Container padding set to 0.5rem */
-}
 .panel {
     background: #fff;
     border: 1px solid #c7d2e4;

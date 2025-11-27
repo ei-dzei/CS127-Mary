@@ -45,29 +45,30 @@ require_once __DIR__ . '/../partials/site_header.php';
 ?>
 
 <style>
+  .panel {box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;  }
   /* Styling for the large, blue, circular indicator */
   #caps-lock-indicator {
     /* Style the button container */
-    background-color: #007bff; /* Bright blue background */
-    color: white; /* White arrow */
+    display: none; /* Initially hidden */
+    /* background-color: #007bff; Bright blue background */
+    color: #4b5563; /* White arrow */
     width: 40px; /* Size of the circle */
     height: 40px; /* Size of the circle */
     border-radius: 50%; /* Make it perfectly circular */
-    display: none; /* Initially hidden */
+    margin-left: 1em;
     
     /* Center the arrow inside the circle */
-    display: flex; 
     justify-content: center;
     align-items: center;
     
     /* Positioning near the password field */
     position: absolute; /* Position it relative to the parent container */
-    right: -55px; /* Adjust this value to position it correctly outside the field */
+    right: 0; /* Adjust this value to position it correctly outside the field */
     top: 50%; /* Start at the vertical center */
     transform: translateY(-50%); /* Shift up by half its height to perfectly center */
     
     /* Visual enhancements */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); Subtle shadow for depth */
     cursor: default; /* Indicate it's not clickable */
   }
 
