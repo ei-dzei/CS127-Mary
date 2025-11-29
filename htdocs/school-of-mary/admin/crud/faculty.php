@@ -155,6 +155,7 @@ $CSRF = csrf_token();
     height: 1.5em; 
     font-size: 1rem;
 }
+/* FILTER */
 .filter-toggle-btn {
     display: flex;
     align-items: center;
@@ -168,15 +169,13 @@ $CSRF = csrf_token();
 .filter-toggle-btn:hover {
     color: #1f2937;
 }
-
-/* --- ADVANCED FILTER PANEL STYLES --- */
 #filter-dropdown {
-    display: none; /* Initially hidden */
+    display: none; 
     position: absolute;
     top: 100%; 
-    right: 0; /* Aligned to the right edge of the filterbar/container */
+    right: 0; 
     margin-top: 8px;
-    width: min(100%, 480px); /* Max width for panel */
+    width: min(100%, 480px); 
     background: #fff;
     border: 1px solid #c7d2e4;
     border-radius: 8px;
@@ -190,6 +189,7 @@ $CSRF = csrf_token();
     gap: 10px;
     margin-bottom: 15px;
 }
+/* CLEAR BUTTON */
 .clear-btn-container {
     text-align: left;
 }
@@ -206,6 +206,7 @@ $CSRF = csrf_token();
 .clear-btn-container .btn-primary:hover {
     background-color: #0b5394;
 }
+/* SORT BUTTON */
 .sort-toggle-btn {
   display: flex;
   align-items: center;
@@ -226,12 +227,12 @@ $CSRF = csrf_token();
   border-radius: 6px;
 }
 #sort-dropdown {
-    display: none; /* Initially hidden */
+    display: none; 
     position: absolute;
     top: 100%; 
-    right: 0; /* Aligned to the right edge of the filterbar/container */
+    right: 0;
     margin-top: 8px;
-    width: min(100%, 200px); /* Max width for panel */
+    width: min(100%, 200px); 
     background: #fff;
     border: 1px solid #c7d2e4;
     border-radius: 8px;
