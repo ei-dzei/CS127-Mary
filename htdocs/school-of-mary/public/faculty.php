@@ -196,16 +196,17 @@
     text-align: left;
 }
 .clear-btn-container .btn-primary {
-    background-color: #2563eb;
+    background-color: #0b5394;
     color: white;
     padding: 10px 15px;
     border: none;
     border-radius: 6px;
     cursor: pointer;
     font-weight: 600;
+    width: 95.7%;
 }
 .clear-btn-container .btn-primary:hover {
-    background-color: #1d4ed8;
+    background-color: #0b5394;
 }
 </style>
 <section class="container fade-in" style="margin-top:6px;">
@@ -222,10 +223,9 @@
         </svg>
         <input type="search" name="q" value="<?= htmlspecialchars($q) ?>" style="width: 85%;"placeholder="Search by name or email…" />
         <!-- <input type="reset" value="X" alt="Clear the search form"> -->
-        <button class="filter-toggle-btn" id="filter-btn" type="button" onclick="toggleFilters(event)">
+        <button class="filter-toggle-btn" id="filter-btn" title="Filter" type="button" onclick="toggleFilters(event)">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 6h18L12 18 3 6z"/>
-            <polyline points="7 10 12 15 17 10"></polyline>
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
           </svg>
         </button>
       </div>
@@ -255,7 +255,9 @@
                 <?php endforeach; ?>
               </select>
             </div>   
-            <button class="btn clear-btn" type="button" onclick="clearFilter()" id="clear-btn">Clear Filters</button>
+          </div>
+          <div class="clear-btn-container">
+            <button class="btn-primary" type="button" onclick="clearFilters(event)">Clear Filters</button>
           </div>
         </div>
     
@@ -286,10 +288,9 @@
       if (e) e.preventDefault();
       
       // Reset inputs
-      qInput.value = '';
-      statusSelect.value = '';
-      fromInput.value = '';
-      toInput.value = '';
+      queryInput.value = '';
+      rankSelect.value = '';
+      deptSelect.value = '';
       
       // Fetch results to show the unfiltered list
       fetchResults(1);

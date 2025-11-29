@@ -277,16 +277,20 @@ $to     = trim($_GET['to'] ?? '');
     text-align: left;
 }
 .clear-btn-container .btn-primary {
-    background-color: #2563eb;
+    background-color: #0b5394;
     color: white;
     padding: 10px 15px;
     border: none;
     border-radius: 6px;
     cursor: pointer;
     font-weight: 600;
+    width: 100%;
 }
 .clear-btn-container .btn-primary:hover {
-    background-color: #1d4ed8;
+    background-color: #0b5394;
+}
+.field input[type="date"] {
+    border-radius: 8px;
 }
 </style>
 
@@ -302,10 +306,10 @@ $to     = trim($_GET['to'] ?? '');
       </svg>
       <input type="search" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search research titles…" id="q-input" />
       
-      <button class="filter-toggle-btn" id="filter-btn" type="button" onclick="toggleFilters(event)">
+      <button class="filter-toggle-btn" id="filter-btn" title="Filter" type="button" onclick="toggleFilters(event)">
+        <!-- Filter Icon (Funnel) -->
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 6h18L12 18 3 6z"/>
-          <polyline points="7 10 12 15 17 10"></polyline>
+          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
         </svg>
       </button>
     </div>
