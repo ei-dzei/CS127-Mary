@@ -105,67 +105,163 @@ $CSRF = csrf_token();
 ?>
 
 <style>
-/* Filter Bar: All inputs on one line */
-.filter-bar {
-  /* Using 12-column grid for precise placement */
-  grid-template-columns: repeat(12, 1fr); 
-  gap: 10px;
-  /* ADDED: Align items to the bottom baseline */
-  align-items: flex-end; 
+.filterbar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+    margin-bottom: 20px;
 }
-.filter-bar .field {
-    /* Ensure label and input stack within the field container */
+.field {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
+}
+.field label {
+    font-weight: 500;
+    color: #4b5563;
+}
+.field .input { 
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    height: 38px; 
+    box-sizing: border-box;
 }
 
-/* Column Spans for desktop view (12 columns total) */
-.filter-bar .field:nth-child(1) { grid-column: span 3; } /* Title (3/12) */
-.filter-bar .field:nth-child(2) { grid-column: span 2; } /* Status (2/12) */
-.filter-bar .field:nth-child(3) { grid-column: span 2; } /* Start from (2/12) */
-.filter-bar .field:nth-child(4) { grid-column: span 2; } /* End by (2/12) */
-.filter-bar .field:nth-child(5) { grid-column: span 2; } /* Order (2/12) */
-
-/* MODIFIED: Clear button placement and alignment */
-.filter-bar .filter-actions { 
-    grid-column: 12 / 13; /* Places the button in the very last column (column 12) */
-    padding-top: 0; /* Clear previous manual adjustment */
-    display: flex; 
-    justify-content: flex-end; /* Push the button to the right edge */
-    /* Removed align-items: flex-start; as align-items: flex-end on parent takes care of bottom alignment */
+/* --- SEARCH BAR AND TOGGLE STYLES (Full Width, Matching Look) --- */
+.searchbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 15px;
+  background: #fff;
+  border: 1px solid #c7d2e4;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  flex: 1; 
+  box-sizing: border-box;
+  width: auto;
+  height: 57px;
 }
-.filter-bar .filter-actions .btn-action {
-    min-width: 100px; 
-    height: 40px; 
-    /* ADDED: Push the button down by the label height + gap (20px) to align its top edge with the inputs' top edge. */
-    margin-top: 20px; 
+.searchbox svg:first-child {
+    color: #6b7280;
+}
+.searchbox input[type="search"] { 
+    flex-grow: 1;
+    border: none;
+    padding: 0;
+    height: 1.5em; 
+    font-size: 1rem;
+}
+.filter-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #4b5563; 
+}
+.filter-toggle-btn:hover {
+    color: #1f2937;
 }
 
-@media (max-width: 992px) {
-  /* Tablet View: Stacking layout */
-  .filter-bar { grid-template-columns: repeat(12, 1fr); align-items: stretch; }
-  .filter-bar .field:nth-child(1) { grid-column: span 6; }
-  .filter-bar .field:nth-child(2) { grid-column: span 6; }
-  .filter-bar .field:nth-child(3) { grid-column: span 3; }
-  .filter-bar .field:nth-child(4) { grid-column: span 3; }
-  .filter-bar .field:nth-child(5) { grid-column: span 4; }
-  .filter-bar .filter-actions { 
-      grid-column: span 2; 
-      padding-top: 0; 
-      justify-content: flex-end; 
-  }
-  .filter-bar .filter-actions .btn-action {
-      margin-top: 0; /* Remove manual margin in stacked layout */
-  }
+/* --- ADVANCED FILTER PANEL STYLES --- */
+#filter-dropdown {
+    display: none; /* Initially hidden */
+    position: absolute;
+    top: 100%; 
+    right: 0; /* Aligned to the right edge of the filterbar/container */
+    margin-top: 8px;
+    width: min(100%, 480px); /* Max width for panel */
+    background: #fff;
+    border: 1px solid #c7d2e4;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    z-index: 100;
+    padding: 15px;
 }
-
-@media (max-width: 720px){ 
-  /* Mobile: Full-width stacking */
-  .filter-bar .field, .filter-bar .filter-actions { 
-      grid-column: span 12 !important; 
-      justify-content: center;
-  }
+#filter-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 10px;
+    margin-bottom: 15px;
+}
+.clear-btn-container {
+    text-align: left;
+}
+.clear-btn-container .btn-primary {
+    background-color: #0b5394;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    width: 100%;
+}
+.clear-btn-container .btn-primary:hover {
+    background-color: #0b5394;
+}
+.sort-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid #c7d2e4;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #4b5563;
+  padding: 0;
+  width: 40px; 
+  height: 57px; 
+  flex-shrink: 0; 
+}
+.sort-toggle-btn:hover {
+  color: #1f2937;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 6px;
+}
+#sort-dropdown {
+    display: none; /* Initially hidden */
+    position: absolute;
+    top: 100%; 
+    right: 0; /* Aligned to the right edge of the filterbar/container */
+    margin-top: 8px;
+    width: min(100%, 200px); /* Max width for panel */
+    background: #fff;
+    border: 1px solid #c7d2e4;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    z-index: 100;
+    padding: 15px;
+}
+#sort-dropdown fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+#sort-dropdown fieldset legend {
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #4b5563;
+}
+#sort-dropdown fieldset > div {
+  display: flex;
+  align-items: center;  
+  gap: 8px;
+  padding: 6px 0;
+}
+#sort-dropdown fieldset > div input[type="radio"] {
+  margin: 0;
+  cursor: pointer;
+}
+#sort-dropdown fieldset > div label {
+  cursor: pointer;
+  margin: 0;
 }
 
 /* --------- Inline modal (Existing CSS) --------- */
@@ -197,7 +293,7 @@ $CSRF = csrf_token();
   display:inline-flex;align-items:center;justify-content:center;
   min-width:130px;height:40px;padding:0 16px;
   border-radius:8px;border:1px solid var(--color-accent);
-  font-weight:600;text-decoration:none;cursor:pointer;
+  font-weight:600; font-size: 0.8rem;text-decoration:none;cursor:pointer;
   transition:background .2s ease,color .2s ease,transform .06s ease,box-shadow .15s ease;
 }
 .btn-action:active{ transform: translateY(1px); }
@@ -236,53 +332,102 @@ $CSRF = csrf_token();
 
 <section class="panel fade-in crud-header-card">
   <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; float:inline-end">
-    <a class="btn-action btn-ghost" href="<?= app_url('/admin/api/export.php'); ?>?table=FACULTY">Export CSV</a>
-    <button class="btn-action btn-primary" id="create-faculty">+ Create Faculty</button>
+    <a class="btn-action btn-ghost" href="<?= app_url('/admin/api/export.php'); ?>?table=FACULTY">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3v10" />
+      <path d="M8 7l4-4 4 4" />
+      <path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" />
+    </svg>
+    <span style="margin-left:5px">Export CSV</span></a>
+    <button class="btn-action btn-primary" id="create-faculty">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+  <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+</svg>
+    Create Faculty</button>
   </div>
   <h1 style="margin-bottom:8px;">Faculty</h1>
   <p class="muted" style="margin-bottom:10px;">Create, update, delete records. CSV export also available.</p>
-  <form method="get" class="grid filter-bar" style="margin-bottom:10px;">
-      <div class="field" style="grid-column: span 4">
-        <label>Search (name or email)</label>
-        <input class="input" name="q" value="<?= htmlspecialchars($q); ?>">
+  <form method="get" class="filterbar" style="margin-bottom:10px;">
+      <div class = "searchbox">
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M10 18a8 8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/>
+        </svg>
+        <input class="input" type ="search" name="q" value="<?= htmlspecialchars($q); ?>" placeholder="Search using name or email...">
+        <button class="filter-toggle-btn" id="filter-btn" title="Filter" type="button" >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+        </svg>
+      </button>
       </div>
-      <div class="field" style="grid-column: span 3">
-        <label>Rank</label>
-        <select class="input" name="rank">
-          <option value="">All</option>
-          <?php foreach ($ranks as $r):
-            $sel = ($rank === $r['RANK_ID']) ? ' selected' : '';
-            echo '<option'.$sel.' value="'.htmlspecialchars($r['RANK_ID'], ENT_QUOTES).'">'.htmlspecialchars($r['RANK_DESCRIPTION']).'</option>';
-          endforeach; ?>
-        </select>
+      
+      <div id="filter-dropdown">
+        <div id="filter-options">
+          <div class="field">
+            <label>Rank</label>
+            <select class="input" name="rank">
+              <option value="">All</option>
+              <?php foreach ($ranks as $r):
+                $sel = ($rank === $r['RANK_ID']) ? ' selected' : '';
+                echo '<option'.$sel.' value="'.htmlspecialchars($r['RANK_ID'], ENT_QUOTES).'">'.htmlspecialchars($r['RANK_DESCRIPTION']).'</option>';
+              endforeach; ?>
+            </select>
+          </div>
+          <div class="field">
+            <label>Department</label>
+            <select class="input" name="dept">
+              <option value="">All</option>
+              <?php foreach ($depts as $d):
+                $sel = ($dept === $d['DEPT_ID']) ? ' selected' : '';
+                echo '<option'.$sel.' value="'.htmlspecialchars($d['DEPT_ID'], ENT_QUOTES).'">'.htmlspecialchars($d['DEPT_SPECIALIZATION']).'</option>';
+              endforeach; ?>
+            </select>
+          </div>
+        </div>
+          <div class="clear-btn-container">
+            <button class="btn-primary" id="clear-btn" type="button" >Clear Filters</button>
+          </div>
       </div>
-      <div class="field" style="grid-column: span 3">
-        <label>Department</label>
-        <select class="input" name="dept">
-          <option value="">All</option>
-          <?php foreach ($depts as $d):
-            $sel = ($dept === $d['DEPT_ID']) ? ' selected' : '';
-            echo '<option'.$sel.' value="'.htmlspecialchars($d['DEPT_ID'], ENT_QUOTES).'">'.htmlspecialchars($d['DEPT_SPECIALIZATION']).'</option>';
-          endforeach; ?>
-        </select>
-      </div>
-      <div class="field" style="grid-column: span 2">
-        <label>Order</label>
-        <select class="input" name="sort">
-          <option value="name_asc"  <?= $sort==='name_asc'?'selected':''; ?>>Name (A–Z)</option>
-          <option value="name_desc" <?= $sort==='name_desc'?'selected':''; ?>>Name (Z–A)</option>
-          <option value="id_asc"    <?= $sort==='id_asc'?'selected':''; ?>>ID (Oldest First)</option>
-          <option value="id_desc"   <?= $sort==='id_desc'?'selected':''; ?>>ID (Newest First)</option>
-          <option value="email_asc" <?= $sort==='email_asc'?'selected':''; ?>>Email (A–Z)</option>
-          <option value="email_desc"<?= $sort==='email_desc'?'selected':''; ?>>Email (Z–A)</option>
-          <option value="rank_asc"  <?= $sort==='rank_asc'?'selected':''; ?>>Rank</option>
-          <option value="dept_asc"  <?= $sort==='dept_asc'?'selected':''; ?>>Department</option>
-        </select>
-      </div>
-      <div class="field" style="grid-column: span 12; display:flex; gap:10px; justify-content:flex-end">
-        <button class="btn-action btn-primary" type="submit">Filter</button>
-        <a class="btn-action btn-ghost" href="<?= app_url('/admin/crud/faculty.php'); ?>">Clear</a>
-      </div>
+        <button class="sort-toggle-btn" id="sort-btn" title="Sort" type="button">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-arrows-sort"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 9l4 -4l4 4m-4 -4v14" /><path d="M21 15l-4 4l-4 -4m4 4v-14" /></svg>
+      </button>
+        <div class="field" id="sort-dropdown" onchange="closeSort()">
+            <fieldset>
+              <legend>Sort by:</legend>
+              <div>
+                <input type="radio" name="sort" value="name_asc"  <?= $sort==='name_asc'?'checked':''; ?>>
+                <label>Name (A–Z)</label>
+              </div>
+              <div>
+                <input type="radio" name="sort" value="name_desc" <?= $sort==='name_desc'?'checked':''; ?>>
+                <label>Name (Z–A)</label><br>
+              </div>
+              <div>
+                <input type="radio" name="sort" value="id_asc"    <?= $sort==='id_asc'?'checked':''; ?>>
+                <label>ID (Oldest First)</label>
+              </div>
+              <div>
+                <input type="radio" name="sort" value="id_desc"   <?= $sort==='id_desc'?'checked':''; ?>>
+                <label>ID (Newest First)</label>
+              </div>
+              <div>
+                <input type="radio" name="sort" value="email_asc" <?= $sort==='email_asc'?'checked':''; ?>>
+                <label>Email (A–Z)</label>
+              </div>
+              <div>
+                <input type="radio" name="sort" value="email_desc"<?= $sort==='email_desc'?'checked':''; ?>>
+                <label>Email (Z–A)</label>
+              </div>
+              <div>
+                <input type="radio" name="sort" value="rank_asc"  <?= $sort==='rank_asc'?'checked':''; ?>>
+                <label>Rank</label>
+              </div>
+              <div>
+                <input type="radio" name="sort" value="dept_asc"  <?= $sort==='dept_asc'?'checked':''; ?>>
+                <label>Department</label>
+              </div>
+            </fieldset>
+
+        </div>
   </form>
 </section>
 
@@ -402,15 +547,85 @@ $CSRF = csrf_token();
   const queryInput = document.querySelector('input[name="q"]');
   const rankSelect = document.querySelector('select[name="rank"]');
   const deptSelect = document.querySelector('select[name="dept"]');
-  const sortSelect = document.querySelector('select[name="sort"]');
+  const sortRadios = document.querySelectorAll('input[name="sort"]');
+  const filterDropdown = document.querySelector('#filter-dropdown');
+  const filterButton = document.querySelector('#filter-btn');
+  const sortDropdown = document.querySelector('#sort-dropdown');
+  const sortButton = document.querySelector('#sort-btn');
+  const clearFiltersButton = document.querySelector('#clear-btn');
   let timer = null;
+
+  // Toggle visibility of the filter dropdown
+  function toggleFilters(e) {
+      if (e) e.preventDefault();
+      e.stopPropagation();
+      sortDropdown.style.display = "none";
+      if (filterDropdown.style.display === "none" || filterDropdown.style.display === "") {
+        filterDropdown.style.display = "block";
+      } else {
+        filterDropdown.style.display = "none";
+      }
+  }
+  function toggleSort(e) {
+      if (e) e.preventDefault();
+      e.stopPropagation();
+      filterDropdown.style.display = "none";
+      if (sortDropdown.style.display === "none" || sortDropdown.style.display === "") {
+        sortDropdown.style.display = "block";
+      } else {
+        sortDropdown.style.display = "none";
+      }
+  }
+  document.addEventListener('click', function(e) {
+  if (!filterDropdown.contains(e.target) && e.target !== filterButton) {
+    filterDropdown.style.display = "none";
+  }
+  });
+  document.addEventListener('click', function(e) {
+  if (!sortDropdown.contains(e.target) && e.target !== sortButton) {
+    sortDropdown.style.display = "none";
+  }
+  });
+  function closeSort() {
+    sortDropdown.style.display = "none";
+  }
+  // Clear button function
+  function clearFilters(e) {
+      if (e) e.preventDefault();
+      
+      // Reset inputs
+      queryInput.value = '';
+      rankSelect.value = '';
+      deptSelect.value = '';
+      
+      // Fetch results to show the unfiltered list
+      fetchResults(1);
+
+      // Hide the filter panel
+      filterDropdown.style.display = "none";
+  }
+
+  function getSelectedSort() {
+    const checkedRadio = document.querySelector('input[name="sort"]:checked');
+    return checkedRadio ? checkedRadio.value : 'name_asc'; 
+  }
+  
+  sortRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      fetchResults(1);
+      closeSort(); 
+    });
+  });
+  clearFiltersButton.addEventListener('click', clearFilters);
+  filterButton.addEventListener('click', toggleFilters);
+  sortButton.addEventListener('click', toggleSort);
 
   // fetch func
   function fetchResults(page) {
     const q = queryInput.value;
-    const rank = rankSelect.value;
+    const rank = rankSelect.value;  
     const dept = deptSelect.value;
-    const sort = sortSelect.value;
+    const sort = getSelectedSort();
     const url = `../api/search_faculty.php?q=${encodeURIComponent(q)}&rank=${encodeURIComponent(rank)}&dept=${encodeURIComponent(dept)}&sort=${encodeURIComponent(sort)}&page=${page}`;
     
     facultyPanel.innerHTML = "<div class='loading'>Loading...</div>";
@@ -437,7 +652,7 @@ $CSRF = csrf_token();
   queryInput.addEventListener('input', handleLiveInput);
   rankSelect.addEventListener('change', () => fetchResults(1));
   deptSelect.addEventListener('change', () => fetchResults(1));
-  sortSelect.addEventListener('change', () => fetchResults(1));
+  
   
   // Attach pagination events
   function attachPaginationEvents() {
