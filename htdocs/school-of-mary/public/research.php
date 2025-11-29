@@ -2,6 +2,7 @@
 $pageTitle = 'Research';
 require_once __DIR__ . '/../partials/site_header.php';
 
+$admin = is_admin();
 /* --- Lookups --- */
 $statuses = $pdo->query("SELECT STATUS_CODE, STATUS_LABEL FROM RESEARCH_STATUS ORDER BY STATUS_LABEL")->fetchAll();
 
@@ -57,6 +58,7 @@ if ($id > 0) {
     }
   }
   ?>
+  
   <section class="panel fade-in">
     <?php if (!$research): ?>
       <h1>Research</h1>
@@ -74,7 +76,7 @@ if ($id > 0) {
           <span style="margin-left:6px;">End: <?= htmlspecialchars($research['RESEARCH_ENDDATE']); ?></span>
         <?php endif; ?>
       </div>
-
+      <?php if($admin):?>
       <div class="grid">
         <div class="panel" style="grid-column: span 6; background:#fff;">
           <h3 style="margin-top:0; font-family:'Patua One',serif;">Overview</h3>
@@ -97,32 +99,55 @@ if ($id > 0) {
             </div>
           </div>
         </div>
-
-        <div class="panel" style="grid-column: span 6; background:#fff;">
-          <h3 style="margin-top:0; font-family:'Patua One',serif;">Funding</h3>
-          <div class="field" style="grid-column: span 6;">
-            <label>Total Funding</label>
-            <input class="input" value="<?= '₱' . number_format($totalFunding, 2); ?>" readonly />
-          </div>
-          <?php if ($funds): ?>
-            <table style="margin-top:8px;">
-              <thead><tr><th>Agency</th><th>Amount</th><th>Date Funded</th></tr></thead>
-              <tbody>
-                <?php foreach ($funds as $f): ?>
-                  <tr>
-                    <td><?= htmlspecialchars($f['AGENCY_NAME']); ?></td>
-                    <td><?= $f['FUNDING_AMOUNT'] !== null ? '₱'.number_format($f['FUNDING_AMOUNT'],2) : '—'; ?></td>
-                    <td><?= htmlspecialchars($f['DATE_FUNDED'] ?? '—'); ?></td>
-                  </tr>
-                <?php endforeach; ?>
-              </tbody>
-            </table>
-          <?php else: ?>
-            <div class="muted">No recorded funding.</div>
-          <?php endif; ?>
+        
+          <div class="panel" style="grid-column: span 6; background:#fff;">
+            <h3 style="margin-top:0; font-family:'Patua One',serif;">Funding</h3>
+            <div class="field" style="grid-column: span 6;">
+              <label>Total Funding</label>
+              <input class="input" value="<?= '₱' . number_format($totalFunding, 2); ?>" readonly />
+            </div>
+            <?php if ($funds): ?>
+              <table style="margin-top:8px;">
+                <thead><tr><th>Agency</th><th>Amount</th><th>Date Funded</th></tr></thead>
+                <tbody>
+                  <?php foreach ($funds as $f): ?>
+                    <tr>
+                      <td><?= htmlspecialchars($f['AGENCY_NAME']); ?></td>
+                      <td><?= $f['FUNDING_AMOUNT'] !== null ? '₱'.number_format($f['FUNDING_AMOUNT'],2) : '—'; ?></td>
+                      <td><?= htmlspecialchars($f['DATE_FUNDED'] ?? '—'); ?></td>
+                    </tr>
+                  <?php endforeach; ?>
+                </tbody>
+              </table>
+            <?php else: ?>
+              <div class="muted">No recorded funding.</div>
+            <?php endif; ?>
+          
         </div>
       </div>
-
+      <?php else: ?>
+        <div class="panel" style="grid-column: span 6; background:#fff;">
+          <h3 style="margin-top:0; font-family:'Patua One',serif;">Overview</h3>
+          <div class="field">
+            <label>Title</label>
+            <input class="input" value="<?= htmlspecialchars($research['RESEARCH_TITLE']); ?>" readonly />
+          </div>
+          <div class="grid">
+            <div class="field" style="grid-column: span 6;">
+              <label>Status</label>
+              <input class="input" value="<?= htmlspecialchars($research['RESEARCH_STATUS']); ?>" readonly />
+            </div>
+            <div class="field" style="grid-column: span 3;">
+              <label>Start</label>
+              <input class="input" value="<?= htmlspecialchars($research['RESEARCH_STARTDATE']); ?>" readonly />
+            </div>
+            <div class="field" style="grid-column: span 3;">
+              <label>End</label>
+              <input class="input" value="<?= htmlspecialchars($research['RESEARCH_ENDDATE'] ?? '—'); ?>" readonly />
+            </div>
+          </div>
+        </div>
+      <?php endif; ?>
       <h2 style="font-family:'Patua One',serif; margin-top:16px;">Assigned Faculty</h2>
       <?php if (!$people): ?>
         <div class="panel">No assignments found.</div>
