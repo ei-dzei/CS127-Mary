@@ -242,7 +242,7 @@ $CSRF = csrf_token();
         </div>
         <div class="field">
           <label for="f_amt">Amount (₱)</label>
-          <input class="input" id="f_amt" type="number" step="0.01" name="FUNDING_AMOUNT" min="0">
+          <input class="input" id="f_amt" type="number" name="FUNDING_AMOUNT" step="0.01" min="0" max="99999999.99">
         </div>
         <div class="field">
           <label for="f_date">Date Funded</label>
