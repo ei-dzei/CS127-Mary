@@ -94,12 +94,9 @@
                         <i class="bi bi-calendar-date-fill"></i> Start: ' . htmlspecialchars($row['RESEARCH_STARTDATE']) . $endDate . '
                     </div>
                     <div class="card__actions">
-                        <button class="btn small"
-                        data-read-more
-                        data-type="research"
-                        data-id="' . (int)$row['RESEARCH_ID']. '">
+                        <a class="btn small" href="' . BASE_URL . '/public/research.php?id=' . (int)$row["RESEARCH_ID"] . '">
                         Read More
-                        </button>
+                    </a>
                     </div>
                 </div>
             </div>';

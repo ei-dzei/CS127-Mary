@@ -580,7 +580,7 @@ require_once __DIR__ . '/../partials/site_header.php';
       <?php endif; ?>
     </div>
 
-    <div class="section-card">
+    <div class="section-card" id="audit-section">
       <div class="section-header">
         <div class="section-emoji"><i class="bi bi-receipt"></i></div>
         <h3 style="margin:0;">Live Activity</h3>
