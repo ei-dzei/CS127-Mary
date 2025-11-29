@@ -159,7 +159,7 @@
 
 
     $output = '
-    <p class="muted" style="margin:6px 0 12px;"> Showing '  . (int)$totalRows . ($total===1 ? ' result' : ' results') .' | Page '.$page.' of '.  ($totalPages ===0? ' 1' : $totalPages)  .'</p>
+    <p class="muted" style="margin:6px 0 12px;"> Showing '  . (int)$totalRows . ($total===1 ? ' faculty' : ' faculties') .' | Page '.$page.' of '.  ($totalPages ===0? ' 1' : $totalPages)  .'</p>
     ';
     $output .='<div class = "cards">'.$cards.'</div>';
     $output .='<div class = "pagination">'.$pagination.'</div>';

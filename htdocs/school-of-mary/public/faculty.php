@@ -42,7 +42,7 @@
         <p class="muted">Record not found.</p>
         <p><a class="btn small" href="<?= BASE_URL ?>/public/faculty.php">Back to list</a></p>
       <?php else: ?>
-        <a class="btn small" href="<?= BASE_URL ?>/public/faculty.php" style="float:right;margin-top:-4px;">← Back</a>
+        <a class="btn small" href="<?= BASE_URL ?>/public/faculty.php" style="float:right;margin-top:-4px;">← Back to Faculty</a>
         <h1 style="margin-bottom:6px">
           <?php
             echo htmlspecialchars($faculty['FACULTY_LNAME'].', '.$faculty['FACULTY_FNAME']);
@@ -106,11 +106,8 @@
 
 <style>
 .panel {
-    background: #fff;
-    border: 1px solid #c7d2e4;
     border-radius: 8px;
     padding: 15px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 .filterbar {
     position: relative; /* Essential for absolute positioning of the dropdown */
@@ -271,12 +268,14 @@
   const queryInput = document.querySelector('input[name="q"]');
   const rankSelect = document.querySelector('select[name="rank"]');
   const deptSelect = document.querySelector('select[name="dept"]'); 
-  const filterDropdown = document.querySelector('#filter-dropdown')
+  const filterDropdown = document.querySelector('#filter-dropdown');
+  const filterButton = document.querySelector('#filter-btn');
   let timer = null;
-
+  
   // Toggle visibility of the filter dropdown
   function toggleFilters(e) {
       if (e) e.preventDefault();
+      e.stopPropagation();
       if (filterDropdown.style.display === "none" || filterDropdown.style.display === "") {
         filterDropdown.style.display = "block";
       } else {
@@ -286,18 +285,19 @@
   // Clear button function
   function clearFilters(e) {
       if (e) e.preventDefault();
-      
-      // Reset inputs
       queryInput.value = '';
       rankSelect.value = '';
       deptSelect.value = '';
       
-      // Fetch results to show the unfiltered list
       fetchResults(1);
 
-      // Hide the filter panel
       filterDropdown.style.display = "none";
   }
+  document.addEventListener('click', function(e) {
+  if (!filterDropdown.contains(e.target) && e.target !== filterButton) {
+    filterDropdown.style.display = "none";
+  }
+  });
   //fetch func
   function fetchResults(page) {
     const q = queryInput.value;

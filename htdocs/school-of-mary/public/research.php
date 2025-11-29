@@ -65,7 +65,7 @@ if ($id > 0) {
       <p class="muted">Record not found.</p>
       <p><a class="btn small" href="<?= BASE_URL ?>/public/research.php">Back to list</a></p>
     <?php else: ?>
-      <a class="btn small" href="<?= BASE_URL ?>/public/research.php" style="float:right;margin-top:-4px;">← Back</a>
+      <a class="btn small" href="<?= BASE_URL ?>/public/research.php" style="float:right;margin-top:-4px;">← Back to Research</a>
       <h1 style="margin-bottom:6px"><?= htmlspecialchars($research['RESEARCH_TITLE']); ?></h1>
       <div class="muted" style="margin-bottom:10px;">
         <span class="pill" style="background:#eef4ff; border:1px solid #cdd8f0; padding:2px 8px; border-radius:999px;">
@@ -307,7 +307,6 @@ $to     = trim($_GET['to'] ?? '');
       <input type="search" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search research titles…" id="q-input" />
       
       <button class="filter-toggle-btn" id="filter-btn" title="Filter" type="button" onclick="toggleFilters(event)">
-        <!-- Filter Icon (Funnel) -->
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
         </svg>
@@ -358,11 +357,12 @@ $to     = trim($_GET['to'] ?? '');
   const fromInput = document.querySelector('#from-input');
   const toInput = document.querySelector('#to-input');
   const filterDropdown = document.querySelector('#filter-dropdown');
+  const filterButton = document.querySelector('#filter-btn');
   let timer = null;
   
-  // Toggle visibility of the filter dropdown
   function toggleFilters(e) {
       if (e) e.preventDefault();
+      e.stopPropagation();
       if (filterDropdown.style.display === "none" || filterDropdown.style.display === "") {
         filterDropdown.style.display = "block";
       } else {
@@ -370,6 +370,11 @@ $to     = trim($_GET['to'] ?? '');
       }
   }
 
+  document.addEventListener('click', function(e) {
+  if (!filterDropdown.contains(e.target) && e.target !== filterButton) {
+    filterDropdown.style.display = "none";
+  }
+  });
   // Clear button function
   function clearFilters(e) {
       if (e) e.preventDefault();
