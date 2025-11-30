@@ -3,6 +3,7 @@
         
     /* ------------------------- Filters + Sorting + Pagination ------------------------- */
     $q      = trim($_GET['q'] ?? '');
+    $role   = trim($_GET['role'] ?? '');
     $sort   = $_GET['sort'] ?? 'id_desc'; // id_desc|id_asc|date_desc|date_asc|faculty_asc|faculty_desc|research_asc|research_desc
     $page   = max(1, (int)($_GET['page'] ?? 1));
     $per    = 5;
@@ -31,6 +32,7 @@
     $baseSql .= " AND (f.FACULTY_LNAME LIKE ? OR f.FACULTY_FNAME LIKE ? OR r.RESEARCH_TITLE LIKE ?)";
     $params = ["%$q%", "%$q%", "%$q%"];
     }
+    if ($role !== '') { $baseSql .= " AND a.ROLE_ID = ?"; $params[] = $role; }
 
     // total
     $stmtCount = $pdo->prepare("SELECT COUNT(*) ".$baseSql);
@@ -78,9 +80,14 @@
                     <td>' . htmlspecialchars($row['ROLE_DESCRIPTION']) . '</td>
                     <td>' . htmlspecialchars($row['DATE_ASSIGNED']) . '</td>
                     <td class="actions-cell">
+                        <button class="btn small btn-view"> 
+                            <a style="color:white; cursor:pointer;" href="' . BASE_URL . '/public/faculty.php?id=' . (int)$row["FACULTY_ID"] . '">
+                                View
+                            </a>
+                        </button>
                         <button
                             type="button"
-                            class="btn small js-edit"
+                            class="btn small btn-edit js-edit"
                             data-id="' . (int)$row['ASSIGNMENT_ID'] . '"
                             data-faculty="' . (int)$row['FACULTY_ID'] . '"
                             data-research="' . (int)$row['RESEARCH_ID'] . '"
@@ -92,7 +99,7 @@
                             <input type="hidden" name="csrf" value="' . $CSRF . '">
                             <input type="hidden" name="action" value="delete">
                             <input type="hidden" name="ASSIGNMENT_ID" value="' . (int)$row['ASSIGNMENT_ID'] . '">
-                            <button class="btn small" style="background:#b91c1c;border-color:#b91c1c">Delete</button>
+                            <button class="btn small btn-delete" style="background:#b91c1c;border-color:#b91c1c">Delete</button>
                         </form>
                     </td>
                 </tr>';
@@ -110,9 +117,10 @@
         </div>';
     $pagination = '';
         // keep q/sort when paging
-        $qs = function($p) use ($q, $sort) {
+        $qs = function($p) use ($q, $role, $sort) {
             $parts = ['page='.$p];
             if ($q !== '')   $parts[]='q='.rawurlencode($q);
+            if ($role !== '') $parts[]='role='.rawurlencode($role);
             if ($sort !== '')$parts[]='sort='.rawurlencode($sort);
             return implode('&',$parts);
       };

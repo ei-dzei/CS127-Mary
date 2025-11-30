@@ -5,6 +5,9 @@ $pageTitle = 'Research (Admin)';
 require_once __DIR__ . '/../../partials/init.php';
 require_once __DIR__ . '/../../validators.php';
 
+$flashError = $_SESSION['error_message'] ?? null;
+unset($_SESSION['error_message']); // Clear the session variable immediately after retrieval
+
 /* Local validators */
 if (!function_exists('v_date')) {
   function v_date($s): bool {
@@ -84,10 +87,20 @@ if ($action === 'update') {
 
 if ($action === 'delete') {
   if (!v_int($_POST['RESEARCH_ID'] ?? '')) guardFail('Missing ID');
-  $pdo->prepare("DELETE FROM RESEARCH WHERE RESEARCH_ID=?")->execute([$_POST['RESEARCH_ID']]);
-  $pdo->prepare("INSERT INTO AUDIT_LOG (ACTOR,ACTION_ENUM,TABLE_NAME,PK_VALUE) VALUES (?,?,?,?)")
+  
+  
+  try {
+    $pdo->prepare("DELETE FROM RESEARCH WHERE RESEARCH_ID=?")->execute([$_POST['RESEARCH_ID']]);
+
+    $pdo->prepare("INSERT INTO AUDIT_LOG (ACTOR,ACTION_ENUM,TABLE_NAME,PK_VALUE) VALUES (?,?,?,?)")
       ->execute([$_SESSION['admin_user'], 'DELETE', 'RESEARCH', $_POST['RESEARCH_ID']]);
-  redirect_to('/admin/crud/research.php?ok=1');
+      redirect_to('/admin/crud/research.php?ok=1');
+  } catch (PDOException $e) {
+    $errorMessage = "Cannot delete research. This record is referenced by other data (i.e. assignment and funding). Please delete dependent records first.";    
+    $_SESSION['error_message'] = $errorMessage;
+    
+    redirect_to('/admin/crud/research.php');
+  }
 }
 
 /* Lookups */
@@ -329,10 +342,10 @@ require_once __DIR__ . '/../../partials/site_header.php';
 
 /* TABLE */
 .table-scroll table {
-    table-layout: fixed; 
-    width: 100%;
-    scrollbar-width: none; /*hide scrollbar*/
-    -ms-overflow-style: none; /*hide scrollbar*/
+  table-layout: fixed; 
+  width: 100%;
+  scrollbar-width: none; /*hide scrollbar*/
+  -ms-overflow-style: none; /*hide scrollbar*/
 }
 .table-scroll::-webkit-scrollbar {
   display: none; /*hide scrollbar*/
@@ -368,38 +381,23 @@ table th:nth-child(5),table td:nth-child(5)  {
 
 /* Action buttons parity */
 .btn-action{
+  font-size: 0.8rem; /* Now it will work */
   display:inline-flex;align-items:center;justify-content:center;
   min-width:130px;height:40px;padding:0 16px;
   border-radius:8px;border:1px solid var(--color-accent);
-  font-weight:600;text-decoration:none;cursor:pointer; font-size: 0.8rem;
+  font-weight:600;text-decoration:none;cursor:pointer; 
   transition:background .2s ease,color .2s ease,transform .06s ease,box-shadow .15s ease;
 }
-.btn-action:active{ transform: translateY(1px); }
-.btn-primary{ background: var(--color-accent); color:#fff; }
-.btn-primary:hover{ filter:brightness(.94); box-shadow:0 4px 10px rgba(0,0,0,.06); }
 .btn-ghost{
+  font-size: 0.8rem; 
   background:#fff;
   color: var(--color-accent);
   border-color: rgba(11,83,148,.35);
 }
+.btn-action:active{ transform: translateY(1px); }
+.btn-primary{ background: var(--color-accent); color:#fff;  }
+.btn-primary:hover{ filter:brightness(.94); box-shadow:0 4px 10px rgba(0,0,0,.06); }
 .btn-ghost:hover{ background: rgba(11,83,148,.05); }
-
-/* START: MODIFIED FOR ACTIONS COLUMN COMPACTNESS */
-.crud-table td:last-child {
-  /* Ensure the content is left-aligned and compact */
-  text-align: left; 
-  padding: 8px 10px; /* Reduced padding */
-}
-
-/* Tighter action buttons */
-.crud-table .btn-action {
-  min-width: 60px; /* Reduced min width */
-  height: 68px; /* Reduced height */
-  padding: 0 10px; /* Reduced padding inside */
-  font-size: 0.9em; /* Smaller font */
-  margin-right: 4px; /* Space between buttons */
-}
-/* END: MODIFIED FOR ACTIONS COLUMN COMPACTNESS */
 </style>
 
 <section class="panel fade-in crud-header-card">
@@ -410,9 +408,9 @@ table th:nth-child(5),table td:nth-child(5)  {
           <path d="M8 7l4-4 4 4" />
           <path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" />
         </svg>
-        <span style="margin-left:5px">Export CSV</span>
+        <span style="margin-left:5px; font-size: 0.8rem">Export CSV</span>
       </a>
-      <button class="btn-action btn-primary" id="create-research">
+      <button class="btn-action btn-primary" id="create-research" style="font-size:0.8rem">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
           <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
         </svg>
@@ -483,7 +481,11 @@ table th:nth-child(5),table td:nth-child(5)  {
         <div>
           <input type="radio" name="sort" value="title_asc"  <?= $sort==='title_asc'?'checked':''; ?>>
           <label>Title (A–Z)</label>
-        </div>
+        </div>   
+        <div>
+          <input type="radio" name="sort" value="title_desc"  <?= $sort==='title_desc'?'checked':''; ?>>
+          <label>Title (Z–A)</label>
+        </div> 
         <div>
           <input type="radio" name="sort" value="status_asc" <?= $sort==='status_asc'?'checked':''; ?>>
           <label>Status (A–Z)</label>
@@ -589,7 +591,18 @@ table th:nth-child(5),table td:nth-child(5)  {
     </form>
   </div>
 </div>
-
+<div class="admin-modal" id="errorModal" hidden>
+  <div class="admin-modal__backdrop" data-close="1"></div>
+  <div class="admin-modal__dialog" role="alertdialog" aria-modal="true" aria-labelledby="errorModalTitle">
+    <div class="admin-modal__head" style="background:rgba(185,28,28,.08); border-color:rgba(185,28,28,.2)">
+      <h3 class="admin-modal__title" id="errorModalTitle" style="color:#b91c1c;">🛑 Error</h3>
+      <button class="admin-modal__close" type="button" data-close="1">✕</button>
+    </div>
+    <div class="admin-modal__body">
+      <p id="errorModalMessage" style="margin:0; font-size:16px;"></p>
+    </div>
+  </div>
+</div>
 <script>
   const researchPanel = document.querySelector('#panel');
   const queryInput = document.querySelector('input[name="q"]');
@@ -833,7 +846,30 @@ table th:nth-child(5),table td:nth-child(5)  {
          eI.removeAttribute('min');
       }
   });
-  
+  //Error Modal
+  (function(){
+    const errorModal = document.getElementById('errorModal');
+    const messageEl = document.getElementById('errorModalMessage');
+    
+    const flashError = '<?= htmlspecialchars(addslashes($flashError ?? '')); ?>'; 
+
+    if (flashError) {
+      messageEl.textContent = flashError;
+      errorModal.hidden = false;
+    }
+    
+    errorModal.addEventListener('click', e => { 
+      if (e.target.dataset.close) {
+        errorModal.hidden = true; 
+      }
+    });
+
+    window.addEventListener('keydown', e => { 
+      if (!errorModal.hidden && e.key === 'Escape') { 
+        errorModal.hidden = true; 
+      }
+    });
+  })();
   function open(payload){
     idI.value = payload.id;
     tI.value  = payload.title || '';
@@ -853,7 +889,6 @@ table th:nth-child(5),table td:nth-child(5)  {
   form.addEventListener('submit', function(e) {
     validateDates('m_start', 'm_end', e);
   });
-  
   
   // fetch func
   function fetchResults(page) {

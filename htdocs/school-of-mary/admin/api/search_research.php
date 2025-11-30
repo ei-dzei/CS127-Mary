@@ -15,6 +15,7 @@
         
     $sortMap = [
     'title_asc'  => 'RESEARCH_TITLE ASC, RESEARCH_ID DESC',
+    'title_desc'  => 'RESEARCH_TITLE desc, RESEARCH_ID DESC',
     'status_asc' => 'RESEARCH_STATUS ASC, RESEARCH_TITLE ASC',
     'start_desc' => 'RESEARCH_STARTDATE DESC, RESEARCH_ID DESC',
     'start_asc'  => 'RESEARCH_STARTDATE ASC, RESEARCH_ID ASC',

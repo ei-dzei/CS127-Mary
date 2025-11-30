@@ -72,10 +72,15 @@
                     <td>' . htmlspecialchars($row['RANK_DESCRIPTION']) . '</td>
                     <td>' . htmlspecialchars($row['DEPT_SPECIALIZATION']) . '</td>
 
-                    <td class="actions-cell">
+                    <td class="actions-cell" onclick="event.stopPropagation()">
+                        <button class="btn small btn-view"> 
+                            <a style="color:white; cursor:pointer;" href="' . BASE_URL . '/public/faculty.php?id=' . (int)$row["FACULTY_ID"] . '">
+                                View
+                            </a>
+                        </button>
                         <button
                             type="button"
-                            class="btn small js-edit"
+                            class="btn small btn-edit js-edit"
                             data-id="' . (int)$row['FACULTY_ID'] . '"
                             data-fname="' . htmlspecialchars($row['FACULTY_FNAME'], ENT_QUOTES) . '"
                             data-initial="' . htmlspecialchars($row['FACULTY_INITIAL'], ENT_QUOTES) . '"
@@ -89,7 +94,7 @@
                             <input type="hidden" name="csrf" value="' . $CSRF . '">
                             <input type="hidden" name="action" value="delete">
                             <input type="hidden" name="FACULTY_ID" value="' . (int)$row['FACULTY_ID'] . '">
-                            <button class="btn small" style="background:#b91c1c;border-color:#b91c1c">Delete</button>
+                            <button class="btn small btn-delete">Delete</button>
                         </form>
                     </td>
                 </tr>
