@@ -73,6 +73,7 @@ $roles = $pdo->query("SELECT ROLE_ID, ROLE_DESCRIPTION FROM ROLE ORDER BY ROLE_I
 
 /* ------------------------- Filters + Sorting + Pagination ------------------------- */
 $q      = trim($_GET['q'] ?? '');
+$role   = trim($_GET['role'] ?? '');
 $sort   = $_GET['sort'] ?? 'id_desc'; // id_desc|id_asc|date_desc|date_asc|faculty_asc|faculty_desc|research_asc|research_desc
 $page   = max(1, (int)($_GET['page'] ?? 1));
 $per    = 5;
@@ -82,6 +83,183 @@ require_once __DIR__ . '/../../partials/site_header.php';
 ?>
 
 <style>
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.field label {
+    font-weight: 500;
+    color: #4b5563;
+}
+.field .input { 
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    height: 38px; 
+    box-sizing: border-box;
+}
+
+/* --- SEARCH BAR AND TOGGLE STYLES (Full Width, Matching Look) --- */
+.searchbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 15px;
+  background: #fff;
+  border: 1px solid #c7d2e4;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  flex: 1; 
+  box-sizing: border-box;
+  width: auto;
+  height: 57px;
+}
+.searchbox svg:first-child {
+    color: #6b7280;
+}
+.searchbox input[type="search"] { 
+    flex-grow: 1;
+    border: none;
+    padding: 0;
+    height: 1.5em; 
+    font-size: 1rem;
+}
+/* FILTER */
+.filter-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #4b5563; 
+}
+.filter-toggle-btn:hover {
+    color: #1f2937;
+}
+#filter-dropdown {
+    display: none; 
+    position: absolute;
+    top: 100%; 
+    right: 0; 
+    margin-top: 8px;
+    width: min(100%, 240px); 
+    background: #fff;
+    border: 1px solid #c7d2e4;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    z-index: 100;
+    padding: 15px;
+}
+#filter-options {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr); 
+    gap: 10px;
+    margin-bottom: 15px;
+}
+/* CLEAR BUTTON */
+.clear-btn-container {
+    text-align: left;
+}
+.clear-btn-container .btn-primary {
+    background-color: #0b5394;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    width: 100%;
+}
+.clear-btn-container .btn-primary:hover {
+    background-color: #0b5394;
+}
+/* SORT BUTTON */
+.sort-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid #c7d2e4;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #4b5563;
+  padding: 0;
+  width: 40px; 
+  height: 57px; 
+  flex-shrink: 0; 
+}
+.sort-toggle-btn:hover {
+  color: #1f2937;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 6px;
+}
+#sort-dropdown {
+    display: none; 
+    position: absolute;
+    top: 100%; 
+    right: 0;
+    margin-top: 8px;
+    width: min(100%, 220px); 
+    background: #fff;
+    border: 1px solid #c7d2e4;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    z-index: 100;
+    padding: 15px;
+}
+#sort-dropdown fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+#sort-dropdown fieldset legend {
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #4b5563;
+}
+#sort-dropdown fieldset > div {
+  display: flex;
+  align-items: center;  
+  gap: 8px;
+  padding: 6px 0;
+}
+#sort-dropdown fieldset > div input[type="radio"] {
+  margin: 0;
+  cursor: pointer;
+  -ms-transform: scale(1.5); /* make button larger */
+  -webkit-transform: scale(1.5); 
+  transform: scale(1.5);
+}
+#sort-dropdown fieldset > div label {
+  cursor: pointer;
+  margin: 0;
+}
+/* VIEW,EDIT,DELETE */
+.btn-view{
+  background: (--color-accent);
+  border-color: (--color-accent);
+}
+.btn-edit {
+  background: #64748b;
+  border-color: #64748b;
+  color:white;
+}
+.btn-edit:hover {
+  background: #5b6878ff;
+  border-color: 5b6878ff;
+}
+.btn-delete {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: white;
+}
+.btn-delete:hover {
+  background: rgba(175, 35, 35, 1)
+}
+
 /* --------- Inline modal (Existing CSS) --------- */
 .admin-modal[hidden]{display:none!important;}
 .admin-modal{
@@ -113,66 +291,9 @@ require_once __DIR__ . '/../../partials/site_header.php';
 }
 
 .modal-grid .field{display:flex; flex-direction:column; gap:6px;}
-.modal-grid .input, .modal-grid select{width:100%; padding:12px 14px; font-size:16px;}
+.modal-grid .input, .modal-grid select{width:100%; padding:10px 14px; font-size:16px;}
 .admin-modal__actions{display:flex; gap:10px; justify-content:flex-end; padding:12px 18px; border-top:1px solid #eef2f6;}
 .btn.wide { min-width: 160px; }
-
-
-/* MODIFIED: Filter Bar Styles for Alignment and Grid */
-.filter-bar {
-  /* Use 12 columns for more flexible layout control */
-  grid-template-columns: repeat(12, 1fr); 
-  gap: 10px;
-  /* Align all content items to the bottom baseline for vertical alignment */
-  align-items: flex-end; 
-}
-.filter-bar .field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-/* Assign column spans for desktop (Search, Order) */
-/* Search field (1st child) */
-.filter-bar .field:nth-child(1) { grid-column: span 8; } 
-/* Order field (2nd child) */
-.filter-bar .field:nth-child(2) { grid-column: span 2; } 
-
-/* Container for Clear button */
-.filter-bar .filter-actions {
-    grid-column: span 2; /* Buttons: 2/12 columns (Remaining space) */
-    display: flex;
-    /* Since there is only one button, justify to start, so it stays near the Order field */
-    justify-content: flex-start; 
-    gap: 10px;
-}
-.filter-bar .btn-action { 
-    min-width: 100px; 
-    height: 40px; 
-    /* Push button down by the label height + gap (approx 20px) for vertical alignment */
-    margin-top: 20px; 
-}
-
-
-/* Tablet/Mobile Adjustments */
-@media (max-width: 992px) {
-  /* Tablet: Search full width, Order and Clear button share the next row */
-  .filter-bar .field:nth-child(1) { grid-column: span 12; }
-  .filter-bar .field:nth-child(2) { grid-column: span 9; } /* Order takes a larger portion */
-  .filter-bar .filter-actions { 
-      grid-column: span 3; /* Clear button takes smaller portion */
-      justify-content: flex-end; /* Push clear button to the right */
-      margin-top: 0; 
-  }
-  .filter-bar .btn-action {
-      margin-top: 0; /* Clear manual top margin */
-  }
-}
-@media (max-width: 720px){
-  .filter-bar .field, .filter-bar .filter-actions { grid-column: span 12 !important; }
-  .filter-bar .filter-actions { justify-content: center; } /* Center button when full width */
-}
-/* END: MODIFIED Filter Bar Styles */
-
 
 /* Action buttons parity */
 .btn-action{
@@ -192,14 +313,19 @@ require_once __DIR__ . '/../../partials/site_header.php';
 }
 .btn-ghost:hover{ background: rgba(11,83,148,.05); }
 
-/* --- Table Optimization for Assignments (Maximization Fix) --- */
+/* --- TABLE --- */
 .table-scroll table {
     table-layout: fixed; 
     width: 100%;
+    scrollbar-width: none; /*hide scrollbar*/
+    -ms-overflow-style: none; /*hide scrollbar*/
 }
-
-.table-scroll table td {
-    white-space: nowrap; 
+.table-scroll::-webkit-scrollbar {
+  display: none; /*hide scrollbar*/
+}
+.table-scroll table td { 
+    height: 50px;
+    white-space: nowrap;
     overflow: hidden; 
     text-overflow: ellipsis; 
 }
@@ -221,8 +347,8 @@ require_once __DIR__ . '/../../partials/site_header.php';
 }
 .table-scroll table th:nth-child(4), /* Role column */
 .table-scroll table td:nth-child(4) {
-    width: 80px; /* Role width fixed (e.g., CR, FC, RA, TW) */
-    text-align: center;
+    width: 180px;
+    text-align: left;
     /* IMPORTANT: Remove truncation rules for Role to make it fully visible */
     white-space: normal; 
     overflow: visible; 
@@ -230,12 +356,12 @@ require_once __DIR__ . '/../../partials/site_header.php';
 }
 .table-scroll table th:nth-child(5), /* Date column */
 .table-scroll table td:nth-child(5) {
-    width: 100px; /* Date width fixed */
+    width: 120px; /* Date width fixed */
     text-align: center;
 }
 .table-scroll table th:nth-child(6), /* Actions column */
 .table-scroll table td:nth-child(6) {
-    width: 160px; /* Actions width fixed */
+    width: 200px; /* Actions width fixed */
 }
 /* Research Title column (3rd child) is left flexible to take up maximum remaining space. */
 .table-scroll table th:nth-child(3),
@@ -246,37 +372,95 @@ require_once __DIR__ . '/../../partials/site_header.php';
 </style>
 
 <section class="panel fade-in crud-header-card">
-  <div class="crud-header-top" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-    <div class="crud-header-text">
-        <h1 style="margin: 0;">Assignments</h1>
-        <p class="muted" style="margin: 4px 0 0 0;">Manage who is assigned to which research and in what role. CSV import/export below.</p>
-    </div>
-    <div class="crud-header-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <a class="btn-action btn-ghost" href="<?= app_url('/admin/api/export.php'); ?>?table=ASSIGNMENT">Export CSV</a>
-        <button class="btn-action btn-primary" id="create-assignment">+ Create Assignment</button>
-    </div>
+  <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; float:inline-end">
+    <a class="btn-action btn-ghost" href="<?= app_url('/admin/api/export.php'); ?>?table=ASSIGNMENT">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 3v10" />
+        <path d="M8 7l4-4 4 4" />
+        <path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" />
+      </svg>
+      <span style="margin-left:5px; font-size: 0.8rem;">Export CSV</span>
+    </a>
+    <button class="btn-action btn-primary" id="create-assignment" style="font-size:0.8rem">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+      </svg> 
+      Create Assignment
+    </button>
   </div>
-  <form method="get" class="grid filter-bar" style="margin-top:10px; margin-bottom:10px;">
-    <div class="field">
-      <label>Search (faculty or research title)</label>
-      <input class="input" name="q" value="<?= htmlspecialchars($q); ?>">
+  <h1 style="margin: 0;">Assignments</h1>
+  <p class="muted" style="margin: 4px 0 0 0;">Manage who is assigned to which research and in what role. CSV import/export below.</p>
+  <form method="get" class="filterbar" style="margin-top:10px; margin-bottom:10px;">
+    <div class="searchbox">
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M10 18a8 8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/>
+      </svg>
+      <input class="input" name="q" value="<?= htmlspecialchars($q); ?>" placeholder="Search using faculty or research title...">
+      <button class="filter-toggle-btn" id="filter-btn" title="Filter" type="button" >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+        </svg>
+      </button>
     </div>
-    <div class="field">
-      <label>Order</label>
-      <select class="input" name="sort">
-        <option value="id_desc"       <?= $sort==='id_desc'?'selected':''; ?>>ID (Newest First)</option>
-        <option value="id_asc"        <?= $sort==='id_asc'?'selected':''; ?>>ID (Oldest First)</option>
-        <option value="date_desc"     <?= $sort==='date_desc'?'selected':''; ?>>Date Assigned (Newest)</option>
-        <option value="date_asc"      <?= $sort==='date_asc'?'selected':''; ?>>Date Assigned (Oldest)</option>
-        <option value="faculty_asc"   <?= $sort==='faculty_asc'?'selected':''; ?>>Faculty (A–Z)</option>
-        <option value="faculty_desc"  <?= $sort==='faculty_desc'?'selected':''; ?>>Faculty (Z–A)</option>
-        <option value="research_asc"  <?= $sort==='research_asc'?'selected':''; ?>>Research (A–Z)</option>
-        <option value="research_desc" <?= $sort==='research_desc'?'selected':''; ?>>Research (Z–A)</option>
-      </select>
+    <div id="filter-dropdown">
+      <div id="filter-options">
+        <div class="field">
+            <label>Role</label>
+            <select class="input" name="role">
+              <option value="">All</option>
+              <?php foreach ($roles as $r):
+                $sel = ($role === $r['ROLE_ID']) ? ' selected' : '';
+                echo '<option'.$sel.' value="'.htmlspecialchars($r['ROLE_ID'], ENT_QUOTES).'">'.htmlspecialchars($r['ROLE_DESCRIPTION']).'</option>';
+              endforeach; ?>
+            </select>
+          </div>
+      </div>
+      <div class="clear-btn-container">
+        <button class="btn-primary" id="clear-btn" type="button" >Clear Filters</button>
+      </div>
     </div>
-    <div class="filter-actions">
-      <a class="btn-action btn-ghost" href="<?= app_url('/admin/crud/assignment.php'); ?>">Clear</a>
+    <button class="sort-toggle-btn" id="sort-btn" title="Sort" type="button">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-arrows-sort"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 9l4 -4l4 4m-4 -4v14" /><path d="M21 15l-4 4l-4 -4m4 4v-14" /></svg>
+    </button>
+    
+    <div class="field" id="sort-dropdown" onchange="closeSort()">
+      <fieldset>
+        <legend>Sort by:</legend>
+        <div>
+          <input type="radio" name="sort" value="id_desc" <?= $sort==='id_desc'?'checked':''; ?>>
+          <label>ID (Newest First)</label>
+        </div>
+        <div>
+          <input type="radio" name="sort" value="id_asc" <?= $sort==='id_asc'?'checked':''; ?>>
+          <label>ID (Oldest First)</label>
+        </div>
+        <div>
+          <input type="radio" name="sort" value="date_desc" <?= $sort==='date_desc'?'checked':''; ?>>
+          <label>Date Assigned (Newest)</label>
+        </div>
+        <div>
+          <input type="radio" name="sort" value="date_asc" <?= $sort==='date_asc'?'checked':''; ?>>
+          <label>Date Assigned (Oldest)</label>
+        </div>
+        <div>
+          <input type="radio" name="sort" value="faculty_asc" <?= $sort==='faculty_asc'?'checked':''; ?>>
+          <label>Faculty (A–Z)</label>
+        </div>
+        <div>
+          <input type="radio" name="sort" value="faculty_desc" <?= $sort==='faculty_desc'?'checked':''; ?>>
+          <label>Faculty (Z–A)</label>
+        </div>
+        <div>
+          <input type="radio" name="sort" value="research_asc" <?= $sort==='research_asc'?'checked':''; ?>>
+          <label>Research (A–Z)</label>
+        </div>
+        <div>
+          <input type="radio" name="sort" value="research_desc" <?= $sort==='research_desc'?'checked':''; ?>>
+          <label>Research (Z–A)</label>
+        </div>
+      </fieldset>
     </div>
+    
   </form>
 </section>
 <section class="panel" id="panel"></section>
@@ -393,17 +577,84 @@ require_once __DIR__ . '/../../partials/site_header.php';
 <script>
   const assignmentPanel = document.querySelector('#panel');
   const queryInput = document.querySelector('input[name="q"]');
-  const sortSelect = document.querySelector('select[name="sort"]');
+  const roleSelect = document.querySelector('select[name="role"]');
+  const sortRadios = document.querySelectorAll('input[name="sort"]');
+  const filterDropdown = document.querySelector('#filter-dropdown');
+  const filterButton = document.querySelector('#filter-btn');
+  const sortDropdown = document.querySelector('#sort-dropdown');
+  const sortButton = document.querySelector('#sort-btn');
+  const clearFiltersButton = document.querySelector('#clear-btn');
   let timer = null;
   
+  // Toggle visibility of the filter dropdown
+  function toggleFilters(e) {
+      if (e) e.preventDefault();
+      e.stopPropagation();
+      sortDropdown.style.display = "none";
+      if (filterDropdown.style.display === "none" || filterDropdown.style.display === "") {
+        filterDropdown.style.display = "block";
+      } else {
+        filterDropdown.style.display = "none";
+      }
+  }
+  function toggleSort(e) {
+      if (e) e.preventDefault();
+      e.stopPropagation();
+      filterDropdown.style.display = "none";
+      if (sortDropdown.style.display === "none" || sortDropdown.style.display === "") {
+        sortDropdown.style.display = "block";
+      } else {
+        sortDropdown.style.display = "none";
+      }
+  }
+  document.addEventListener('click', function(e) {
+  if (!filterDropdown.contains(e.target) && e.target !== filterButton) {
+    filterDropdown.style.display = "none";
+  }
+  });
+  document.addEventListener('click', function(e) {
+  if (!sortDropdown.contains(e.target) && e.target !== sortButton) {
+    sortDropdown.style.display = "none";
+  }
+  });
+  function closeSort() {
+    sortDropdown.style.display = "none";
+  }
+  // Clear button function
+  function clearFilters(e) {
+      if (e) e.preventDefault();
+      // Reset inputs
+      roleSelect.value = '';
+      
+      // Fetch results to show the unfiltered list
+      fetchResults(1);
+
+      // Hide the filter panel
+      filterDropdown.style.display = "none";
+  }
+
+  function getSelectedSort() {
+    const checkedRadio = document.querySelector('input[name="sort"]:checked');
+    return checkedRadio ? checkedRadio.value : 'name_asc'; 
+  }
+  
+  sortRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      fetchResults(1);
+      closeSort(); 
+    });
+  });
+  clearFiltersButton.addEventListener('click', clearFilters);
+  filterButton.addEventListener('click', toggleFilters);
+  sortButton.addEventListener('click', toggleSort);
+
   // fetch func
   function fetchResults(page) {
     const q = queryInput.value;
-    const sort = sortSelect.value;
-    const url = `../api/search_assignment.php?q=${encodeURIComponent(q)}&sort=${encodeURIComponent(sort)}&page=${page}`;
-    
+    const role = roleSelect.value;
+    const sort = getSelectedSort();
+    const url = `../api/search_assignment.php?q=${encodeURIComponent(q)}&role=${encodeURIComponent(role)}&sort=${encodeURIComponent(sort)}&page=${page}`;
     assignmentPanel.innerHTML = "<div class='loading'>Loading...</div>";
-    
     fetch(url)
       .then(res => res.text())
       .then(html => {
@@ -426,7 +677,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
   // Note: The form is still submitted when Enter is pressed in the search box, 
   // or when the Clear button is clicked, which also triggers a refresh/filter.
   queryInput.addEventListener('input', handleLiveInput);
-  sortSelect.addEventListener('change', () => fetchResults(1));
+  roleSelect.addEventListener('change', () => fetchResults(1));
   
   // Attach pagination events
   function attachPaginationEvents() {

@@ -77,11 +77,75 @@ a {
   text-decoration: none;
 }
 a:hover {
-  text-decoration: underline;
+  text-decoration: none;
 }
 .container {
   width: min(1200px, 94%);
   margin: 0 auto;
+}
+/* =======================================
+   STICKY TOPBAR / NAVBAR
+   ======================================= */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  transition: background var(--transition), transform var(--transition);
+}
+.topbar__inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #fff;
+  font-family: 'Patua One', serif;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 1.15rem; 
+}
+.brand__logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  display: block;
+}
+.mainnav {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+.mainnav a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+  position: relative;
+  transition: color var(--transition);
+}
+.mainnav a:hover {
+  color: #e6e6e6;
+}
+.mainnav a.active::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #ffcc00;
+  border-radius: 1px;
+}
+.divider {
+  width: 1px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.3);
 }
 
 /* =======================================
@@ -802,14 +866,12 @@ th {
    FILTER BAR
    ======================================= */
 .filterbar {
-  background: linear-gradient(180deg, rgba(11,83,148,.06), rgba(11,83,148,.04));
-  border: 1px solid rgba(11,83,148,.20);
-  border-radius: 14px;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;        
-  align-items: flex-start;
-  gap: 1rem;                    
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+    margin-bottom: 20px;
 }
 @media (min-width: 860px) {
   .filterbar { align-items: center; }
