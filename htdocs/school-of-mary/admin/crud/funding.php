@@ -115,6 +115,182 @@ $CSRF = csrf_token();
 ?>
 
 <style>
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.field label {
+    font-weight: 500;
+    color: #4b5563;
+}
+.field .input { 
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    height: 38px; 
+    box-sizing: border-box;
+}
+
+/* --- SEARCH BAR AND TOGGLE STYLES (Full Width, Matching Look) --- */
+.searchbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 15px;
+  background: #fff;
+  border: 1px solid #c7d2e4;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  flex: 1; 
+  box-sizing: border-box;
+  width: auto;
+  height: 57px;
+}
+.searchbox svg:first-child {
+    color: #6b7280;
+}
+.searchbox input[type="search"] { 
+    flex-grow: 1;
+    border: none;
+    padding: 0;
+    height: 1.5em; 
+    font-size: 1rem;
+}
+/* FILTER */
+.filter-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #4b5563; 
+}
+.filter-toggle-btn:hover {
+    color: #1f2937;
+}
+#filter-dropdown {
+    display: none; 
+    position: absolute;
+    top: 100%; 
+    right: 0; 
+    margin-top: 8px;
+    width: min(100%, 240px); 
+    background: #fff;
+    border: 1px solid #c7d2e4;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    z-index: 100;
+    padding: 15px;
+}
+#filter-options {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr); 
+    gap: 10px;
+    margin-bottom: 15px;
+}
+/* CLEAR BUTTON */
+.clear-btn-container {
+    text-align: left;
+}
+.clear-btn-container .btn-primary {
+    background-color: #0b5394;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    width: 100%;
+}
+.clear-btn-container .btn-primary:hover {
+    background-color: #0b5394;
+}
+/* SORT BUTTON */
+.sort-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid #c7d2e4;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #4b5563;
+  padding: 0;
+  width: 40px; 
+  height: 57px; 
+  flex-shrink: 0; 
+}
+.sort-toggle-btn:hover {
+  color: #1f2937;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 6px;
+}
+#sort-dropdown {
+    display: none; 
+    position: absolute;
+    top: 100%; 
+    right: 0;
+    margin-top: 8px;
+    width: min(100%, 170px); 
+    background: #fff;
+    border: 1px solid #c7d2e4;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    z-index: 100;
+    padding: 15px;
+}
+#sort-dropdown fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+#sort-dropdown fieldset legend {
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #4b5563;
+}
+#sort-dropdown fieldset > div {
+  display: flex;
+  align-items: center;  
+  gap: 8px;
+  padding: 6px 0;
+}
+#sort-dropdown fieldset > div input[type="radio"] {
+  margin: 0;
+  cursor: pointer;
+  -ms-transform: scale(1.5); /* make button larger */
+  -webkit-transform: scale(1.5); 
+  transform: scale(1.5);
+}
+#sort-dropdown fieldset > div label {
+  cursor: pointer;
+  margin: 0;
+}
+/* VIEW,EDIT,DELETE */
+.btn-view{
+  background: (--color-accent);
+  border-color: (--color-accent);
+}
+.btn-edit {
+  background: #64748b;
+  border-color: #64748b;
+  color:white;
+}
+.btn-edit:hover {
+  background: #5b6878ff;
+  border-color: 5b6878ff;
+}
+.btn-delete {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: white;
+}
+.btn-delete:hover {
+  background: rgba(175, 35, 35, 1)
+}
 /* --------- Inline modal --------- */
 .admin-modal[hidden]{display:none!important;}
 .admin-modal{
@@ -177,35 +353,76 @@ $CSRF = csrf_token();
 
 <section class="panel fade-in crud-header-card">
   <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; float:inline-end">
-    <a class="btn-action btn-ghost" href="<?= app_url('/admin/api/export.php'); ?>?table=FUNDING">Export CSV</a>
-    <button class="btn-action btn-primary" id="create-funding">+ Create Funding</button>
+    <a class="btn-action btn-ghost" href="<?= app_url('/admin/api/export.php'); ?>?table=FUNDING">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 3v10" />
+        <path d="M8 7l4-4 4 4" />
+        <path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" />
+      </svg>
+      <span style="margin-left:5px; font-size: 0.8rem;">Export CSV</span>
+    </a>
+    <button class="btn-action btn-primary" id="create-funding" style="font-size:0.8rem">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+      </svg> 
+      Create Funding
+    </button>
   </div>
   <h1 style="margin-bottom:8px;">Funding</h1>
   <p class="muted" style="margin-bottom:10px;">Manage funding rows. CSV import/export below.</p>
 
-  
+  <form method="get" class="filterbar" style="margin-bottom:10px;">
+    <div class="searchbox">
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M10 18a8 8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/>
+      </svg>
+      <input class="input" name="q" value="<?= htmlspecialchars($q); ?>" placeholder="Search agency or research....">
+      <!-- <button class="filter-toggle-btn" id="filter-btn" title="Filter" type="button" >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+        </svg>
+      </button> -->
+    </div>
 
-  <form method="get" class="grid filter-bar" style="margin-bottom:10px;">
-    <div class="field" style="grid-column: span 7">
-      <label>Search (research or agency)</label>
-      <input class="input" name="q" value="<?= htmlspecialchars($q); ?>">
-    </div>
-    <div class="field" style="grid-column: span 3">
-      <label>Order</label>
-      <select class="input" name="sort">
-        <option value="date_desc"   <?= $sort==='date_desc'?'selected':''; ?>>Date (Newest First)</option>
-        <option value="date_asc"    <?= $sort==='date_asc'?'selected':''; ?>>Date (Oldest First)</option>
-        <option value="amount_desc" <?= $sort==='amount_desc'?'selected':''; ?>>Amount (High → Low)</option>
-        <option value="amount_asc"  <?= $sort==='amount_asc'?'selected':''; ?>>Amount (Low → High)</option>
-        <option value="title_asc"   <?= $sort==='title_asc'?'selected':''; ?>>Research (A–Z)</option>
-        <option value="agency_asc"  <?= $sort==='agency_asc'?'selected':''; ?>>Agency (A–Z)</option>
-        <option value="id_desc"     <?= $sort==='id_desc'?'selected':''; ?>>ID (Newest First)</option>
-        <option value="id_asc"      <?= $sort==='id_asc'?'selected':''; ?>>ID (Oldest First)</option>
-      </select>
-    </div>
-    <div class="field" style="grid-column: span 2; display:flex; align-items:flex-end; gap:10px">
-      <button class="btn-action btn-primary" type="submit">Filter</button>
-      <a class="btn-action btn-ghost" href="<?= app_url('/admin/crud/funding.php'); ?>">Clear</a>
+    <button class="sort-toggle-btn" id="sort-btn" title="Sort" type="button">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-arrows-sort"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 9l4 -4l4 4m-4 -4v14" /><path d="M21 15l-4 4l-4 -4m4 4v-14" /></svg>
+    </button>
+    <div class="field" id="sort-dropdown">
+      <fieldset>
+        <legend>Sort by:</legend>
+        <div>
+          <input type="radio" name="sort" value="date_desc" <?= $sort==='date_desc'?'checked':''; ?>>
+          <label>Date (Newest First)</label>
+        </div>
+        <div>
+          <input type="radio" name="sort" value="date_asc" <?= $sort==='date_asc'?'checked':''; ?>>
+          <label>Date (Oldest First)</label>
+        </div>
+        <div>
+          <input type="radio" name="sort" value="amount_desc" <?= $sort==='amount_desc'?'checked':''; ?>>
+          <label>Amount (High → Low)</label>
+        </div>
+        <div>
+          <input type="radio" name="sort" value="amount_asc" <?= $sort==='amount_asc'?'checked':''; ?>>
+          <label>Amount (Low → High)</label>
+        </div>
+        <div>
+          <input type="radio" name="sort" value="title_asc" <?= $sort==='title_asc'?'checked':''; ?>>
+          <label>Research (A–Z)</label>
+        </div>
+        <div>
+          <input type="radio" name="sort" value="agency_asc" <?= $sort==='agency_asc'?'checked':''; ?>>
+          <label>Agency (A–Z)</label>
+        </div>
+        <div>
+          <input type="radio" name="sort" value="id_desc" <?= $sort==='id_desc'?'checked':''; ?>>
+          <label>ID (Newest First)</label>
+        </div>
+        <div>
+          <input type="radio" name="sort" value="id_asc" <?= $sort==='id_asc'?'checked':''; ?>>
+          <label>ID (Oldest First)</label>
+        </div>
+      </fieldset>
     </div>
   </form>
 </section>
@@ -310,13 +527,44 @@ $CSRF = csrf_token();
   //Search
   const fundingPanel = document.querySelector('#panel');
   const queryInput = document.querySelector('input[name="q"]');
-  const sortSelect = document.querySelector('select[name="sort"]');
+  const sortRadios = document.querySelectorAll('input[name="sort"]');
+  const sortDropdown = document.querySelector('#sort-dropdown');
+  const sortButton = document.querySelector('#sort-btn');
   let timer = null;
-  
+  function toggleSort(e) {
+      if (e) e.preventDefault();
+      e.stopPropagation();
+      filterDropdown.style.display = "none";
+      if (sortDropdown.style.display === "none" || sortDropdown.style.display === "") {
+        sortDropdown.style.display = "block";
+      } else {
+        sortDropdown.style.display = "none";
+      }
+  }
+  document.addEventListener('click', function(e) {
+  if (!sortDropdown.contains(e.target) && e.target !== sortButton) {
+    sortDropdown.style.display = "none";
+  }
+  });
+  function closeSort() {
+    sortDropdown.style.display = "none";
+  }
+  function getSelectedSort() {
+    const checkedRadio = document.querySelector('input[name="sort"]:checked');
+    return checkedRadio ? checkedRadio.value : 'name_asc'; 
+  }
+  sortRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      fetchResults(1);
+      closeSort(); 
+    });
+  });
+
+  sortButton.addEventListener('click', toggleSort);  
   // fetch func
   function fetchResults(page) {
     const q = queryInput.value;
-    const sort = sortSelect.value;
+    const sort = getSelectedSort();
     const url = `../api/search_funding.php?q=${encodeURIComponent(q)}&sort=${encodeURIComponent(sort)}&page=${page}`;
     
     fundingPanel.innerHTML = "<div class='loading'>Loading...</div>";
@@ -340,7 +588,6 @@ $CSRF = csrf_token();
     timer = setTimeout(() => fetchResults(1), 300);
   }
   queryInput.addEventListener('input', handleLiveInput);
-  sortSelect.addEventListener('change', () => fetchResults(1));
   
   function attachPaginationEvents() {
     const links = document.querySelectorAll('.page-btn');
