@@ -398,6 +398,7 @@ $to     = trim($_GET['to'] ?? '');
     const status = statusSelect.value;
     const from = fromInput.value;
     const to = toInput.value;
+    const isOngoing = status === 'ONGOING';
     
     // Construct the URL to the API endpoint
     const url = `api/search_research.php?q=${encodeURIComponent(q)}&status=${encodeURIComponent(status)}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&page=${page}`;
@@ -410,6 +411,11 @@ $to     = trim($_GET['to'] ?? '');
         return res.text();
       })
       .then(html => {
+        if(isOngoing) {
+          toInput.disabled = true;
+        } else {
+          toInput.disabled = false;
+        }
         resultsContainer.innerHTML = html;
         attachPaginationEvents(); 
       })
