@@ -4,6 +4,9 @@ $pageTitle = 'Agencies (Admin)';
 require_once __DIR__ . '/../../partials/init.php';
 require_once __DIR__ . '/../../validators.php';
 
+$flashError = $_SESSION['error_message'] ?? null;
+unset($_SESSION['error_message']); // Clear the session variable immediately after retrieval
+
 if (!is_admin()) { redirect_to('/admin/login.php'); }
 // Note: csrf_check is moved inside the POST conditional for robustness,
 // but is kept here based on your original code structure.
@@ -50,13 +53,18 @@ if ($action === 'update') {
 
 if ($action === 'delete') {
   if (!v_int($_POST['AGENCY_ID'] ?? '')) guardFail('Missing ID');
+  try {
+    $pdo->prepare("DELETE FROM AGENCY WHERE AGENCY_ID=?")->execute([$_POST['AGENCY_ID']]);
 
-  $pdo->prepare("DELETE FROM AGENCY WHERE AGENCY_ID=?")->execute([$_POST['AGENCY_ID']]);
-
-  $pdo->prepare("INSERT INTO AUDIT_LOG (ACTOR,ACTION_ENUM,TABLE_NAME,PK_VALUE) VALUES (?,?,?,?)")
+    $pdo->prepare("INSERT INTO AUDIT_LOG (ACTOR,ACTION_ENUM,TABLE_NAME,PK_VALUE) VALUES (?,?,?,?)")
       ->execute([$_SESSION['admin_user'], 'DELETE', 'AGENCY', $_POST['AGENCY_ID']]);
-
-  redirect_to('/admin/crud/agency.php?ok=1');
+      redirect_to('/admin/crud/agency.php?ok=1');
+  } catch (PDOException $e) {
+    $errorMessage = "Cannot delete agency. This record is referenced by other data (i.e. funding). Please delete dependent records first.";    
+    $_SESSION['error_message'] = $errorMessage;
+    
+    redirect_to('/admin/crud/agency.php');
+  }  
 }
 
 /* ------------------------- Lookups ------------------------- */
@@ -74,6 +82,182 @@ require_once __DIR__ . '/../../partials/site_header.php';
 ?>
 
 <style>
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.field label {
+    font-weight: 500;
+    color: #4b5563;
+}
+.field .input { 
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    height: 38px; 
+    box-sizing: border-box;
+}
+
+/* --- SEARCH BAR AND TOGGLE STYLES (Full Width, Matching Look) --- */
+.searchbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 15px;
+  background: #fff;
+  border: 1px solid #c7d2e4;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  flex: 1; 
+  box-sizing: border-box;
+  width: auto;
+  height: 57px;
+}
+.searchbox svg:first-child {
+    color: #6b7280;
+}
+.searchbox input[type="search"] { 
+    flex-grow: 1;
+    border: none;
+    padding: 0;
+    height: 1.5em; 
+    font-size: 1rem;
+}
+/* FILTER */
+.filter-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #4b5563; 
+}
+.filter-toggle-btn:hover {
+    color: #1f2937;
+}
+#filter-dropdown {
+    display: none; 
+    position: absolute;
+    top: 100%; 
+    right: 0; 
+    margin-top: 8px;
+    width: min(100%, 240px); 
+    background: #fff;
+    border: 1px solid #c7d2e4;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    z-index: 100;
+    padding: 15px;
+}
+#filter-options {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr); 
+    gap: 10px;
+    margin-bottom: 15px;
+}
+/* CLEAR BUTTON */
+.clear-btn-container {
+    text-align: left;
+}
+.clear-btn-container .btn-primary {
+    background-color: #0b5394;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    width: 100%;
+}
+.clear-btn-container .btn-primary:hover {
+    background-color: #0b5394;
+}
+/* SORT BUTTON */
+.sort-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid #c7d2e4;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #4b5563;
+  padding: 0;
+  width: 40px; 
+  height: 57px; 
+  flex-shrink: 0; 
+}
+.sort-toggle-btn:hover {
+  color: #1f2937;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 6px;
+}
+#sort-dropdown {
+    display: none; 
+    position: absolute;
+    top: 100%; 
+    right: 0;
+    margin-top: 8px;
+    width: min(100%, 170px); 
+    background: #fff;
+    border: 1px solid #c7d2e4;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    z-index: 100;
+    padding: 15px;
+}
+#sort-dropdown fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+#sort-dropdown fieldset legend {
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #4b5563;
+}
+#sort-dropdown fieldset > div {
+  display: flex;
+  align-items: center;  
+  gap: 8px;
+  padding: 6px 0;
+}
+#sort-dropdown fieldset > div input[type="radio"] {
+  margin: 0;
+  cursor: pointer;
+  -ms-transform: scale(1.5); /* make button larger */
+  -webkit-transform: scale(1.5); 
+  transform: scale(1.5);
+}
+#sort-dropdown fieldset > div label {
+  cursor: pointer;
+  margin: 0;
+}
+/* VIEW,EDIT,DELETE */
+.btn-view{
+  background: (--color-accent);
+  border-color: (--color-accent);
+}
+.btn-edit {
+  background: #64748b;
+  border-color: #64748b;
+  color:white;
+}
+.btn-edit:hover {
+  background: #5b6878ff;
+  border-color: 5b6878ff;
+}
+.btn-delete {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: white;
+}
+.btn-delete:hover {
+  background: rgba(175, 35, 35, 1)
+}
 /* --------- Inline modal (Existing CSS) --------- */
 .admin-modal[hidden]{display:none!important;}
 .admin-modal{
@@ -99,10 +283,6 @@ require_once __DIR__ . '/../../partials/site_header.php';
 .modal-grid .input, .modal-grid select{width:100%; padding:12px 14px; font-size:16px;}
 .admin-modal__actions{display:flex; gap:10px; justify-content:flex-end; padding:12px 18px; border-top:1px solid #eef2f6;}
 .btn.wide { min-width: 160px; }
-.filter-bar .btn, .filter-bar .clear-btn { min-width: 140px; }
-@media (max-width: 720px){
-  .filter-bar .btn, .filter-bar .clear-btn { width:100%; }
-}
 /* Action buttons in the filter row */
   .btn-action{
     display:inline-flex;align-items:center;justify-content:center;
@@ -196,53 +376,77 @@ td:has(.actions-cell) {
 
 <section class="panel fade-in crud-header-card">
   <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; float:inline-end">
-    <a class="btn-action btn-ghost" href="<?= app_url('/admin/api/export.php'); ?>?table=AGENCY">Export CSV</a>
-    <button class="btn-action btn-primary" id="create-agency">+ Create Agency</button>
+    <a class="btn-action btn-ghost" href="<?= app_url('/admin/api/export.php'); ?>?table=AGENCY">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 3v10" />
+        <path d="M8 7l4-4 4 4" />
+        <path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" />
+      </svg>
+      <span style="margin-left:5px; font-size: 0.8rem;">Export CSV</span>
+    </a>
+    <button class="btn-action btn-primary" id="create-agency" style="font-size:0.8rem">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+      </svg> 
+      Create Agency
+    </button>
   </div>
   <h1 style="margin-bottom:8px;">Agencies</h1>
   <p class="muted" style="margin-bottom:10px;">Manage agencies and their types.</p>
   
-
-  <form method="get" class="grid filter-bar" style="margin-bottom:10px;">
-    <div class="searchbox" style="grid-column: span 11" >
+  <form method="get" class="filterbar" style="margin-bottom:10px;">
+    <div class="searchbox">
       <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M10 18a8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/>
-        </svg>
+        <path d="M10 18a8 8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/>
+      </svg>
       <input class="input" type="search" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search agency..." style="width:70%" />
-      <button class="btn-action btn-primary" type="button" id="filter-btn" onclick="showHide()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-filter" viewBox="0 0 16 16">
-            <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5"/>
-          </svg>
+      <button class="filter-toggle-btn" id="filter-btn" title="Filter" type="button" >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+        </svg>
       </button>
-      <div id="filter-dropdown">
-        <div class="field" style="grid-column: span 3">
-        <label>Type</label>
-        <select class="input" name="type">
-          <option value="">All</option>
-          <?php foreach ($types as $t):
-            $sel = ($type === $t['TYPE_CODE']) ? ' selected' : '';
-            echo '<option'.$sel.' value="'.$t['TYPE_CODE'].'">'.htmlspecialchars($t['TYPE_LABEL']).'</option>';
-          endforeach; ?>
-        </select>
-        <div class="field" style="grid-column: span 2; display:flex; align-items:flex-end; gap:10px">
-          <a class="btn-action btn-ghost" onclick="clearFilter()">Clear</a>
+    </div>
+    <div id="filter-dropdown">
+      <div id="filter-options">
+        <div class="field">
+          <label>Type</label>
+          <select class="input" name="type">
+            <option value="">All</option>
+            <?php foreach ($types as $t):
+              $sel = ($type === $t['TYPE_CODE']) ? ' selected' : '';
+              echo '<option'.$sel.' value="'.$t['TYPE_CODE'].'">'.htmlspecialchars($t['TYPE_LABEL']).'</option>';
+            endforeach; ?>
+          </select>
         </div>
       </div>
+      <div class="clear-btn-container">
+        <button class="btn-primary" id="clear-btn" type="button" >Clear Filters</button>
       </div>
     </div>
-    <div class="field" style="grid-column: span 1; float: right; top: 0; margin: bottom 150px; vertical-align:text-top">
-      <select class="input" name="sort">
-        <option>
-          <label>Order</label>
-        </option>
-        <option value="name_asc"  <?= $sort==='name_asc'?'selected':''; ?>>Name (A–Z)</option>
-        <option value="name_desc" <?= $sort==='name_desc'?'selected':''; ?>>Name (Z–A)</option>
-        <option value="id_asc"    <?= $sort==='id_asc'?'selected':''; ?>>ID (Low→High)</option>
-        <option value="id_desc"   <?= $sort==='id_desc'?'selected':''; ?>>ID (High→Low)</option>
-        <option value="recent_desc" <?= $sort==='recent_desc'?'selected':''; ?>>Newest First</option>
-      </select>
+    <button class="sort-toggle-btn" id="sort-btn" title="Sort" type="button">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-arrows-sort"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 9l4 -4l4 4m-4 -4v14" /><path d="M21 15l-4 4l-4 -4m4 4v-14" /></svg>
+    </button>
+    <div class="field" id="sort-dropdown">
+      <fieldset>
+        <legend>Sort by:</legend>
+        <div>
+          <input type="radio" name="sort" value="name_asc" <?= $sort==='name_asc'?'checked':''; ?>>
+          <label>Name (A–Z)</label>
+        </div>
+        <div>
+          <input type="radio" name="sort" value="name_desc" <?= $sort==='name_desc'?'checked':''; ?>>
+          <label>Name (Z–A)</label>
+        </div>
+        <div>
+          <input type="radio" name="sort" value="id_asc" <?= $sort==='id_asc'?'checked':''; ?>>
+          <label>ID (Oldest)</label>
+        </div>
+        <div>
+          <input type="radio" name="sort" value="id_desc" <?= $sort==='id_desc'?'checked':''; ?>>
+          <label>ID (Newest)</label>
+        </div>
+      </fieldset>
     </div>
-    
   </form>
 </section>
 
@@ -322,38 +526,96 @@ td:has(.actions-cell) {
     </form>
   </div>
 </div>
-
-
+<div class="admin-modal" id="errorModal" hidden>
+  <div class="admin-modal__backdrop" data-close="1"></div>
+  <div class="admin-modal__dialog" role="alertdialog" aria-modal="true" aria-labelledby="errorModalTitle">
+    <div class="admin-modal__head" style="background:rgba(185,28,28,.08); border-color:rgba(185,28,28,.2)">
+      <h3 class="admin-modal__title" id="errorModalTitle" style="color:#b91c1c;">🛑 Error</h3>
+      <button class="admin-modal__close" type="button" data-close="1">✕</button>
+    </div>
+    <div class="admin-modal__body">
+      <p id="errorModalMessage" style="margin:0; font-size:16px;"></p>
+    </div>
+  </div>
+</div>
 <script>
   const agencyPanel = document.querySelector('#panel');
   const queryInput = document.querySelector('input[name="q"]');
   const typeSelect = document.querySelector('select[name="type"]');
-  const sortSelect = document.querySelector('select[name="sort"]');
+  const sortRadios = document.querySelectorAll('input[name="sort"]');
+  const filterDropdown = document.querySelector('#filter-dropdown');
+  const filterButton = document.querySelector('#filter-btn');
+  const sortDropdown = document.querySelector('#sort-dropdown');
+  const sortButton = document.querySelector('#sort-btn');
+  const clearFiltersButton = document.querySelector('#clear-btn');
   let timer = null;
   
-  function showHide() {
-    var f = document.getElementById("filter-dropdown");
-    if (f.style.display == "none") {
-      f.style.display = "block";
-    } else {
-      f.style.display = "none";
-    }
+  // Toggle visibility of the filter dropdown
+  function toggleFilters(e) {
+      if (e) e.preventDefault();
+      e.stopPropagation();
+      sortDropdown.style.display = "none";
+      if (filterDropdown.style.display === "none" || filterDropdown.style.display === "") {
+        filterDropdown.style.display = "block";
+      } else {
+        filterDropdown.style.display = "none";
+      }
   }
-  
-  function clearFilter() {
-    if((queryInput.value == '') && (typeSelect.value == '')) {
-      return;
-    } else {
+  function toggleSort(e) {
+      if (e) e.preventDefault();
+      e.stopPropagation();
+      filterDropdown.style.display = "none";
+      if (sortDropdown.style.display === "none" || sortDropdown.style.display === "") {
+        sortDropdown.style.display = "block";
+      } else {
+        sortDropdown.style.display = "none";
+      }
+  }
+  document.addEventListener('click', function(e) {
+  if (!filterDropdown.contains(e.target) && e.target !== filterButton) {
+    filterDropdown.style.display = "none";
+  }
+  });
+  document.addEventListener('click', function(e) {
+  if (!sortDropdown.contains(e.target) && e.target !== sortButton) {
+    sortDropdown.style.display = "none";
+  }
+  });
+  function closeSort() {
+    sortDropdown.style.display = "none";
+  }
+  // Clear button function
+  function clearFilters(e) {
+      if (e) e.preventDefault();
+      // Reset inputs
       typeSelect.value = '';
+      
+      // Fetch results to show the unfiltered list
       fetchResults(1);
-    }
+
+      // Hide the filter panel
+      filterDropdown.style.display = "none";
+  }
+
+  function getSelectedSort() {
+    const checkedRadio = document.querySelector('input[name="sort"]:checked');
+    return checkedRadio ? checkedRadio.value : 'name_asc'; 
   }
   
+  sortRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      fetchResults(1);
+      closeSort(); 
+    });
+  });
+  clearFiltersButton.addEventListener('click', clearFilters);
+  filterButton.addEventListener('click', toggleFilters);
+  sortButton.addEventListener('click', toggleSort);  
   // fetch func
   function fetchResults(page) {
     const q = queryInput.value;
     const type = typeSelect.value;
-    const sort = sortSelect.value;
+    const sort = getSelectedSort();
     const url = `../api/search_agency.php?q=${encodeURIComponent(q)}&type=${encodeURIComponent(type)}&sort=${encodeURIComponent(sort)}&page=${page}`;
     
     agencyPanel.innerHTML = "<div class='loading'>Loading...</div>";
@@ -379,7 +641,6 @@ td:has(.actions-cell) {
   
   queryInput.addEventListener('input', handleLiveInput);
   typeSelect.addEventListener('change', () => fetchResults(1));
-  sortSelect.addEventListener('change', () => fetchResults(1));
   
   // Attach pagination events
   function attachPaginationEvents() {
@@ -466,7 +727,30 @@ td:has(.actions-cell) {
   window.addEventListener('keydown', e => {
     if (!modal.hidden && e.key === 'Escape') closeModal();
   });
-  
+  //Error Modal
+  (function(){
+    const errorModal = document.getElementById('errorModal');
+    const messageEl = document.getElementById('errorModalMessage');
+    
+    const flashError = '<?= htmlspecialchars(addslashes($flashError ?? '')); ?>'; 
+
+    if (flashError) {
+      messageEl.textContent = flashError;
+      errorModal.hidden = false;
+    }
+    
+    errorModal.addEventListener('click', e => { 
+      if (e.target.dataset.close) {
+        errorModal.hidden = true; 
+      }
+    });
+
+    window.addEventListener('keydown', e => { 
+      if (!errorModal.hidden && e.key === 'Escape') { 
+        errorModal.hidden = true; 
+      }
+    });
+  })();
   // Initial load
   fetchResults(1);
 </script>

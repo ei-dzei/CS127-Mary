@@ -9,10 +9,10 @@
     $offset = ($page - 1) * $per;
     $orderSql = "a.AGENCY_NAME ASC";
     switch ($sort) {
+        case 'name_asc':   $orderSql = "a.AGENCY_NAME ASC"; break;
         case 'name_desc':  $orderSql = "a.AGENCY_NAME DESC"; break;
         case 'id_asc':     $orderSql = "a.AGENCY_ID ASC";    break;
         case 'id_desc':    $orderSql = "a.AGENCY_ID DESC";   break;
-        case 'recent_desc':$orderSql = "a.AGENCY_ID DESC";   break;
     }
 
     $baseSql = "FROM AGENCY a LEFT JOIN TYPE_AGENCY t ON a.AGENCY_TYPE = t.TYPE_CODE WHERE 1=1";
@@ -60,18 +60,18 @@
                 <td class="actions-cell">
                     <button
                     type="button"
-                    class="btn small js-edit"
+                    class="btn small btn-edit js-edit"
                     data-id="' . (int)$row['AGENCY_ID'] . '"
                     data-name="' . htmlspecialchars($row['AGENCY_NAME'], ENT_QUOTES) . '"
                     data-type="' . htmlspecialchars($row['AGENCY_TYPE'], ENT_QUOTES) . '"
                     data-contact="' . htmlspecialchars($row['AGENCY_CONTACTINFO'], ENT_QUOTES) . '"
                     >Edit</button>
 
-                    <form method="post" action="' . app_url('/admin/crud/agency.php') . '" onsubmit="return confirm(\"Delete agency?\");" style="display:inline">
+                    <form method="post" action="' . app_url('/admin/crud/agency.php') . '" onsubmit="return confirm(\'Are you sure you want to delete this agency?\');" style="display:inline">
                     <input type="hidden" name="csrf" value="' . csrf_token() . '">
                     <input type="hidden" name="action" value="delete">
                     <input type="hidden" name="AGENCY_ID" value="' .  (int)$row['AGENCY_ID'] . '">
-                    <button class="btn small" style="background:#b91c1c;border-color:#b91c1c">Delete</button>
+                    <button class="btn small btn-delete" style="background:#b91c1c;border-color:#b91c1c">Delete</button>
                     </form>
                 </td>
                 </tr>';
