@@ -159,5 +159,5 @@
   $output = '<p class="muted" style="margin:6px 0 12px;">Showing ' .(int)$totalRows .  ($total===1 ? " project" : " projects") . ' | Page '.$page.' of '. ($totalPages ===0? ' 1' : $totalPages) . '</p>';
   $output .= '<div class = "cards">' . $cards . '</div>';
   $output .='<div class = "pagination">'.$pagination.'</div>';
-  echo $output; //Showing 1-5 of 20 results | Page 1 of 4
-?>//
+  echo $output; 
+?>

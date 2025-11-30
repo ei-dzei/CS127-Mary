@@ -66,10 +66,15 @@
                     <td>' . htmlspecialchars($row['RESEARCH_STATUS']) . '</td>
                     <td>' . htmlspecialchars($row['RESEARCH_STARTDATE']) . '</td>
                     <td>' . htmlspecialchars((string)$row['RESEARCH_ENDDATE']) . '</td>
-                    <td class="actions-cell">
+                    <td class="actions-cell onclick="event.stopPropagation()">
+                        <button class="btn small btn-view"> 
+                            <a style="color:white; cursor:pointer;" href="' . BASE_URL . '/public/research.php?id=' . (int)$row["RESEARCH_ID"] . '">
+                                View
+                            </a>
+                        </button>
                         <button
                             type="button"
-                            class="btn small js-edit"
+                            class="btn btn-edit small js-edit"
                             data-id="' . (int)$row['RESEARCH_ID'] . '"
                             data-title="' . htmlspecialchars($row['RESEARCH_TITLE'], ENT_QUOTES) . '"
                             data-start="' . htmlspecialchars($row['RESEARCH_STARTDATE'], ENT_QUOTES) . '"
@@ -81,7 +86,7 @@
                             <input type="hidden" name="csrf" value="' . $CSRF . '">
                             <input type="hidden" name="action" value="delete">
                             <input type="hidden" name="RESEARCH_ID" value="' . (int)$row['RESEARCH_ID'] . '">
-                            <button class="btn small" style="background:#b91c1c;border-color:#b91c1c">Delete</button>
+                            <button class="btn small btn-delete">Delete</button>
                         </form>
                     </td>
                 </tr>';

@@ -147,95 +147,223 @@ require_once __DIR__ . '/../../partials/site_header.php';
 /* ------------------------------------------- */
 /* START: NEW HEADER AND FILTER BAR STYLES */
 /* ------------------------------------------- */
-
-/* Alignment for Research header and Action buttons */
-.crud-header-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px; /* Space between header and filter bar */
-}
-.crud-header-text {
-    /* Container for H1 and P tag */
-}
-.crud-header-text h1 {
-    margin: 0;
-}
-.crud-header-text p {
-    margin: 4px 0 0 0;
-}
-.crud-header-actions {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-/* Filter Bar: All inputs on one line */
-.filter-bar {
-  /* Using 12-column grid for precise placement */
-  grid-template-columns: repeat(12, 1fr); 
-  gap: 10px;
-  /* ADDED: Align items to the bottom baseline */
-  align-items: flex-end; 
-}
-.filter-bar .field {
-    /* Ensure label and input stack within the field container */
+.field {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
+}
+.field label {
+    font-weight: 500;
+    color: #4b5563;
+}
+.field .input { 
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    height: 38px; 
+    box-sizing: border-box;
 }
 
-/* Column Spans for desktop view (12 columns total) */
-.filter-bar .field:nth-child(1) { grid-column: span 3; } /* Title (3/12) */
-.filter-bar .field:nth-child(2) { grid-column: span 2; } /* Status (2/12) */
-.filter-bar .field:nth-child(3) { grid-column: span 2; } /* Start from (2/12) */
-.filter-bar .field:nth-child(4) { grid-column: span 2; } /* End by (2/12) */
-.filter-bar .field:nth-child(5) { grid-column: span 2; } /* Order (2/12) */
-
-/* MODIFIED: Clear button placement and alignment */
-.filter-bar .filter-actions { 
-    grid-column: 12 / 13; /* Places the button in the very last column (column 12) */
-    padding-top: 0; /* Clear previous manual adjustment */
-    display: flex; 
-    justify-content: flex-end; /* Push the button to the right edge */
-    /* Removed align-items: flex-start; as align-items: flex-end on parent takes care of bottom alignment */
+/* --- SEARCH BAR AND TOGGLE STYLES (Full Width, Matching Look) --- */
+.searchbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 15px;
+  background: #fff;
+  border: 1px solid #c7d2e4;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  flex: 1; 
+  box-sizing: border-box;
+  width: auto;
+  height: 57px;
 }
-.filter-bar .filter-actions .btn-action {
-    min-width: 100px; 
-    height: 40px; 
-    /* ADDED: Push the button down by the label height + gap (20px) to align its top edge with the inputs' top edge. */
-    margin-top: 20px; 
+.searchbox svg:first-child {
+    color: #6b7280;
 }
-
-@media (max-width: 992px) {
-  /* Tablet View: Stacking layout */
-  .filter-bar { grid-template-columns: repeat(12, 1fr); align-items: stretch; }
-  .filter-bar .field:nth-child(1) { grid-column: span 6; }
-  .filter-bar .field:nth-child(2) { grid-column: span 6; }
-  .filter-bar .field:nth-child(3) { grid-column: span 3; }
-  .filter-bar .field:nth-child(4) { grid-column: span 3; }
-  .filter-bar .field:nth-child(5) { grid-column: span 4; }
-  .filter-bar .filter-actions { 
-      grid-column: span 2; 
-      padding-top: 0; 
-      justify-content: flex-end; 
-  }
-  .filter-bar .filter-actions .btn-action {
-      margin-top: 0; /* Remove manual margin in stacked layout */
-  }
+.searchbox input[type="search"] { 
+    flex-grow: 1;
+    border: none;
+    padding: 0;
+    height: 1.5em; 
+    font-size: 1rem;
 }
-
-@media (max-width: 720px){ 
-  /* Mobile: Full-width stacking */
-  .filter-bar .field, .filter-bar .filter-actions { 
-      grid-column: span 12 !important; 
-      justify-content: center;
-  }
+/* FILTER */
+.filter-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #4b5563; 
 }
-
+.filter-toggle-btn:hover {
+    color: #1f2937;
+}
+#filter-dropdown {
+    display: none; 
+    position: absolute;
+    top: 100%; 
+    right: 0; 
+    margin-top: 8px;
+    width: min(100%, 480px); 
+    background: #fff;
+    border: 1px solid #c7d2e4;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    z-index: 100;
+    padding: 15px;
+}
+#filter-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 10px;
+    margin-bottom: 15px;
+}
+/* CLEAR BUTTON */
+.clear-btn-container {
+    text-align: left;
+}
+.clear-btn-container .btn-primary {
+    background-color: #0b5394;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    width: 100%;
+}
+.clear-btn-container .btn-primary:hover {
+    background-color: #0b5394;
+}
+/* SORT BUTTON */
+.sort-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid #c7d2e4;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #4b5563;
+  padding: 0;
+  width: 40px; 
+  height: 57px; 
+  flex-shrink: 0; 
+}
+.sort-toggle-btn:hover {
+  color: #1f2937;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 6px;
+}
+#sort-dropdown {
+    display: none; 
+    position: absolute;
+    top: 100%; 
+    right: 0;
+    margin-top: 8px;
+    width: min(100%, 200px); 
+    background: #fff;
+    border: 1px solid #c7d2e4;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    z-index: 100;
+    padding: 15px;
+}
+#sort-dropdown fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+#sort-dropdown fieldset legend {
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #4b5563;
+}
+#sort-dropdown fieldset > div {
+  display: flex;
+  align-items: center;  
+  gap: 8px;
+  padding: 6px 0;
+}
+#sort-dropdown fieldset > div input[type="radio"] {
+  margin: 0;
+  cursor: pointer;
+  -ms-transform: scale(1.5); /* make button larger */
+  -webkit-transform: scale(1.5); 
+  transform: scale(1.5);
+}
+#sort-dropdown fieldset > div label {
+  cursor: pointer;
+  margin: 0;
+}
+/* VIEW,EDIT,DELETE */
+.btn-view{
+  background: (--color-accent);
+  border-color: (--color-accent);
+}
+.btn-edit {
+  background: #64748b;
+  border-color: #64748b;
+  color:white;
+}
+.btn-edit:hover {
+  background: #5b6878ff;
+  border-color: 5b6878ff;
+}
+.btn-delete {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: white;
+}
+.btn-delete:hover {
+  background: rgba(175, 35, 35, 1)
+}
 /* ------------------------------------------- */
 /* END: NEW HEADER AND FILTER BAR STYLES */
 /* ------------------------------------------- */
+
+/* TABLE */
+.table-scroll table {
+    table-layout: fixed; 
+    width: 100%;
+    scrollbar-width: none; /*hide scrollbar*/
+    -ms-overflow-style: none; /*hide scrollbar*/
+}
+.table-scroll::-webkit-scrollbar {
+  display: none; /*hide scrollbar*/
+}
+.table-scroll table td { 
+    height: 50px;
+    white-space: nowrap;
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+}
+table th:first-child,
+table td:first-child {
+  width: 60px;
+  min-width: 60px;
+  max-width: 60px;
+}
+table th:nth-child(2),
+table td:nth-child(2) {
+  width: 580px;
+  min-width: 300px;
+  max-width: 600px;
+}
+table th:nth-child(3),table td:nth-child(3){
+  width: 120px; 
+  max-width: 120px;
+}
+table th:nth-child(4),table td:nth-child(4),
+table th:nth-child(5),table td:nth-child(5)  {
+  width: 130px; 
+  max-width: 130px;
+}
 
 
 /* Action buttons parity */
@@ -243,7 +371,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
   display:inline-flex;align-items:center;justify-content:center;
   min-width:130px;height:40px;padding:0 16px;
   border-radius:8px;border:1px solid var(--color-accent);
-  font-weight:600;text-decoration:none;cursor:pointer;
+  font-weight:600;text-decoration:none;cursor:pointer; font-size: 0.8rem;
   transition:background .2s ease,color .2s ease,transform .06s ease,box-shadow .15s ease;
 }
 .btn-action:active{ transform: translateY(1px); }
@@ -266,7 +394,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
 /* Tighter action buttons */
 .crud-table .btn-action {
   min-width: 60px; /* Reduced min width */
-  height: 32px; /* Reduced height */
+  height: 68px; /* Reduced height */
   padding: 0 10px; /* Reduced padding inside */
   font-size: 0.9em; /* Smaller font */
   margin-right: 4px; /* Space between buttons */
@@ -275,52 +403,100 @@ require_once __DIR__ . '/../../partials/site_header.php';
 </style>
 
 <section class="panel fade-in crud-header-card">
-  <div class="crud-header-top">
-    <div class="crud-header-text">
-        <h1>Research</h1>
-        <p class="muted">Manage research, status, and dates. Use the fields below to filter the list.</p>
-    </div>
-    <div class="crud-header-actions">
-        <a class="btn-action btn-ghost" href="<?= app_url('/admin/api/export.php'); ?>?table=RESEARCH">Export CSV</a>
-        <button class="btn btn-action btn-primary" id="create-research">+ Create Research</button>
-    </div>
+  <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; float:inline-end">
+      <a class="btn-action btn-ghost" href="<?= app_url('/admin/api/export.php'); ?>?table=RESEARCH">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3v10" />
+          <path d="M8 7l4-4 4 4" />
+          <path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" />
+        </svg>
+        <span style="margin-left:5px">Export CSV</span>
+      </a>
+      <button class="btn-action btn-primary" id="create-research">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+          <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+        </svg>
+        Create Research
+      </button>
   </div>
-  <form method="get" class="grid filter-bar" style="margin-top:10px; margin-bottom:10px;">
-    <div class="field">
-      <label>Title </label>
-      <input class="input" name="q" value="<?= htmlspecialchars($q); ?>"></div>
-    <div class="field">
-      <label>Status</label>
-      <select class="input" name="status">
-        <option value="">All</option>
-        <?php foreach ($statuses as $s):
-          $sel = ($status === $s['STATUS_CODE']) ? ' selected' : '';
-          echo '<option'.$sel.' value="'.htmlspecialchars($s['STATUS_CODE'], ENT_QUOTES).'">'.htmlspecialchars($s['STATUS_LABEL']).'</option>';
-        endforeach; ?>
-      </select>
+  <h1>Research</h1>
+  <p class="muted">Manage research, status, and dates. Use the fields below to filter the list.</p>
+  <form method="get" class="filterbar" style="margin-top:10px; margin-bottom:10px;">
+    <div class="searchbox">
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M10 18a8 8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/>
+      </svg>
+      <input class="input" name="q" value="<?= htmlspecialchars($q); ?>" placeholder="Search research...">
+      <button class="filter-toggle-btn" id="filter-btn" title="Filter" type="button">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+        </svg>
+      </button>
     </div>
-    <div class="field">
-      <label>Start from</label>
-      <input class="input" type="date" name="from" value="<?= htmlspecialchars($from); ?>">
+    <div id ="filter-dropdown">
+      <div id="filter-options">
+        <div class="field">
+          <label>Status</label>
+          <select class="input" name="status">
+            <option value="">All</option>
+            <?php foreach ($statuses as $s):
+              $sel = ($status === $s['STATUS_CODE']) ? ' selected' : '';
+              echo '<option'.$sel.' value="'.htmlspecialchars($s['STATUS_CODE'], ENT_QUOTES).'">'.htmlspecialchars($s['STATUS_LABEL']).'</option>';
+            endforeach; ?>
+          </select>
+        </div>
+        <div class="field">
+          <label>Start from</label>
+          <input class="input" type="date" name="from" value="<?= htmlspecialchars($from); ?>">
+        </div>
+        <div class="field">
+          <label>End by</label>
+          <input class="input" type="date" name="to" value="<?= htmlspecialchars($to); ?>">
+        </div>
+      </div>
+      <div class="clear-btn-container">
+        <button class="btn-primary" id="clear-btn" type="button" >Clear Filters</button>
+      </div>
     </div>
-    <div class="field">
-      <label>End by</label>
-      <input class="input" type="date" name="to" value="<?= htmlspecialchars($to); ?>"></div>
-    <div class="field">
-      <label>Order</label>
-      <select class="input" name="sort">
-        <option value="start_desc" <?= $sort==='start_desc'?'selected':''; ?>>Start (Newest)</option>
-        <option value="start_asc"  <?= $sort==='start_asc'?'selected':''; ?>>Start (Oldest)</option>
-        <option value="end_desc"   <?= $sort==='end_desc'?'selected':''; ?>>End (Newest)</option>
-        <option value="end_asc"    <?= $sort==='end_asc'?'selected':''; ?>>End (Oldest)</option>
-        <option value="title_asc"  <?= $sort==='title_asc'?'selected':''; ?>>Title (A–Z)</option>
-        <option value="status_asc" <?= $sort==='status_asc'?'selected':''; ?>>Status (A–Z)</option>
-        <option value="id_desc"    <?= $sort==='id_desc'?'selected':''; ?>>ID (Newest)</option>
-        <option value="id_asc"     <?= $sort==='id_asc'?'selected':''; ?>>ID (Oldest)</option>
-      </select>
-    </div>
-    <div class="filter-actions">
-      <a class="btn-action btn-ghost" href="<?= app_url('/admin/crud/research.php'); ?>">Clear</a>
+    <button class="sort-toggle-btn" id="sort-btn" title="Sort" type="button">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-arrows-sort"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 9l4 -4l4 4m-4 -4v14" /><path d="M21 15l-4 4l-4 -4m4 4v-14" /></svg>
+        </button>
+    <div class="field" id="sort-dropdown" onchange="closeSort()">
+      <fieldset>
+        <legend>Sort by:</legend>
+        <div>
+          <input type="radio" name="sort"  value="start_desc" <?= $sort==='start_desc'?'checked':''; ?>>
+          <label>Start Date (Newest)</label>
+        </div>
+        <div>
+          <input type="radio" name="sort" value="start_asc"  <?= $sort==='start_asc'?'checked':''; ?>>
+          <label>Start Date (Oldest)</label><br>
+        </div>
+        <div>
+          <input type="radio" name="sort" value="end_desc"   <?= $sort==='end_desc'?'checked':''; ?>>
+          <label>End Date (Newest)</label>
+        </div>
+        <div>
+          <input type="radio" name="sort" value="end_asc"    <?= $sort==='end_asc'?'checked':''; ?>>
+          <label>End Date (Oldest)</label>
+        </div>
+        <div>
+          <input type="radio" name="sort" value="title_asc"  <?= $sort==='title_asc'?'checked':''; ?>>
+          <label>Title (A–Z)</label>
+        </div>
+        <div>
+          <input type="radio" name="sort" value="status_asc" <?= $sort==='status_asc'?'checked':''; ?>>
+          <label>Status (A–Z)</label>
+        </div>
+        <div>
+          <input type="radio" name="sort" value="id_desc"    <?= $sort==='id_desc'?'checked':''; ?>>
+          <label>ID (Newest)</label>
+        </div>
+        <div>
+          <input type="radio" name="sort" value="id_asc"     <?= $sort==='id_asc'?'checked':''; ?>>
+          <label>ID (Oldest)</label>
+        </div>
+      </fieldset>
     </div>
   </form>
 </section>
@@ -420,9 +596,80 @@ require_once __DIR__ . '/../../partials/site_header.php';
   const statusSelect = document.querySelector('select[name="status"]');
   const fromInput = document.querySelector('input[name="from"]');
   const toInput = document.querySelector('input[name="to"]');
-  const sortSelect = document.querySelector('select[name="sort"]');
+  const sortRadios = document.querySelectorAll('input[name="sort"]');
+  const filterDropdown = document.querySelector('#filter-dropdown');
+  const filterButton = document.querySelector('#filter-btn');
+  const sortDropdown = document.querySelector('#sort-dropdown');
+  const sortButton = document.querySelector('#sort-btn');
+  const clearFiltersButton = document.querySelector('#clear-btn');
   let timer = null;
   
+  // Toggle visibility of the filter dropdown
+  function toggleFilters(e) {
+      if (e) e.preventDefault();
+      e.stopPropagation();
+      sortDropdown.style.display = "none";
+      if (filterDropdown.style.display === "none" || filterDropdown.style.display === "") {
+        filterDropdown.style.display = "block";
+      } else {
+        filterDropdown.style.display = "none";
+      }
+  }
+  function toggleSort(e) {
+      if (e) e.preventDefault();
+      e.stopPropagation();
+      filterDropdown.style.display = "none";
+      if (sortDropdown.style.display === "none" || sortDropdown.style.display === "") {
+        sortDropdown.style.display = "block";
+      } else {
+        sortDropdown.style.display = "none";
+      }
+  }
+  document.addEventListener('click', function(e) {
+  if (!filterDropdown.contains(e.target) && e.target !== filterButton) {
+    filterDropdown.style.display = "none";
+  }
+  });
+  document.addEventListener('click', function(e) {
+  if (!sortDropdown.contains(e.target) && e.target !== sortButton) {
+    sortDropdown.style.display = "none";
+  }
+  });
+  function closeSort() {
+    sortDropdown.style.display = "none";
+  }
+  // Clear button function
+  function clearFilters(e) {
+      if (e) e.preventDefault();
+      
+      // Reset inputs
+      queryInput.value = '';
+      statusSelect.value = '';
+      fromInput.value = '';
+      toInput.value = '';
+      
+      // Fetch results to show the unfiltered list
+      fetchResults(1);
+
+      // Hide the filter panel
+      filterDropdown.style.display = "none";
+  }
+
+  function getSelectedSort() {
+    const checkedRadio = document.querySelector('input[name="sort"]:checked');
+    return checkedRadio ? checkedRadio.value : 'start_desc'; 
+  }
+  
+  sortRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      fetchResults(1);
+      closeSort(); 
+    });
+  });
+  clearFiltersButton.addEventListener('click', clearFilters);
+  filterButton.addEventListener('click', toggleFilters);
+  sortButton.addEventListener('click', toggleSort);
+
   // CLIENT-SIDE DATE VALIDATION FUNCTION
   function validateDates(startDateId, endDateId, formEvent) {
     const startInput = document.getElementById(startDateId);
@@ -614,7 +861,8 @@ require_once __DIR__ . '/../../partials/site_header.php';
     const status = statusSelect.value;
     const from = fromInput.value;
     const to = toInput.value;
-    const sort = sortSelect.value;
+    const sort = getSelectedSort();
+    const isOngoing = status === 'ONGOING';
     const url = `../api/search_research.php?q=${encodeURIComponent(q)}&status=${encodeURIComponent(status)}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&sort=${encodeURIComponent(sort)}&page=${page}`;    
     
     researchPanel.innerHTML = "<div class='loading'>Loading...</div>";
@@ -622,6 +870,13 @@ require_once __DIR__ . '/../../partials/site_header.php';
     fetch(url)
       .then(res => res.text())
       .then(html => {
+        if(isOngoing) {
+          toInput.disabled = true;
+          toInput.style.cursor = 'not-allowed';
+        } else {
+          toInput.disabled = false;
+          toInput.style.cursor = 'initial';
+        }
         researchPanel.innerHTML = html;
         attachPaginationEvents();
         attachEditButtons(); 
@@ -641,7 +896,6 @@ require_once __DIR__ . '/../../partials/site_header.php';
   statusSelect.addEventListener('change', () => fetchResults(1));
   fromInput.addEventListener('input', handleLiveInput);
   toInput.addEventListener('input', handleLiveInput);
-  sortSelect.addEventListener('change', () => fetchResults(1));
   
   // Attach pagination events
   function attachPaginationEvents() {

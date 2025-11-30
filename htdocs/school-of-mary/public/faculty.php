@@ -42,7 +42,7 @@
         <p class="muted">Record not found.</p>
         <p><a class="btn small" href="<?= BASE_URL ?>/public/faculty.php">Back to list</a></p>
       <?php else: ?>
-        <a class="btn small" href="<?= BASE_URL ?>/public/faculty.php" style="float:right;margin-top:-4px;">← Back to Faculty</a>
+        <button class="btn small" style="float:right;margin-top:-4px;" onclick="history.back()">← Back</button>
         <h1 style="margin-bottom:6px">
           <?php
             echo htmlspecialchars($faculty['FACULTY_LNAME'].', '.$faculty['FACULTY_FNAME']);

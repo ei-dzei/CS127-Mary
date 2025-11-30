@@ -65,7 +65,7 @@ if ($id > 0) {
       <p class="muted">Record not found.</p>
       <p><a class="btn small" href="<?= BASE_URL ?>/public/research.php">Back to list</a></p>
     <?php else: ?>
-      <a class="btn small" href="<?= BASE_URL ?>/public/research.php" style="float:right;margin-top:-4px;">← Back to Research</a>
+      <button class="btn small" style="float:right;margin-top:-4px;" onclick="history.back()">← Back</button>
       <h1 style="margin-bottom:6px"><?= htmlspecialchars($research['RESEARCH_TITLE']); ?></h1>
       <div class="muted" style="margin-bottom:10px;">
         <span class="pill" style="background:#eef4ff; border:1px solid #cdd8f0; padding:2px 8px; border-radius:999px;">
@@ -299,7 +299,6 @@ $to     = trim($_GET['to'] ?? '');
   <p class="muted" style="margin-bottom:10px;">Browse the research database system of School of Mary.</p>
 
   <form method="get" class="filterbar" id="research-filter-form">
-    
     <div class="searchbox">
       <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M10 18a8 8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/>
@@ -380,7 +379,6 @@ $to     = trim($_GET['to'] ?? '');
       if (e) e.preventDefault();
       
       // Reset inputs
-      qInput.value = '';
       statusSelect.value = '';
       fromInput.value = '';
       toInput.value = '';
@@ -413,8 +411,10 @@ $to     = trim($_GET['to'] ?? '');
       .then(html => {
         if(isOngoing) {
           toInput.disabled = true;
+          toInput.style.cursor = 'not-allowed';
         } else {
           toInput.disabled = false;
+          toInput.style.cursor = 'initial';
         }
         resultsContainer.innerHTML = html;
         attachPaginationEvents(); 
