@@ -76,7 +76,7 @@ if ($action === 'delete') {
 
   } catch (PDOException $e) {
     // Catch the database error 
-    $errorMessage = "Cannot delete faculty. This record is referenced by other data (e.g., courses or schedules). Please delete dependent records first.";
+    $errorMessage = "Cannot delete faculty. This record is referenced by other data (i.e. assignment). Please delete dependent records first.";
     
     // Set the error message into a session variable (FLASH MESSAGE)
     $_SESSION['error_message'] = $errorMessage;
@@ -105,14 +105,6 @@ $CSRF = csrf_token();
 ?>
 
 <style>
-.filterbar {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: nowrap;
-    margin-bottom: 20px;
-}
 .field {
     display: flex;
     flex-direction: column;
@@ -259,10 +251,35 @@ $CSRF = csrf_token();
 #sort-dropdown fieldset > div input[type="radio"] {
   margin: 0;
   cursor: pointer;
+  -ms-transform: scale(1.5); /* make button larger */
+  -webkit-transform: scale(1.5); 
+  transform: scale(1.5);
 }
 #sort-dropdown fieldset > div label {
   cursor: pointer;
   margin: 0;
+}
+/* VIEW,EDIT,DELETE */
+.btn-view{
+  background: (--color-accent);
+  border-color: (--color-accent);
+}
+.btn-edit {
+  background: #64748b;
+  border-color: #64748b;
+  color:white;
+}
+.btn-edit:hover {
+  background: #5b6878ff;
+  border-color: 5b6878ff;
+}
+.btn-delete {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: white;
+}
+.btn-delete:hover {
+  background: rgba(175, 35, 35, 1)
 }
 
 /* --------- Inline modal (Existing CSS) --------- */
@@ -285,7 +302,9 @@ $CSRF = csrf_token();
 .modal-grid{ display:grid; grid-template-columns: 1fr 120px 1fr 1fr; gap:16px; }
 @media (max-width: 900px){ .modal-grid{ grid-template-columns: 1fr; } }
 .modal-grid .field{display:flex; flex-direction:column; gap:6px;}
-.modal-grid .input, .modal-grid select{width:100%; padding:12px 14px; font-size:16px;}
+.modal-grid .field:nth-child(5) {grid-column: span 1;}
+.modal-grid .field:nth-child(6) {grid-column: span 2;}
+.modal-grid .input, .modal-grid select{width:100%; padding:8px 14px; font-size:16px;}
 .admin-modal__actions{display:flex; gap:10px; justify-content:flex-end; padding:12px 18px; border-top:1px solid #eef2f6;}
 .btn.wide { min-width: 160px; }
 
@@ -303,14 +322,19 @@ $CSRF = csrf_token();
 .btn-ghost{ background:#fff; color: var(--color-accent); border-color: rgba(11,83,148,.35); }
 .btn-ghost:hover{ background: rgba(11,83,148,.05); }
 
-/* --- Table Optimization for single-line data (The Fix) --- */
+/* --- TABLE --- */
 .table-scroll table {
     table-layout: fixed; 
     width: 100%;
+    scrollbar-width: none; /*hide scrollbar*/
+    -ms-overflow-style: none; /*hide scrollbar*/
 }
-
-.table-scroll table td {
-    white-space: nowrap; 
+.table-scroll::-webkit-scrollbar {
+  display: none; /*hide scrollbar*/
+}
+.table-scroll table td { 
+    height: 50px;
+    white-space: nowrap;
     overflow: hidden; 
     text-overflow: ellipsis; 
 }
@@ -326,7 +350,7 @@ $CSRF = csrf_token();
 }
 .table-scroll table th:nth-child(6), /* Actions column */
 .table-scroll table td:nth-child(6) {
-    width: 160px; /* Adjust based on button size */
+    width: 200px; /* Adjust based on button size */
 }
 /* --- End of Fix --- */
 </style>
@@ -334,17 +358,19 @@ $CSRF = csrf_token();
 <section class="panel fade-in crud-header-card">
   <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; float:inline-end">
     <a class="btn-action btn-ghost" href="<?= app_url('/admin/api/export.php'); ?>?table=FACULTY">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M12 3v10" />
-      <path d="M8 7l4-4 4 4" />
-      <path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" />
-    </svg>
-    <span style="margin-left:5px">Export CSV</span></a>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 3v10" />
+        <path d="M8 7l4-4 4 4" />
+        <path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" />
+      </svg>
+      <span style="margin-left:5px">Export CSV</span>
+    </a>
     <button class="btn-action btn-primary" id="create-faculty">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
-  <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
-</svg>
-    Create Faculty</button>
+        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+      </svg>
+      Create Faculty
+    </button>
   </div>
   <h1 style="margin-bottom:8px;">Faculty</h1>
   <p class="muted" style="margin-bottom:10px;">Create, update, delete records. CSV export also available.</p>
@@ -355,10 +381,10 @@ $CSRF = csrf_token();
         </svg>
         <input class="input" type ="search" name="q" value="<?= htmlspecialchars($q); ?>" placeholder="Search using name or email...">
         <button class="filter-toggle-btn" id="filter-btn" title="Filter" type="button" >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-        </svg>
-      </button>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+          </svg>
+        </button>
       </div>
       
       <div id="filter-dropdown">
@@ -390,7 +416,7 @@ $CSRF = csrf_token();
       </div>
         <button class="sort-toggle-btn" id="sort-btn" title="Sort" type="button">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-arrows-sort"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 9l4 -4l4 4m-4 -4v14" /><path d="M21 15l-4 4l-4 -4m4 4v-14" /></svg>
-      </button>
+        </button>
         <div class="field" id="sort-dropdown" onchange="closeSort()">
             <fieldset>
               <legend>Sort by:</legend>
@@ -427,7 +453,6 @@ $CSRF = csrf_token();
                 <label>Department</label>
               </div>
             </fieldset>
-
         </div>
   </form>
 </section>
@@ -538,9 +563,6 @@ $CSRF = csrf_token();
     <div class="admin-modal__body">
       <p id="errorModalMessage" style="margin:0; font-size:16px;"></p>
     </div>
-    <div class="admin-modal__actions">
-      <button class="btn wide" type="button" data-close="1" style="background:#b91c1c;border-color:#b91c1c">Close</button>
-    </div>
   </div>
 </div>
 <script>
@@ -593,9 +615,7 @@ $CSRF = csrf_token();
   // Clear button function
   function clearFilters(e) {
       if (e) e.preventDefault();
-      
       // Reset inputs
-      queryInput.value = '';
       rankSelect.value = '';
       deptSelect.value = '';
       
@@ -654,7 +674,6 @@ $CSRF = csrf_token();
   rankSelect.addEventListener('change', () => fetchResults(1));
   deptSelect.addEventListener('change', () => fetchResults(1));
   
-  
   // Attach pagination events
   function attachPaginationEvents() {
     const links = document.querySelectorAll('.page-btn');
@@ -687,7 +706,7 @@ $CSRF = csrf_token();
     createFacultyModal.hidden = true;
   }
   document.getElementById('create-faculty').addEventListener('click', function() {
-    openFacultyModal();  // Call without payload for create mode
+    openFacultyModal(); 
   });
       createFacultyModal.addEventListener('click', e => {
     if (e.target.dataset.close) closeFacultyModal();
@@ -752,30 +771,30 @@ $CSRF = csrf_token();
 
   modal.addEventListener('click', e=>{ if (e.target.dataset.close) close(); });
   window.addEventListener('keydown', e=>{ if (!modal.hidden && e.key === 'Escape') close(); });
+//Error Modal
+  (function(){
+    const errorModal = document.getElementById('errorModal');
+    const messageEl = document.getElementById('errorModalMessage');
+    
+    const flashError = '<?= htmlspecialchars(addslashes($flashError ?? '')); ?>'; 
 
-(function(){
-  const errorModal = document.getElementById('errorModal');
-  const messageEl = document.getElementById('errorModalMessage');
-  
-  const flashError = '<?= htmlspecialchars(addslashes($flashError ?? '')); ?>'; 
-
-  if (flashError) {
-    messageEl.textContent = flashError;
-    errorModal.hidden = false;
-  }
-  
-  errorModal.addEventListener('click', e => { 
-    if (e.target.dataset.close) {
-      errorModal.hidden = true; 
+    if (flashError) {
+      messageEl.textContent = flashError;
+      errorModal.hidden = false;
     }
-  });
+    
+    errorModal.addEventListener('click', e => { 
+      if (e.target.dataset.close) {
+        errorModal.hidden = true; 
+      }
+    });
 
-  window.addEventListener('keydown', e => { 
-    if (!errorModal.hidden && e.key === 'Escape') { 
-      errorModal.hidden = true; 
-    }
-  });
-})();
+    window.addEventListener('keydown', e => { 
+      if (!errorModal.hidden && e.key === 'Escape') { 
+        errorModal.hidden = true; 
+      }
+    });
+  })();
 </script>
 
 <?php require_once __DIR__ . '/../../partials/site_footer.php'; ?>
