@@ -90,7 +90,7 @@
                             data-dept="' . htmlspecialchars($row['DEPT_ID'], ENT_QUOTES) . '"
                         >Edit</button>
 
-                        <form method="post"  action="' . $base . '" onsubmit="return confirm(\'Delete faculty?\');" style="display:inline">
+                        <form method="post"  action="' . $base . '" onsubmit="return confirm(\'Are you sure you want to delete this faculty?\');" style="display:inline">
                             <input type="hidden" name="csrf" value="' . $CSRF . '">
                             <input type="hidden" name="action" value="delete">
                             <input type="hidden" name="FACULTY_ID" value="' . (int)$row['FACULTY_ID'] . '">

@@ -15,7 +15,7 @@
         
     $sortMap = [
     'title_asc'  => 'RESEARCH_TITLE ASC, RESEARCH_ID DESC',
-    'title_desc'  => 'RESEARCH_TITLE desc, RESEARCH_ID DESC',
+    'title_desc'  => 'RESEARCH_TITLE DESC, RESEARCH_ID DESC',
     'status_asc' => 'RESEARCH_STATUS ASC, RESEARCH_TITLE ASC',
     'start_desc' => 'RESEARCH_STARTDATE DESC, RESEARCH_ID DESC',
     'start_asc'  => 'RESEARCH_STARTDATE ASC, RESEARCH_ID ASC',
@@ -83,7 +83,7 @@
                             data-status="' . htmlspecialchars($row['RESEARCH_STATUS'], ENT_QUOTES) . '"
                         >Edit</button>
 
-                        <form method="post" action="' . $base . '" onsubmit="return confirm(\'Delete research?\');" style="display:inline">
+                        <form method="post" action="' . $base . '" onsubmit="return confirm(\'Are you sure you want to delete this research?\');" style="display:inline">
                             <input type="hidden" name="csrf" value="' . $CSRF . '">
                             <input type="hidden" name="action" value="delete">
                             <input type="hidden" name="RESEARCH_ID" value="' . (int)$row['RESEARCH_ID'] . '">

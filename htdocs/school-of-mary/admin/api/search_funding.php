@@ -84,7 +84,7 @@
                             data-amount="' . htmlspecialchars((string)$row['FUNDING_AMOUNT'], ENT_QUOTES) . '"
                             data-date="'.htmlspecialchars((string)$row['DATE_FUNDED'], ENT_QUOTES) .'"
                           >Edit</button> 
-                        <form method="post" action="' . $base . '" onsubmit="return confirm(\'Delete this record?\');" style="display:inline">
+                        <form method="post" action="' . $base . '" onsubmit="return confirm(\'Are you sure you want to delete this funding?\');" style="display:inline">
                             <input type="hidden" name="csrf" value="' . $CSRF . '">
                             <input type="hidden" name="action" value="delete">
                             <input type="hidden" name="FUNDING_ID" value="' . (int)$row['FUNDING_ID'] . '">

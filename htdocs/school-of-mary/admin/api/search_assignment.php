@@ -95,7 +95,7 @@
                             data-date="' . htmlspecialchars($row['DATE_ASSIGNED'], ENT_QUOTES) . '"
                         >Edit</button>
 
-                        <form method="post" action="' . $base . '" onsubmit="return confirm(\'Delete this record?\');" style="display:inline">
+                        <form method="post" action="' . $base . '" onsubmit="return confirm(\'Are you sure you want to delete this assignment?\');" style="display:inline">
                             <input type="hidden" name="csrf" value="' . $CSRF . '">
                             <input type="hidden" name="action" value="delete">
                             <input type="hidden" name="ASSIGNMENT_ID" value="' . (int)$row['ASSIGNMENT_ID'] . '">

@@ -87,8 +87,6 @@ if ($action === 'update') {
 
 if ($action === 'delete') {
   if (!v_int($_POST['RESEARCH_ID'] ?? '')) guardFail('Missing ID');
-  
-  
   try {
     $pdo->prepare("DELETE FROM RESEARCH WHERE RESEARCH_ID=?")->execute([$_POST['RESEARCH_ID']]);
 
