@@ -77,7 +77,7 @@
                     <td class="actions-cell">
                         <button
                             type="button"
-                            class="btn small js-edit"
+                            class="btn small btn-edit js-edit"
                             data-id="' . (int)$row['FUNDING_ID'] . '"
                             data-research="' . (int)$row['RESEARCH_ID'] . '"
                             data-agency="' . (int)$row['AGENCY_ID'] . '"
@@ -88,7 +88,7 @@
                             <input type="hidden" name="csrf" value="' . $CSRF . '">
                             <input type="hidden" name="action" value="delete">
                             <input type="hidden" name="FUNDING_ID" value="' . (int)$row['FUNDING_ID'] . '">
-                            <button class="btn small" style="background:#b91c1c;border-color:#b91c1c">Delete</button>
+                            <button class="btn small btn-delete">Delete</button>
                         </form>
                     </td>
                 </tr>';

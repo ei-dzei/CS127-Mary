@@ -71,7 +71,7 @@
                     <input type="hidden" name="csrf" value="' . csrf_token() . '">
                     <input type="hidden" name="action" value="delete">
                     <input type="hidden" name="AGENCY_ID" value="' .  (int)$row['AGENCY_ID'] . '">
-                    <button class="btn small btn-delete" style="background:#b91c1c;border-color:#b91c1c">Delete</button>
+                    <button class="btn small btn-delete">Delete</button>
                     </form>
                 </td>
                 </tr>';

@@ -99,7 +99,7 @@
                             <input type="hidden" name="csrf" value="' . $CSRF . '">
                             <input type="hidden" name="action" value="delete">
                             <input type="hidden" name="ASSIGNMENT_ID" value="' . (int)$row['ASSIGNMENT_ID'] . '">
-                            <button class="btn small btn-delete" style="background:#b91c1c;border-color:#b91c1c">Delete</button>
+                            <button class="btn small btn-delete">Delete</button>
                         </form>
                     </td>
                 </tr>';
