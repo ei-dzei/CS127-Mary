@@ -21,9 +21,9 @@
                 <div class="footer__col">
                     <h4 class="footer__heading">Contact Us</h4>
                     <ul class="footer__list footer__contact">
-                        <li><i class="icon">📞</i> (02) 8555-1234</li>
-                        <li><i class="icon">📧</i> info@somary.edu.ph</li>
-                        <li><i class="icon">📍</i> 123 Research Lane, City, 1000</li>
+                        <li><i class="icon">📞</i> (02) 0000-1234</li>
+                        <li><i class="icon">📧</i> schoolofmary@university.edu</li>
+                        <li><i class="icon">📍</i> 127 TBA Section, Mary City, 0127</li>
                         <li><i class="icon">🕒</i> Mon - Fri: 8:00 AM - 5:00 PM</li>
                     </ul>
                 </div>

@@ -427,7 +427,7 @@ require_once __DIR__ . '/../partials/site_header.php';
                 <tr>
                   <td><?= $rankStart + $idx; ?></td>
                   <td>
-                    <a href="<?= app_url('/public/research.php'); ?>?id=<?= (int)$tr['RESEARCH_ID']; ?>">
+                    <a href="<?= app_url('/../public/research.php'); ?>?id=<?= (int)$tr['RESEARCH_ID']; ?>">
                       <?= htmlspecialchars($tr['RESEARCH_TITLE']); ?>
                     </a>
                   </td>
@@ -715,7 +715,7 @@ require_once __DIR__ . '/../partials/site_header.php';
   
   // FIX: Use a relative path to ensure we leave the admin folder correctly
   // This assumes your structure is: /admin/dashboard.php and /public/research.php
-  const RESEARCH_DETAILS_URL = "../public/research.php"; 
+  const RESEARCH_DETAILS_URL = "/../public/research.php"; 
 
   // --- ELEMENTS ---
   const el = {
