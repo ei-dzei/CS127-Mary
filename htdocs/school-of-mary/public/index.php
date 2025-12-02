@@ -14,10 +14,16 @@ require_once __DIR__ . '/../partials/site_header.php';
            style="background: url('bg1.png') center/cover no-repeat;">
     <div class="hero__overlay"></div>
     <div class="hero__content">
-      <div class="hero__icon" aria-hidden="true"><i class="bi bi-mortarboard-fill"></i></div>
+      <div class="hero__logo-wrapper" >
+          <img class="brand__logo" 
+               src="<?= BASE_URL ?>/public/logo.png" 
+               alt="School of Mary Logo" 
+               onerror="this.style.display='none'"
+               style="width: 230px; height: auto; display: block; margin: 0 auto; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));">
+      </div>
       <h1 class="hero__title">School of Mary Faculty and Research Portal</h1>
       <p class="hero__subtitle">
-        Discover faculty expertise, funded projects, and academic impact.
+        Excellence in Research and Innovation
       </p>
       <div class="hero__actions">
         <a href="<?= BASE_URL ?>/public/faculty.php" class="btn">Get Started</a>
@@ -30,13 +36,13 @@ require_once __DIR__ . '/../partials/site_header.php';
            style="background: url('bg2.png') center/cover no-repeat;">
     <div class="hero__overlay"></div>
     <div class="hero__content">
-      <div class="hero__icon" aria-hidden="true"><i class="bi bi-search"></i></div>
-      <h2 class="hero__title">Explore Ongoing & Completed Studies</h2>
+      <div class="hero__icon" aria-hidden="true"><i class="bi bi-people-fill"></i></div>
+      <h2 class="hero__title">Discover Faculty and their Academic Contributions</h2>
       <p class="hero__subtitle">
-        Filter by status and date range, and dive into details on funding and collaborators.
+        Discover faculty expertise, funded research projects, and their academic impact.
       </p>
       <div class="hero__actions">
-        <a href="<?= BASE_URL ?>/public/research.php" class="btn">View Studies</a>
+        <a href="<?= BASE_URL ?>/public/faculty.php" class="btn">Explore Faculty</a>
       </div>
     </div>
   </article>
@@ -45,13 +51,13 @@ require_once __DIR__ . '/../partials/site_header.php';
            style="background: url('bg3.png') center/cover no-repeat;">
     <div class="hero__overlay"></div>
     <div class="hero__content">
-      <div class="hero__icon" aria-hidden="true"><i class="bi bi-people-fill"></i></div>
+      <div class="hero__icon" aria-hidden="true"><i class="bi bi-journal-bookmark-fill"></i></div>
       <h2 class="hero__title">Funding & Partnerships</h2>
       <p class="hero__subtitle">
-        See agencies supporting our research and how resources are allocated.
+        Browse agencies supporting our research and how resources are allocated.
       </p>
       <div class="hero__actions">
-        <a href="<?= BASE_URL ?>/public/research.php" class="btn">View Studies</a>
+        <a href="<?= BASE_URL ?>/public/research.php" class="btn">Explore Research</a>
       </div>
     </div>
   </article>
@@ -70,8 +76,6 @@ require_once __DIR__ . '/../partials/site_header.php';
     <p class="feature-text">
       The <strong>School of Mary Faculty and Research Portal</strong> provides a unified system for managing research,
       faculty information, funding records, and agencies involved in academic collaboration.
-      While the general public can browse and view data, administrators can securely log in to manage
-      records, ensuring accurate and up-to-date information.
     </p>
   </div>
 </section>
@@ -82,7 +86,6 @@ require_once __DIR__ . '/../partials/site_header.php';
     <h2 class="feature-title">Admin Access</h2>
     <p class="feature-text">
       Authorized staff may log in to the Admin Dashboard to view and manage database records in real time.
-      The dashboard includes tools for CRUD operations, CSV imports/exports, and printable audit logs.
     </p>
     <div class="feature-actions">
       <a href="<?= BASE_URL ?>/admin/login.php" class="btn btn--primary">Go to Admin Login</a>
