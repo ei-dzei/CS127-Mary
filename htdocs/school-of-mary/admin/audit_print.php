@@ -1,6 +1,6 @@
 <?php
 // File: admin/audit_print.php
-$pageTitle = 'Audit Log (Print View)';
+$pageTitle = 'Audit Log';
 
 require_once __DIR__ . '/../partials/init.php';
 
