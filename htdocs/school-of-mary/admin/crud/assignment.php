@@ -68,8 +68,8 @@ if ($action === 'delete') {
 
 /* ------------------------- Lookups ------------------------- */
 $fac   = $pdo->query("SELECT FACULTY_ID, FACULTY_LNAME, FACULTY_FNAME FROM FACULTY ORDER BY FACULTY_LNAME, FACULTY_FNAME")->fetchAll(PDO::FETCH_ASSOC);
-$res   = $pdo->query("SELECT RESEARCH_ID, RESEARCH_TITLE FROM RESEARCH ORDER BY RESEARCH_STARTDATE DESC")->fetchAll(PDO::FETCH_ASSOC);
-$roles = $pdo->query("SELECT ROLE_ID, ROLE_DESCRIPTION FROM ROLE ORDER BY ROLE_ID")->fetchAll(PDO::FETCH_ASSOC);
+$res   = $pdo->query("SELECT RESEARCH_ID, RESEARCH_TITLE FROM RESEARCH ORDER BY RESEARCH_TITLE")->fetchAll(PDO::FETCH_ASSOC);
+$roles = $pdo->query("SELECT ROLE_ID, ROLE_DESCRIPTION FROM ROLE ORDER BY ROLE_DESCRIPTION")->fetchAll(PDO::FETCH_ASSOC);
 
 /* ------------------------- Filters + Sorting + Pagination ------------------------- */
 $q      = trim($_GET['q'] ?? '');
