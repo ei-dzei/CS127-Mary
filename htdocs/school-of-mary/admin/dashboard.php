@@ -30,21 +30,31 @@ function faculty_label(PDO $pdo, int $facultyId): string {
   return $name !== '' ? $name : 'Faculty #'.$facultyId;
 }
 
-/** Fetch a page of audit rows with robust column aliasing */
-function fetch_audit_page(PDO $pdo, int $limit, int $offset): array {
+/** Fetch a page of audit rows with robust column aliasing AND SORTING */
+function fetch_audit_page(PDO $pdo, int $limit, int $offset, string $sortMode = 'newest'): array {
   $idCandidates   = ['ID', 'id', 'log_id', 'audit_id'];
   $timeCandidates = ['CREATED_AT', 'created_at', 'logged_at', 'timestamp', 'createdOn'];
 
   foreach ($idCandidates as $idCol) {
     foreach ($timeCandidates as $tCol) {
       try {
+        // Determine Order Clause based on Sort Mode
+        $orderSql = "{$idCol} DESC"; // Default
+        switch ($sortMode) {
+            case 'oldest':      $orderSql = "{$idCol} ASC"; break;
+            case 'actor_asc':   $orderSql = "ACTOR ASC"; break;
+            case 'actor_desc':  $orderSql = "ACTOR DESC"; break;
+            case 'action_asc':  $orderSql = "ACTION_ENUM ASC"; break;
+            case 'table_asc':   $orderSql = "TABLE_NAME ASC"; break;
+        }
+
         $sql = "
           SELECT
             {$idCol} AS ID,
             {$tCol}  AS CREATED_AT,
             ACTOR, ACTION_ENUM, TABLE_NAME, PK_VALUE
           FROM AUDIT_LOG
-          ORDER BY {$idCol} DESC
+          ORDER BY {$orderSql}
           LIMIT :lim OFFSET :off
         ";
         $stmt = $pdo->prepare($sql);
@@ -57,6 +67,7 @@ function fetch_audit_page(PDO $pdo, int $limit, int $offset): array {
   }
   return [];
 }
+
 function count_audit(PDO $pdo): int {
   try {
     return (int)$pdo->query("SELECT COUNT(*) FROM AUDIT_LOG")->fetchColumn();
@@ -113,12 +124,15 @@ $tf_stmt->bindValue(':off', $tf_offset, PDO::PARAM_INT);
 $tf_stmt->execute();
 $topFaculty = $tf_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-/* -------------------- Audit (paginated) -------------------- */
+/* -------------------- Audit (paginated + sorted) -------------------- */
 $log_page   = get_page('log_page');
+$log_sort   = $_GET['log_sort'] ?? 'newest'; // Catch the sort parameter
 $log_total  = count_audit($pdo);
 $log_pages  = max(1, (int)ceil($log_total / $PAGE_SIZE));
 $log_offset = ($log_page - 1) * $PAGE_SIZE;
-$audit      = fetch_audit_page($pdo, $PAGE_SIZE, $log_offset);
+
+// Pass $log_sort to the fetch function
+$audit      = fetch_audit_page($pdo, $PAGE_SIZE, $log_offset, $log_sort);
 
 require_once __DIR__ . '/../partials/site_header.php';
 ?>
@@ -140,9 +154,8 @@ require_once __DIR__ . '/../partials/site_header.php';
     padding: 22px;
   }
   
-  /* NEW STYLE: Welcome Message */
   .welcome-message {
-    color: var(--color-secondary, #f0b800); /* Use a secondary/accent color */
+    color: var(--color-secondary, #f0b800); 
     font-size: 1.1rem;
     font-weight: 600;
     margin: 0 0 4px;
@@ -160,35 +173,31 @@ require_once __DIR__ . '/../partials/site_header.php';
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    /* --- RULE 1: Center items horizontally (for the button) --- */
     align-items: center; 
   }
   .kpi-col { grid-column: span 4; }
   
-  /* NEW RULE: Container for text content (Icon, Title, Value) */
   .kpi-card > div:first-child { 
     width: 100%; 
-    text-align: center; /* Center the icon, title, and value */
+    text-align: center;
     margin-bottom: 10px;
   }
   
-  /* Bootstrap Icon Styles */
   .kpi-emoji { 
-    font-size: 32px; /* Slightly larger for Bootstrap Icons */
+    font-size: 32px;
     line-height: 1;
-    color: var(--color-primary, #1e4073); /* Give icons color for visibility */
+    color: var(--color-primary, #1e4073);
   }
   .kpi-emoji i { vertical-align: middle; }
   
   .kpi-title { font-weight: 700; margin-top: 6px; }
   .kpi-value { font-size: 2rem; font-weight: 800; margin-top: 6px; }
 
-  /* --- UPDATED RULE 2: Make the link span full width and center its text --- */
   .btn-link {
-    align-self: stretch; /* Stretch the link button to fill the card width */
-    display: flex; /* Change to flex for content centering */
-    justify-content: center; /* Center the text inside the button */
-    padding: 8px 10px; /* Adjusted padding for a better look */
+    align-self: stretch;
+    display: flex;
+    justify-content: center;
+    padding: 8px 10px;
     border-radius: 8px;
     background: var(--color-primary);
     color: #fff; 
@@ -207,14 +216,70 @@ require_once __DIR__ . '/../partials/site_header.php';
     padding: 15px;
   }
   #research-section, #faculty-section, #audit-section{ scroll-margin-top: 100px;}
+  
+  /* Header for Sections */
   .section-header {
-    display:flex; align-items:center; gap:10px; margin-bottom:10px;
+    display:flex; 
+    align-items:center; 
+    gap:10px; 
+    margin-bottom:10px;
+    justify-content: space-between; 
   }
+  .section-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+  }
+
   .section-emoji {
     font-size: 24px;
-    color: #444; /* Standard icon color */
+    color: #444; 
   }
   .section-emoji i { vertical-align: middle; }
+
+  /* Sort Button and Dropdown CSS */
+  .sort-wrapper {
+      position: relative;
+  }
+  .sort-toggle-btn {
+    display: flex; align-items: center; justify-content: center;
+    background: transparent; border: 1px solid #d1d5db;
+    border-radius: 6px; cursor: pointer; color: #4b5563;
+    width: 36px; height: 36px; padding: 0;
+    transition: all .2s;
+  }
+  .sort-toggle-btn:hover { background: #f3f4f6; color: #1f2937; }
+  
+  .sort-dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 6px;
+      width: 180px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      z-index: 50;
+      padding: 6px;
+  }
+  .sort-dropdown-menu.show { display: block; }
+
+  .sort-option {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 8px 12px;
+      border-radius: 6px;
+      color: #374151;
+      text-decoration: none;
+      font-size: 0.9rem;
+      box-sizing: border-box;
+  }
+  .sort-option:hover { background: #f3f4f6; }
+  .sort-option.active { background: #eff6ff; color: #1d4ed8; font-weight: 600; }
+
 
   .list {
     width:100%;
@@ -232,9 +297,9 @@ require_once __DIR__ . '/../partials/site_header.php';
   .dual-column-layout {
     grid-column: span 12;
     display: grid;
-    grid-template-columns: 2fr 1fr; /* 2 parts for content, 1 part for calendar */
+    grid-template-columns: 2fr 1fr;
     gap: 16px;
-    margin-top: 16px; /* Added separation from KPI cards */
+    margin-top: 16px;
   }
   .research-col { grid-column: span 1; }
   .calendar-col { grid-column: span 1; }
@@ -242,73 +307,45 @@ require_once __DIR__ . '/../partials/site_header.php';
   @media (max-width: 960px) {
     .kpi-col { grid-column: span 12; }
     .dual-column-layout {
-      grid-template-columns: 1fr; /* Stack on smaller screens */
+      grid-template-columns: 1fr;
     }
     .research-col, .calendar-col { grid-column: span 1; }
   }
   
   /* Calendar Compact Overrides */
-  .calendar-header .btn.small {
-    padding: 4px 8px; /* Smaller buttons */
-  }
-  .calendar-header h2 {
-    font-size: 1rem; /* Smaller month name */
-  }
-  .calendar-grid-header > div {
-    padding: 5px 3px;
-    font-size: 0.8rem; /* Smaller day names */
-  }
-  .calendar-day {
-    min-height: 55px; /* Significantly smaller cells */
-    padding: 3px;
-  }
-  .calendar-day-number {
-    font-size: 0.9rem; /* Smaller day number */
-    margin-bottom: 2px;
-  }
-  .calendar-event {
-    font-size: 0.7rem; /* Tiny event text */
-    padding: 1px 2px;
-  }
+  .calendar-header .btn.small { padding: 4px 8px; }
+  .calendar-header h2 { font-size: 1rem; }
+  .calendar-grid-header > div { padding: 5px 3px; font-size: 0.8rem; }
+  .calendar-day { min-height: 55px; padding: 3px; }
+  .calendar-day-number { font-size: 0.9rem; margin-bottom: 2px; }
+  .calendar-event { font-size: 0.7rem; padding: 1px 2px; }
   
-  /* NEW STYLE: Live Clock */
+  /* Live Clock */
   #live-clock {
     display: block;
     text-align: center;
     font-size: 1.4rem;
     font-weight: 700;
-    color: var(--color-primary); /* Use a strong color for the time */
+    color: var(--color-primary); 
     padding-top: 10px;
     margin-top: 10px;
     border-top: 1px solid #eee;
   }
 
-  .kpi-card,
-  .section-card,
-  .hero-card {
+  .kpi-card, .section-card, .hero-card {
     transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
   }
-  .kpi-card:hover,
-  .section-card:hover,
-  .hero-card:hover {
+  .kpi-card:hover, .section-card:hover, .hero-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 18px rgba(0,0,0,.08);
     border-color: #dfe7f3;
   }
-  .btn-link {
-    transition: filter .2s ease, transform .06s ease, box-shadow .15s ease;
-  }
+  .btn-link { transition: filter .2s ease, transform .06s ease, box-shadow .15s ease; }
   .btn-link:hover { filter: brightness(.94); box-shadow: 0 4px 10px rgba(0,0,0,.06); }
   .btn-link:active { transform: translateY(1px); }
   .list tr { transition: background-color .12s ease; }
   .list tbody tr:hover { background: #f7fbff; }
-  .btn-link:focus, .page-btn:focus {
-    outline: 2px solid #234b7a;
-    outline-offset: 2px;
-  }
-  .kpi-card:focus-within, .section-card:focus-within {
-    box-shadow: 0 0 0 2px #c7d5ef inset, 0 6px 18px rgba(0,0,0,.08);
-  }
+  
   @media (prefers-reduced-motion: reduce) {
     .kpi-card, .section-card, .hero-card,
     .btn-link, .page-btn, .list tr { transition: none !important; }
@@ -377,12 +414,13 @@ require_once __DIR__ . '/../partials/site_header.php';
       <a class="btn-link" target="_blank" href="<?= app_url('/admin/audit_print.php'); ?>">Open Print View</a>
     </div>
 
-    <!-- Top Research by Total Funding -->
     <div class="dual-column-layout">
       <div class="section-card research-col" id="research-section">
         <div class="section-header">
-          <div class="section-emoji"><i class="bi bi-trophy"></i></div>
-          <h3 style="margin:0;">Top Research by Total Funding</h3>
+            <div class="section-header-left">
+              <div class="section-emoji"><i class="bi bi-trophy"></i></div>
+              <h3 style="margin:0;">Top Research by Funding</h3>
+            </div>
         </div>
         <?php if (!$topResearch): ?>
           <div class="muted">No data.</div>
@@ -413,12 +451,12 @@ require_once __DIR__ . '/../partials/site_header.php';
             </tbody>
           </table>
           
-          <!-- Pagination INSIDE the section-card -->
           <div class="pagination">
             <?php
               $base  = app_url('/admin/dashboard.php');
-              $qs_tr = function($p) use ($tf_page, $log_page) {
-                return 'tr_page='.$p.'&tf_page='.$tf_page.'&log_page='.$log_page;
+              // Include current log_sort in other paginations too to preserve state
+              $qs_tr = function($p) use ($tf_page, $log_page, $log_sort) {
+                return 'tr_page='.$p.'&tf_page='.$tf_page.'&log_page='.$log_page.'&log_sort='.$log_sort;
               };
             ?>
             <?php if ($tr_page > 1): ?>
@@ -433,7 +471,6 @@ require_once __DIR__ . '/../partials/site_header.php';
                 $tr_start = max(1, $tr_end - $tr_maxPage + 1);
               } 
             ?>
-            <!-- 1 + ...  -->
             <?php if ($tr_start > 1): ?>
               <a href="<?= $base.'?'.$qs_tr(1); ?>#research-section" class="page-btn" >1</a>
               <?php if ($tr_start > 3): ?>
@@ -447,7 +484,7 @@ require_once __DIR__ . '/../partials/site_header.php';
             <?php for ($i = $tr_start; $i <= $tr_end; $i++): ?>
               <a class="page-btn <?= $i == $tr_page ? 'active' : '' ?>" href="<?= $base.'?'.$qs_tr($i); ?>#research-section"><?= $i ?></a>
             <?php endfor; ?>
-            <!-- ... + lastPage -->
+
             <?php if ($tr_end < $tr_pages): ?>
               <?php if ($tr_end == $tr_pages - 2):?>
                 <a href="<?= $base.'?'.$qs_tr($tr_pages - 1); ?>#research-section" class="page-btn" > <?=$tr_pages - 1?></a>
@@ -464,11 +501,12 @@ require_once __DIR__ . '/../partials/site_header.php';
         <?php endif; ?>  
       </div>
 
-      <!-- Calendar Col -->
       <div class="section-card calendar-col">
         <div class="section-header">
-            <div class="section-emoji"><i class="bi bi-calendar-check"></i></div>
-            <h3 style="margin:0;">Calendar</h3>
+            <div class="section-header-left">
+                <div class="section-emoji"><i class="bi bi-calendar-check"></i></div>
+                <h3 style="margin:0;">Calendar</h3>
+            </div>
         </div>
         
         <div id="calendar-app" class="panel" style="padding: 0; border: none; box-shadow: none;">
@@ -479,13 +517,7 @@ require_once __DIR__ . '/../partials/site_header.php';
             </div>
             
             <div class="calendar-grid-header">
-                <div>S</div>
-                <div>M</div>
-                <div>T</div>
-                <div>W</div>
-                <div>T</div>
-                <div>F</div>
-                <div>S</div>
+                <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
             </div>
 
             <div id="calendar-days" class="calendar-grid">
@@ -498,8 +530,10 @@ require_once __DIR__ . '/../partials/site_header.php';
     
     <div class="section-card" id="faculty-section">
       <div class="section-header">
-        <div class="section-emoji"><i class="bi bi-people"></i></div>
-        <h3 style="margin:0;">Top Faculty by Total Assignments</h3>
+        <div class="section-header-left">
+            <div class="section-emoji"><i class="bi bi-people"></i></div>
+            <h3 style="margin:0;">Top Faculty by Assignments</h3>
+        </div>
       </div>
       <?php if (!$topFaculty): ?>
         <div class="muted">No data.</div>
@@ -533,8 +567,8 @@ require_once __DIR__ . '/../partials/site_header.php';
         <div class="pagination">
           <?php
             $base  = app_url('/admin/dashboard.php');
-            $qs_tf = function($p) use ($tr_page, $log_page) {
-              return 'tr_page='.$tr_page.'&tf_page='.$p.'&log_page='.$log_page;
+            $qs_tf = function($p) use ($tr_page, $log_page, $log_sort) {
+              return 'tr_page='.$tr_page.'&tf_page='.$p.'&log_page='.$log_page.'&log_sort='.$log_sort;
             };
           ?>
           <?php if ($tf_page > 1): ?>
@@ -549,7 +583,6 @@ require_once __DIR__ . '/../partials/site_header.php';
               $tf_start = max(1, $tf_end - $tf_maxPage + 1);
             } 
           ?>
-          <!-- 1 + ...  -->
           <?php if ($tf_start > 1): ?>
             <a href="<?= $base.'?'.$qs_tf(1); ?>#faculty-section" class="page-btn" >1</a>
             <?php if ($tf_start > 3): ?>
@@ -563,7 +596,7 @@ require_once __DIR__ . '/../partials/site_header.php';
           <?php for ($i = $tf_start; $i <= $tf_end; $i++): ?>
             <a class="page-btn <?= $i === $tf_page ? 'active' : '' ?>" href="<?= $base.'?'.$qs_tf($i); ?>#faculty-section"><?= $i ?></a>
           <?php endfor; ?>
-          <!-- ... + lastPage -->
+
           <?php if ($tf_end < $tf_pages): ?>
             <?php if ($tf_end == $tf_pages - 2):?>
               <a href="<?= $base.'?'.$qs_tf($tf_pages - 1); ?>#faculty-section" class="page-btn" > <?=$tf_pages - 1?></a>
@@ -582,9 +615,33 @@ require_once __DIR__ . '/../partials/site_header.php';
 
     <div class="section-card" id="audit-section">
       <div class="section-header">
-        <div class="section-emoji"><i class="bi bi-receipt"></i></div>
-        <h3 style="margin:0;">Live Activity</h3>
+        <div class="section-header-left">
+            <div class="section-emoji"><i class="bi bi-receipt"></i></div>
+            <h3 style="margin:0;">Live Activity</h3>
+        </div>
+        
+        <div class="sort-wrapper">
+             <button class="sort-toggle-btn" id="dash-sort-btn" title="Sort" type="button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 9l4 -4l4 4m-4 -4v14" /><path d="M21 15l-4 4l-4 -4m4 4v-14" /></svg>
+             </button>
+             
+             <div class="sort-dropdown-menu" id="dash-sort-menu">
+                 <?php
+                    // Helper to generate sort link (Resets log_page to 1)
+                    $buildSortUrl = function($sortKey) use ($tr_page, $tf_page) {
+                        return app_url('/admin/dashboard.php') . "?tr_page=$tr_page&tf_page=$tf_page&log_page=1&log_sort=$sortKey#audit-section";
+                    };
+                 ?>
+                 <a href="<?= $buildSortUrl('newest'); ?>" class="sort-option <?= $log_sort==='newest'?'active':''; ?>">Newest First</a>
+                 <a href="<?= $buildSortUrl('oldest'); ?>" class="sort-option <?= $log_sort==='oldest'?'active':''; ?>">Oldest First</a>
+                 <a href="<?= $buildSortUrl('actor_asc'); ?>" class="sort-option <?= $log_sort==='actor_asc'?'active':''; ?>">Actor (A-Z)</a>
+                 <a href="<?= $buildSortUrl('actor_desc'); ?>" class="sort-option <?= $log_sort==='actor_desc'?'active':''; ?>">Actor (Z-A)</a>
+                 <a href="<?= $buildSortUrl('action_asc'); ?>" class="sort-option <?= $log_sort==='action_asc'?'active':''; ?>">Action (A-Z)</a>
+                 <a href="<?= $buildSortUrl('table_asc'); ?>" class="sort-option <?= $log_sort==='table_asc'?'active':''; ?>">Table (A-Z)</a>
+             </div>
+        </div>
       </div>
+
       <?php if (!$audit): ?>
         <div class="muted">No audit entries yet.</div>
       <?php else: ?>
@@ -615,8 +672,9 @@ require_once __DIR__ . '/../partials/site_header.php';
         <div class="pagination">
           <?php
             $base   = app_url('/admin/dashboard.php');
-            $qs_log = function($p) use ($tr_page, $tf_page) {
-              return 'tr_page='.$tr_page.'&tf_page='.$tf_page.'&log_page='.$p;
+            // Include log_sort in pagination link to preserve sort order
+            $qs_log = function($p) use ($tr_page, $tf_page, $log_sort) {
+              return 'tr_page='.$tr_page.'&tf_page='.$tf_page.'&log_page='.$p.'&log_sort='.$log_sort;
             };
           ?>
           <?php if ($log_page > 1): ?>
@@ -631,7 +689,6 @@ require_once __DIR__ . '/../partials/site_header.php';
               $log_start = max(1, $log_end - $log_maxPage + 1);
             } 
           ?>
-          <!-- 1 + ...  -->
           <?php if ($log_start > 1): ?>
             <a href="<?= $base.'?'.$qs_log(1); ?>#audit-section" class="page-btn" >1</a>
             <?php if ($log_start > 3): ?>
@@ -645,7 +702,6 @@ require_once __DIR__ . '/../partials/site_header.php';
           <?php for ($i = $log_start; $i <= $log_end; $i++): ?>
             <a class="page-btn <?= $i === $log_page ? 'active' : '' ?>" href="<?= $base.'?'.$qs_log($i); ?>#audit-section"><?= $i ?></a>
           <?php endfor; ?>
-          <!-- ... + lastPage -->
           <?php if ($log_end < $log_pages): ?>
             <?php if ($log_end == $log_pages - 2): ?>
               <a href="<?= $base.'?'.$qs_log($log_pages - 1); ?>#audit-section" class="page-btn"><?= $log_pages - 1 ?></a>
@@ -674,14 +730,12 @@ require_once __DIR__ . '/../partials/site_header.php';
     ag:   document.getElementById('kpi-agencies'),
     fund: document.getElementById('kpi-funding'),
     asg:  document.getElementById('kpi-assignment'),
-    clock: document.getElementById('live-clock') // ADDED: Clock element
+    clock: document.getElementById('live-clock') 
   };
   function number(n){ return (Number(n)||0).toLocaleString(); }
   
-  // ADDED: Function to update the clock
   function updateClock() {
     const now = new Date();
-    // Format the time as HH:MM:SS AM/PM
     const timeString = now.toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit',
@@ -708,11 +762,26 @@ require_once __DIR__ . '/../partials/site_header.php';
     } catch(e){ /* silent */ }
   }
   
-  // Initial calls and interval setup
   refreshKPIs();
-  updateClock(); // Initial clock update
-  setInterval(refreshKPIs, 60000); // Keep KPI refresh
-  setInterval(updateClock, 1000); // ADDED: Update clock every second
+  updateClock();
+  setInterval(refreshKPIs, 60000); 
+  setInterval(updateClock, 1000); 
+
+  // Sort Dropdown Logic
+  const sortBtn = document.getElementById('dash-sort-btn');
+  const sortMenu = document.getElementById('dash-sort-menu');
+  
+  if(sortBtn && sortMenu) {
+      sortBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          sortMenu.classList.toggle('show');
+      });
+      document.addEventListener('click', (e) => {
+          if (!sortMenu.contains(e.target) && e.target !== sortBtn) {
+              sortMenu.classList.remove('show');
+          }
+      });
+  }
 
 })();
 </script>

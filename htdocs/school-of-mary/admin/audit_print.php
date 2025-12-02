@@ -1,65 +1,13 @@
 <?php
-// Printable audit log
+// File: admin/audit_print.php
 $pageTitle = 'Audit Log (Print View)';
 
 require_once __DIR__ . '/../partials/init.php';
+
+// Security Check
 if (!is_admin()) { redirect_to('/admin/login.php'); }
 
-// Resolve audit table PK/timestamp columns
-function audit_resolve_cols(PDO $pdo): array {
-  $idCandidates   = ['ID','id','log_id','audit_id'];
-  $timeCandidates = ['CREATED_AT','created_at','logged_at','timestamp','createdOn'];
-  foreach ($idCandidates as $idCol) {
-    foreach ($timeCandidates as $tCol) {
-      try {
-        $pdo->query("SELECT {$idCol} AS ID, {$tCol} AS CREATED_AT FROM AUDIT_LOG ORDER BY {$idCol} ASC LIMIT 1");
-        return [$idCol, $tCol];
-      } catch (Throwable $e) {}
-    }
-  }
-  return ['ID', 'CREATED_AT'];
-}
-[$AUDIT_ID, $AUDIT_TIME] = audit_resolve_cols($pdo);
-
-/* --- Filters --- */
-$actor  = trim($_GET['actor'] ?? '');
-$action = trim($_GET['action'] ?? '');
-$table  = trim($_GET['table'] ?? '');
-$from   = trim($_GET['from'] ?? '');
-$to     = trim($_GET['to'] ?? '');
-$page   = max(1, (int)($_GET['page'] ?? 1));
-$PAGE_SIZE = 100;
-$offset = ($page - 1) * $PAGE_SIZE;
-
-/* Named parameters only */
-$sqlBase = " FROM AUDIT_LOG WHERE 1=1 ";
-$params = [];
-if ($actor !== '')  { $sqlBase .= " AND ACTOR LIKE :actor";             $params[':actor'] = "%{$actor}%"; }
-if ($action !== '') { $sqlBase .= " AND ACTION_ENUM = :action";         $params[':action'] = $action; }
-if ($table !== '')  { $sqlBase .= " AND TABLE_NAME = :table";           $params[':table']  = $table; }
-if ($from  !== '')  { $sqlBase .= " AND DATE({$AUDIT_TIME}) >= :from";  $params[':from']   = $from; }
-if ($to    !== '')  { $sqlBase .= " AND DATE({$AUDIT_TIME}) <= :to";    $params[':to']     = $to; }
-
-/* Count */
-$stmtCnt = $pdo->prepare("SELECT COUNT(*) ".$sqlBase);
-$stmtCnt->execute($params);
-$total = (int)$stmtCnt->fetchColumn();
-$totalPages = max(1, (int)ceil($total / $PAGE_SIZE));
-
-/* Fetch page rows */
-$sql = "
-  SELECT {$AUDIT_ID} AS ID, {$AUDIT_TIME} AS CREATED_AT, ACTOR, ACTION_ENUM, TABLE_NAME, PK_VALUE
-  $sqlBase
-  ORDER BY {$AUDIT_ID} ASC
-  LIMIT :lim OFFSET :off
-";
-$stmt = $pdo->prepare($sql);
-foreach ($params as $k => $v) $stmt->bindValue($k, $v, PDO::PARAM_STR);
-$stmt->bindValue(':lim', $PAGE_SIZE, PDO::PARAM_INT);
-$stmt->bindValue(':off', $offset, PDO::PARAM_INT);
-$stmt->execute();
-$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+// Lookups for the Filter Dropdown
 $tables  = ['FACULTY','RESEARCH','AGENCY','FUNDING','ASSIGNMENT'];
 $actions = ['CREATE','UPDATE','DELETE','IMPORT'];
 
@@ -67,342 +15,299 @@ require_once __DIR__ . '/../partials/site_header.php';
 ?>
 
 <style>
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.field label {
-  font-weight: 500;
-  color: #4b5563;
-}
+/* --- STYLES (Adapted from your Faculty.php) --- */
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field label { font-weight: 500; color: #4b5563; }
 .field .input { 
-  padding: 10px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  height: 38px; 
-  box-sizing: border-box;
+  padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; height: 38px; box-sizing: border-box;
 }
 
-/* --- SEARCH BAR AND TOGGLE STYLES (Full Width, Matching Look) --- */
+/* SEARCH BAR CONTAINER */
 .searchbox {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 15px;
-  background: #fff;
-  border: 1px solid #c7d2e4;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  flex: 1; 
-  box-sizing: border-box;
-  width: auto;
-  height: 57px;
+  display: flex; align-items: center; gap: 10px; padding: 8px 15px;
+  background: #fff; border: 1px solid #c7d2e4; border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex: 1; box-sizing: border-box;
+  width: auto; height: 57px;
 }
-.searchbox svg:first-child {
-  color: #6b7280;
-}
+.searchbox svg:first-child { color: #6b7280; }
 .searchbox input[type="search"] { 
-  flex-grow: 1;
-  border: none;
-  padding: 0;
-  height: 1.5em; 
-  font-size: 1rem;
+  flex-grow: 1; border: none; padding: 0; height: 1.5em; font-size: 1rem;
 }
-/* FILTER */
-.filterbar {
-  position: relative; 
-  z-index: 10;
-  overflow: visible;
+
+/* BUTTONS */
+.filter-toggle-btn, .sort-toggle-btn {
+  display: flex; align-items: center; justify-content: center;
+  padding: 0; background: transparent; border: none; cursor: pointer; color: #4b5563; 
 }
-.filter-toggle-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: #4b5563; 
+.filter-toggle-btn:hover, .sort-toggle-btn:hover { color: #1f2937; }
+
+.sort-toggle-btn {
+  border: 1px solid #c7d2e4; border-radius: 8px; width: 40px; height: 57px; flex-shrink: 0;
 }
-.filter-toggle-btn:hover {
-  color: #1f2937;
+.sort-toggle-btn:hover { background: rgba(0, 0, 0, 0.05); border-radius: 6px; }
+
+/* DROPDOWNS */
+#filter-dropdown, #sort-dropdown {
+  display: none; position: absolute; top: 100%; right: 0; margin-top: 8px;
+  background: #fff; border: 1px solid #c7d2e4; border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 1000; padding: 15px;
 }
-#filter-dropdown {
-  display: none; 
-  position: absolute;
-  top: 100%; 
-  right: 0; 
-  margin-top: 8px;
-  width: min(100%, 550px); 
-  background: #fff;
-  border: 1px solid #c7d2e4;
-  border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-  z-index: 9999;
-  padding: 15px;
-}
-#filter-options {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr); 
-  gap: 10px;
-  margin-bottom: 15px;
-}
+#filter-dropdown { width: min(100%, 550px); }
+#sort-dropdown { width: min(100%, 200px); }
+
+#filter-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
+
+/* SORT RADIO BUTTONS */
+#sort-dropdown fieldset { border: none; padding: 0; margin: 0; }
+#sort-dropdown fieldset legend { font-weight: 600; margin-bottom: 10px; color: #4b5563; }
+#sort-dropdown fieldset > div { display: flex; align-items: center; gap: 8px; padding: 6px 0; }
+#sort-dropdown input[type="radio"] { transform: scale(1.5); cursor: pointer; margin: 0; }
+#sort-dropdown label { cursor: pointer; margin: 0; }
+
 /* CLEAR BUTTON */
-.clear-btn-container {
-  text-align: left;
-}
 .clear-btn-container .btn-primary {
-  background-color: #0b5394;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  width: 100%;
+  background-color: #0b5394; color: white; padding: 10px 15px; border: none;
+  border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%;
 }
-.clear-btn-container .btn-primary:hover {
-  background-color: #0b5394;
-}
-.panel.fade-in:first-of-type {
-  position: relative;
-  z-index: 5000;
-}
-/* === Buttons === */
-.btn-action{
+
+/* PRINT BUTTON STYLE */
+.btn-action {
   display:inline-flex; align-items:center; justify-content:center;
   min-width:130px; height:40px; padding:0 16px;
-  border-radius:8px; border:1px solid var(--color-accent);
+  border-radius:8px; border:1px solid #0b5394;
   font-weight:600; text-decoration:none; cursor:pointer;
-  transition:background .2s ease, color .2s ease, transform .06s ease, box-shadow .15s ease;
+  background:#0b5394; color:#fff;
 }
-.btn-action:active{ transform:translateY(1px); }
-.btn-primary{ background:var(--color-accent); color:#fff; }
-.btn-primary:hover{ filter:brightness(.94); box-shadow:0 4px 10px rgba(0,0,0,.06); }
-.btn-ghost{ background:#fff; color:var(--color-accent); border-color:rgba(11,83,148,.35); }
-.btn-ghost:hover{ background:rgba(11,83,148,.05); }
+.btn-action:hover { filter:brightness(.94); box-shadow:0 4px 10px rgba(0,0,0,.06); }
 
-.filter-bar .btn-action{ min-width:140px; }
-@media (max-width: 720px){ .filter-bar .btn-action{ width:100%; } }
-
-/* === Print View Optimization === */
+/* HIDE ELEMENTS WHEN PRINTING */
 @media print {
-  .panel.fade-in:first-child, 
-  .pagination,
-  #print-button-section { 
-    display: none !important;
-  }
-  body, .container {
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-  .panel.fade-in:last-child {
-    margin-top: 0 !important;
-  }
-  table {
-    page-break-inside: auto; 
-  }
-  tr {
-    page-break-inside: avoid; 
-    page-break-after: auto;
-  }
+  .crud-header-card, .filterbar, .pagination, .btn-action { display: none !important; }
+  body, .container { margin: 0 !important; padding: 0 !important; }
+  .panel { box-shadow: none; border: none; }
 }
+
+/* TABLE STYLING */
+.table-scroll table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.table-scroll th, .table-scroll td { padding: 10px; text-align: left; border-bottom: 1px solid #e5e7eb; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.table-scroll th:nth-child(1), .table-scroll td:nth-child(1) { width: 60px; } /* ID */
+.table-scroll th:nth-child(2), .table-scroll td:nth-child(2) { width: 180px; } /* Date */
 </style>
 
-<section class="panel fade-in">
+<section class="panel fade-in crud-header-card">
   <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; float:inline-end">
-    <button class="btn-action btn-primary" onclick="window.print()" style="min-width:160px;">
+    <button class="btn-action" onclick="window.print()" style="min-width:160px;">
       <span style="font-size:1.2em; margin-right:8px;">&#x1F5B6;&#xFE0F;</span> Print Audit Log
     </button>
   </div>
-  <h1 style="margin-bottom:8px;">Audit Log — Print View</h1>
+
+  <h1 style="margin-bottom:8px;">Audit Log</h1>
   <p class="muted" style="margin-bottom:10px;">Check changes made in database.</p>
-  <form method="get" class="filterbar">
+  
+  <form method="get" class="filterbar" onsubmit="return false;">
     <div class="searchbox">
       <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M10 18a8 8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/>
       </svg>
-      <input class="input" name="actor" value="<?= htmlspecialchars($actor); ?>" placeholder="Search actor..." />
-      <button class="filter-toggle-btn" id="filter-btn" title="Filter" type="button" >
+      <input class="input" type="search" name="actor" placeholder="Search actor..." autocomplete="off">
+      
+      <button class="filter-toggle-btn" id="filter-btn" title="Filter" type="button">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
         </svg>
       </button>
     </div>
+    
     <div id="filter-dropdown">
       <div id="filter-options">
-          <div class="field">
-            <label>Action</label>
-            <select class="input" name="action">
-              <option value="">All</option>
-              <?php foreach ($actions as $a): ?>
-                <option value="<?= $a; ?>"<?= $action===$a?' selected':''; ?>><?= $a; ?></option>
-              <?php endforeach; ?>
-            </select>
-          </div>
-          <div class="field">
-            <label>Table</label>
-            <select class="input" name="table">
-              <option value="">All</option>
-              <?php foreach ($tables as $t): ?>
-                <option value="<?= $t; ?>"<?= $table===$t?' selected':''; ?>><?= $t; ?></option>
-              <?php endforeach; ?>
-            </select>
-          </div>
-          <div class="field">
-            <label>From</label>
-            <input class="input" type="date" name="from" value="<?= htmlspecialchars($from); ?>">
-          </div>
-          <div class="field">
-            <label>To</label>
-            <input class="input" type="date" name="to" value="<?= htmlspecialchars($to); ?>">
-          </div>
+        <div class="field">
+          <label>Action</label>
+          <select class="input" name="action">
+            <option value="">All</option>
+            <?php foreach ($actions as $a): ?>
+              <option value="<?= $a; ?>"><?= $a; ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        <div class="field">
+          <label>Table</label>
+          <select class="input" name="table">
+            <option value="">All</option>
+            <?php foreach ($tables as $t): ?>
+              <option value="<?= $t; ?>"><?= $t; ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        <div class="field">
+          <label>From</label>
+          <input class="input" type="date" name="from">
+        </div>
+        <div class="field">
+          <label>To</label>
+          <input class="input" type="date" name="to">
+        </div>
       </div>
       <div class="clear-btn-container">
-        <button class="btn-primary" id="clear-btn" type="button" >Clear Filters</button>
+        <button class="btn-primary" id="clear-btn" type="button">Clear Filters</button>
       </div>
+    </div>
+
+    <button class="sort-toggle-btn" id="sort-btn" title="Sort" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 9l4 -4l4 4m-4 -4v14" /><path d="M21 15l-4 4l-4 -4m4 4v-14" /></svg>
+    </button>
+    
+    <div class="field" id="sort-dropdown">
+        <fieldset>
+          <legend>Sort by:</legend>
+          <div>
+            <input type="radio" name="sort" value="newest" checked> <label>Newest First</label>
+          </div>
+          <div>
+            <input type="radio" name="sort" value="oldest"> <label>Oldest First</label>
+          </div>
+          <div>
+            <input type="radio" name="sort" value="actor_asc"> <label>Actor (A–Z)</label>
+          </div>
+          <div>
+            <input type="radio" name="sort" value="actor_desc"> <label>Actor (Z–A)</label>
+          </div>
+        </fieldset>
     </div>
   </form>
 </section>
 
-<section class="panel fade-in" style="background:#fff;">
-  <div class="container" style="width:100%;">
-    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:10px;">
-      <div>
-        <h2 style="font-family:'Patua One', serif; margin:0;">School of Mary — Audit Log</h2>
-        <div class="muted">
-          <?php if ($actor||$action||$table||$from||$to): ?>
-            · Filters:
-            <?php
-              $chips=[];
-              if ($actor)  $chips[]="Actor: ".htmlspecialchars($actor);
-              if ($action) $chips[]="Action: ".htmlspecialchars($action);
-              if ($table)  $chips[]="Table: ".htmlspecialchars($table);
-              if ($from)   $chips[]="From: ".htmlspecialchars($from);
-              if ($to)     $chips[]="To: ".htmlspecialchars($to);
-              echo implode(' · ', $chips);
-            ?>
-          <?php endif; ?>
-        </div>
-      </div>
-      <div class="muted">
-        Records: <?= number_format($total); ?>
-        <?php if ($total > 0): ?>
-          <?php $start = $offset + 1; $end = min($offset + $PAGE_SIZE, $total); ?>
-          · Showing <?= number_format($start) ?>–<?= number_format($end) ?>
-        <?php endif; ?>
-      </div>
-    </div>
+<section class="panel" id="panel" style="background:#fff; min-height:200px;"></section>
 
-    <?php if (!$rows): ?>
-      <div class="panel" style="background:#f8fafc; border-color:#e5eaf0;">No audit rows match your filters.</div>
-    <?php else: ?>
-      <table>
-        <thead>
-          <tr>
-            <th style="width:70px;">ID</th>
-            <th style="width:160px;">When</th>
-            <th>Actor</th>
-            <th>Action</th>
-            <th>Table</th>
-            <th>PK</th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php foreach ($rows as $r): ?>
-            <tr>
-              <td><?= (int)$r['ID']; ?></td>
-              <td><?= htmlspecialchars($r['CREATED_AT']); ?></td>
-              <td><?= htmlspecialchars($r['ACTOR']); ?></td>
-              <td><?= htmlspecialchars($r['ACTION_ENUM']); ?></td>
-              <td><?= htmlspecialchars($r['TABLE_NAME']); ?></td>
-              <td><?= htmlspecialchars($r['PK_VALUE']); ?></td>
-            </tr>
-          <?php endforeach; ?>
-        </tbody>
-      </table>
-    <?php endif; ?>
-
-    <div class="pagination">
-      <?php
-        $base = app_url('/admin/audit_print.php');
-        $qs = "actor=".urlencode($actor)
-            ."&action=".urlencode($action)
-            ."&table=".urlencode($table)
-            ."&from=".urlencode($from)
-            ."&to=".urlencode($to);
-        $prev = $page - 1;
-        $next = $page + 1;
-
-        $maxPage = 5;
-        $start = max(1, $page - floor($maxPage / 2));
-        $end = min($totalPages, $start + $maxPage - 1);
-        if ($end - $start + 1 < $maxPage) {
-          $start = max(1, $end - $maxPage + 1);
-        }
-
-        // Calculate jump pages
-        $jumpBack = max(1, $page - $maxPage);
-        $jumpNext = min($totalPages, $page + $maxPage);
-      ?>
-
-      <?php if ($page > 1): ?>
-        <a class="page-btn" href="<?= "{$base}?{$qs}&page={$prev}" ?>" title = "Previous Page">&#x276E;</a>
-      <?php endif; ?>
-
-      <?php if ($start > 1): ?>
-        <a class="page-btn" href="<?= "{$base}?{$qs}&page={$jumpBack}" ?>" title="Jump backward 5 pages">...</a>
-      <?php endif; ?>
-
-      <?php for ($i = $start; $i <= $end; $i++): ?>
-        <a class="page-btn <?= $i == $page ? 'active' : '' ?>" 
-          href="<?= "{$base}?{$qs}&page={$i}" ?>"><?= $i ?></a>
-      <?php endfor; ?>
-
-      <?php if ($end < $totalPages): ?>
-        <a class="page-btn" href="<?= "{$base}?{$qs}&page={$jumpNext}" ?>" title="Jump forward 5 pages">...</a>
-      <?php endif; ?>
-
-      <?php  if ($page < $totalPages): ?>
-      <a class="page-btn" href="<?= "{$base}?{$qs}&page={$next}" ?>" title = "Next Page">&#x276F;</a>
-      <?php  endif;?>
-    </div>
-
-</section>
 <script>
-  const actorInput = document.querySelector('input[name="actor"]');
+  // --- DOM Elements ---
+  const panel        = document.querySelector('#panel');
+  const actorInput   = document.querySelector('input[name="actor"]');
   const actionSelect = document.querySelector('select[name="action"]');
-  const tableSelect = document.querySelector('select[name="table"]');
-  const fromInput = document.querySelector('input[name="from"]');
-  const toInput = document.querySelector('input[name="to"]');
+  const tableSelect  = document.querySelector('select[name="table"]');
+  const fromInput    = document.querySelector('input[name="from"]');
+  const toInput      = document.querySelector('input[name="to"]');
+  
   const filterDropdown = document.querySelector('#filter-dropdown');
-  const filterButton = document.querySelector('#filter-btn');
-  const clearFiltersButton = document.querySelector('#clear-btn');
-  // Toggle visibility of the filter dropdown
-  function toggleFilters(e) {
-      if (e) e.preventDefault();
-      e.stopPropagation();
-      if (filterDropdown.style.display === "none" || filterDropdown.style.display === "") {
-        filterDropdown.style.display = "block";
-      } else {
-        filterDropdown.style.display = "none";
-      }
+  const filterButton   = document.querySelector('#filter-btn');
+  const sortDropdown   = document.querySelector('#sort-dropdown');
+  const sortButton     = document.querySelector('#sort-btn');
+  const clearBtn       = document.querySelector('#clear-btn');
+  const sortRadios     = document.querySelectorAll('input[name="sort"]');
+
+  let timer = null;
+
+  // --- 1. Fetch Logic ---
+  
+  // Helper to get currently selected radio value
+  function getSelectedSort() {
+    const checked = document.querySelector('input[name="sort"]:checked');
+    return checked ? checked.value : 'newest';
   }
-  document.addEventListener('click', function(e) {
-  if (!filterDropdown.contains(e.target) && e.target !== filterButton) {
-    filterDropdown.style.display = "none";
+
+  // Main function to call API
+  function fetchResults(page) {
+    const params = new URLSearchParams({
+      actor:  actorInput.value,
+      action: actionSelect.value,
+      table:  tableSelect.value,
+      from:   fromInput.value,
+      to:     toInput.value,
+      sort:   getSelectedSort(),
+      page:   page
+    });
+
+    // Path to the API file we created
+    const url = `api/search_audit.php?${params.toString()}`;
+
+    // Show loading state
+    panel.innerHTML = "<div style='padding:20px; text-align:center; color:#666;'>Loading...</div>";
+
+    fetch(url)
+      .then(res => res.text())
+      .then(html => {
+        panel.innerHTML = html;
+        attachPaginationEvents(); // Re-attach listeners to new links
+      })
+      .catch(err => {
+        panel.innerHTML = "<div style='padding:20px; color:red; text-align:center;'>Error loading data.</div>";
+        console.error(err);
+      });
   }
+
+  // --- 2. Event Listeners ---
+  
+  // Live Search (Debounce 300ms)
+  actorInput.addEventListener('input', () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fetchResults(1), 300);
   });
-  function clearFilters(e) {
-      if (e) e.preventDefault();
-      actorInput.value = '';
-      actionSelect.value = '';
-      tableSelect.value = '';
-      fromInput.value = '';
-      toInput.value = '';
+
+  // Filters (Immediate fetch)
+  [actionSelect, tableSelect, fromInput, toInput].forEach(el => {
+    el.addEventListener('change', () => fetchResults(1));
+  });
+
+  // Sorting
+  sortRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
       fetchResults(1);
-      filterDropdown.style.display = "none";
+      sortDropdown.style.display = 'none'; // Close dropdown after selection
+    });
+  });
+
+  // Pagination Link Handling (Prevent full page reload)
+  function attachPaginationEvents() {
+    const links = panel.querySelectorAll('.page-btn');
+    links.forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        // Parse the 'page' param from the link's href
+        const urlObj = new URL(this.href);
+        const page = urlObj.searchParams.get('page') || 1;
+        fetchResults(page);
+      });
+    });
   }
-  clearFiltersButton.addEventListener('click', clearFilters);
-  filterButton.addEventListener('click', toggleFilters);
+
+  // --- 3. UI Toggle Logic (Dropdowns) ---
+  
+  // Toggle Filter
+  filterButton.addEventListener('click', (e) => {
+    e.stopPropagation();
+    sortDropdown.style.display = 'none';
+    filterDropdown.style.display = (filterDropdown.style.display === 'block') ? 'none' : 'block';
+  });
+
+  // Toggle Sort
+  sortButton.addEventListener('click', (e) => {
+    e.stopPropagation();
+    filterDropdown.style.display = 'none';
+    sortDropdown.style.display = (sortDropdown.style.display === 'block') ? 'none' : 'block';
+  });
+
+  // Close dropdowns when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!filterDropdown.contains(e.target) && e.target !== filterButton) {
+      filterDropdown.style.display = 'none';
+    }
+    if (!sortDropdown.contains(e.target) && e.target !== sortButton) {
+      sortDropdown.style.display = 'none';
+    }
+  });
+
+  // Clear Filters Button
+  clearBtn.addEventListener('click', () => {
+    actorInput.value = '';
+    actionSelect.value = '';
+    tableSelect.value = '';
+    fromInput.value = '';
+    toInput.value = '';
+    filterDropdown.style.display = 'none';
+    fetchResults(1);
+  });
+
+  // --- 4. Initial Load ---
+  fetchResults(1);
 </script>
+
 <?php require_once __DIR__ . '/../partials/site_footer.php'; ?>
