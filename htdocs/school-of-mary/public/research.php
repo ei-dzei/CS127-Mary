@@ -30,10 +30,12 @@ if ($id > 0) {
     $as = $pdo->prepare("
       SELECT a.ASSIGNMENT_ID, a.DATE_ASSIGNED, a.ROLE_ID,
              f.FACULTY_ID, f.FACULTY_FNAME, f.FACULTY_INITIAL, f.FACULTY_LNAME,
-             r.RANK_DESCRIPTION
+             r.RANK_DESCRIPTION,
+             ro.ROLE_DESCRIPTION 
       FROM ASSIGNMENT a
       JOIN FACULTY f ON f.FACULTY_ID = a.FACULTY_ID
       JOIN `RANK` r ON r.RANK_ID = f.RANK_ID
+      JOIN `ROLE` ro ON ro.ROLE_ID = a.ROLE_ID 
       WHERE a.RESEARCH_ID = ?
       ORDER BY a.DATE_ASSIGNED DESC, a.ASSIGNMENT_ID DESC
     ");
@@ -163,7 +165,7 @@ if ($id > 0) {
               </h3>
               <div class="muted" style="font-size:.95rem; margin-top:4px;">
                 <?= htmlspecialchars($p['RANK_DESCRIPTION']); ?>
-                · Role: <?= htmlspecialchars($p['ROLE_ID']); ?>
+                · Role: <?= htmlspecialchars($p['ROLE_DESCRIPTION']); ?>
                 · Assigned: <?= htmlspecialchars($p['DATE_ASSIGNED']); ?>
               </div>
             </a>

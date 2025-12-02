@@ -26,9 +26,11 @@
     if ($faculty) {
       $rs = $pdo->prepare("
         SELECT re.RESEARCH_ID, re.RESEARCH_TITLE, re.RESEARCH_STATUS, re.RESEARCH_STARTDATE, re.RESEARCH_ENDDATE,
-              a.ROLE_ID
+               a.ROLE_ID,
+               ro.ROLE_DESCRIPTION
         FROM ASSIGNMENT a
         JOIN RESEARCH re ON re.RESEARCH_ID = a.RESEARCH_ID
+        JOIN `ROLE` ro ON ro.ROLE_ID = a.ROLE_ID
         WHERE a.FACULTY_ID = ?
         ORDER BY re.RESEARCH_STARTDATE DESC
       ");
@@ -84,7 +86,7 @@
                     Start: <?= htmlspecialchars($p['RESEARCH_STARTDATE']); ?>
                     <?php if (!empty($p['RESEARCH_ENDDATE'])) echo " · End: ".htmlspecialchars($p['RESEARCH_ENDDATE']); ?>
                   </span>
-                  <span style="margin-left:6px;">Role: <?= htmlspecialchars($p['ROLE_ID']); ?></span>
+                  <span style="margin-left:6px;">Role: <?= htmlspecialchars($p['ROLE_DESCRIPTION']); ?></span>
                 </div>
               </a>
             <?php endforeach; ?>
