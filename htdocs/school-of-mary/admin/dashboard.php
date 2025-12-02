@@ -1,5 +1,5 @@
 <?php
-$pageTitle = 'Dashboard | Admin';
+$pageTitle = 'Admin Dashboard';
 
 // Load init (sessions, db, helpers) BEFORE any output
 require_once __DIR__ . '/../partials/init.php';
@@ -153,7 +153,7 @@ require_once __DIR__ . '/../partials/site_header.php';
     box-shadow: 0 1px 2px rgba(0,0,0,.04);
     padding: 22px;
   }
-  
+
   .welcome-message {
     color: var(--color-secondary, #f0b800); 
     font-size: 1.1rem;
@@ -176,25 +176,22 @@ require_once __DIR__ . '/../partials/site_header.php';
     align-items: center; 
   }
   .kpi-col { grid-column: span 4; }
-  
   .kpi-card > div:first-child { 
     width: 100%; 
     text-align: center;
     margin-bottom: 10px;
   }
-  
   .kpi-emoji { 
     font-size: 32px;
     line-height: 1;
     color: var(--color-primary, #1e4073);
   }
   .kpi-emoji i { vertical-align: middle; }
-  
+
   .kpi-title { font-weight: 700; margin-top: 6px; }
   .kpi-value { font-size: 2rem; font-weight: 800; margin-top: 6px; }
-
-  .btn-link {
-    align-self: stretch;
+.btn-link {
+   align-self: stretch;
     display: flex;
     justify-content: center;
     padding: 8px 10px;
@@ -280,6 +277,7 @@ require_once __DIR__ . '/../partials/site_header.php';
   .sort-option:hover { background: #f3f4f6; }
   .sort-option.active { background: #eff6ff; color: #1d4ed8; font-weight: 600; }
 
+
   .list {
     width:100%;
     border-collapse: collapse;
@@ -292,7 +290,7 @@ require_once __DIR__ . '/../partials/site_header.php';
   .list tr:last-child td { border-bottom:none; }
   .muted-small { color:#666; font-size:.9rem; }
 
-  /* Dual Column Layout */
+  /* New Dual Column Layout */
   .dual-column-layout {
     grid-column: span 12;
     display: grid;
@@ -310,36 +308,14 @@ require_once __DIR__ . '/../partials/site_header.php';
     }
     .research-col, .calendar-col { grid-column: span 1; }
   }
-  
-  /* Calendar Styles */
+
+  /* Calendar Compact Overrides */
   .calendar-header .btn.small { padding: 4px 8px; }
   .calendar-header h2 { font-size: 1rem; }
   .calendar-grid-header > div { padding: 5px 3px; font-size: 0.8rem; }
-  .calendar-day { min-height: 55px; padding: 3px; border: 1px solid #f0f0f0; }
-  .calendar-day-number { font-size: 0.9rem; margin-bottom: 2px; color: #888; }
-  
-  /* Event Styling */
-  .calendar-event { 
-      display: block; /* Makes the link fill the width like a div */
-      text-decoration: none; /* Removes the default underline */
-      font-size: 0.75rem; 
-      padding: 2px 4px; 
-      background-color: #e0f2fe; 
-      color: #0369a1;
-      border-radius: 4px;
-      margin-bottom: 2px;
-      cursor: pointer; 
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      transition: background-color 0.2s;
-  }
-  .calendar-event:hover {
-      background-color: #bae6fd;
-      color: #0284c7; /* Slightly darker blue on hover */
-      text-decoration: none;
-  }
-  
+  .calendar-day { min-height: 55px; padding: 3px; }
+  .calendar-day-number { font-size: 0.9rem; margin-bottom: 2px; }
+  .calendar-event { font-size: 0.7rem; padding: 1px 2px; }
   /* Live Clock */
   #live-clock {
     display: block;
@@ -351,7 +327,9 @@ require_once __DIR__ . '/../partials/site_header.php';
     margin-top: 10px;
     border-top: 1px solid #eee;
   }
-
+  .kpi-card, .section-card, .hero-card {
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  }
   .kpi-card:hover, .section-card:hover, .hero-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 18px rgba(0,0,0,.08);
@@ -360,7 +338,9 @@ require_once __DIR__ . '/../partials/site_header.php';
   .btn-link { transition: filter .2s ease, transform .06s ease, box-shadow .15s ease; }
   .btn-link:hover { filter: brightness(.94); box-shadow: 0 4px 10px rgba(0,0,0,.06); }
   .btn-link:active { transform: translateY(1px); }
-  
+  .list tr { transition: background-color .12s ease; }
+  .list tbody tr:hover { background: #f7fbff; }
+
   @media (prefers-reduced-motion: reduce) {
     .kpi-card, .section-card, .hero-card,
     .btn-link, .page-btn, .list tr { transition: none !important; }
@@ -376,34 +356,62 @@ require_once __DIR__ . '/../partials/site_header.php';
     </div>
 
     <div class="kpi-card kpi-col">
-      <div><div class="kpi-emoji"><i class="bi bi-person-badge"></i></div><div class="kpi-title">Faculty</div><div class="kpi-value" id="kpi-faculty"><?= number_format($kpi['faculty']); ?></div></div>
+      <div>
+        <div class="kpi-emoji"><i class="bi bi-person-badge"></i></div>
+        <div class="kpi-title">Faculty</div>
+        <div class="kpi-value" id="kpi-faculty"><?= number_format($kpi['faculty']); ?></div>
+      </div>
       <a class="btn-link" href="<?= app_url('/admin/crud/faculty.php'); ?>">Manage</a>
     </div>
+
     <div class="kpi-card kpi-col">
-      <div><div class="kpi-emoji"><i class="bi bi-book"></i></div><div class="kpi-title">Research</div><div class="kpi-value" id="kpi-research"><?= number_format($kpi['research']); ?></div></div>
+      <div>
+        <div class="kpi-emoji"><i class="bi bi-book"></i></div>
+        <div class="kpi-title">Research</div>
+        <div class="kpi-value" id="kpi-research"><?= number_format($kpi['research']); ?></div>
+      </div>
       <a class="btn-link" href="<?= app_url('/admin/crud/research.php'); ?>">Manage</a>
     </div>
+
     <div class="kpi-card kpi-col">
-      <div><div class="kpi-emoji"><i class="bi bi-building"></i></div><div class="kpi-title">Agencies</div><div class="kpi-value" id="kpi-agencies"><?= number_format($kpi['agencies']); ?></div></div>
+      <div>
+        <div class="kpi-emoji"><i class="bi bi-building"></i></div>
+        <div class="kpi-title">Agencies</div>
+        <div class="kpi-value" id="kpi-agencies"><?= number_format($kpi['agencies']); ?></div>
+      </div>
       <a class="btn-link" href="<?= app_url('/admin/crud/agency.php'); ?>">Manage</a>
     </div>
+
     <div class="kpi-card kpi-col">
-      <div><div class="kpi-emoji"><i class="bi bi-cash-stack"></i></div><div class="kpi-title">Fundings</div><div class="kpi-value" id="kpi-funding"><?= number_format($kpi['funding']); ?></div></div>
+      <div>
+        <div class="kpi-emoji"><i class="bi bi-cash-stack"></i></div>
+        <div class="kpi-title">Fundings</div>
+        <div class="kpi-value" id="kpi-funding"><?= number_format($kpi['funding']); ?></div>
+      </div>
       <a class="btn-link" href="<?= app_url('/admin/crud/funding.php'); ?>">Manage</a>
     </div>
+
     <div class="kpi-card kpi-col">
-      <div><div class="kpi-emoji"><i class="bi bi-list-check"></i></div><div class="kpi-title">Assignments</div><div class="kpi-value" id="kpi-assignment"><?= number_format($kpi['assignment']); ?></div></div>
+      <div>
+        <div class="kpi-emoji"><i class="bi bi-list-check"></i></div>
+        <div class="kpi-title">Assignments</div>
+        <div class="kpi-value" id="kpi-assignment"><?= number_format($kpi['assignment']); ?></div>
+      </div>
       <a class="btn-link" href="<?= app_url('/admin/crud/assignment.php'); ?>">Manage</a>
     </div>
+
     <div class="kpi-card kpi-col">
-      <div><div class="kpi-emoji"><i class="bi bi-printer"></i></div><div class="kpi-title">Audit (Print)</div><div class="muted-small">Formal printable log of changes</div></div>
+      <div>
+        <div class="kpi-emoji"><i class="bi bi-printer"></i></div>
+        <div class="kpi-title">Audit (Print)</div>
+        <div class="muted-small">Formal printable log of changes</div>
+      </div>
       <a class="btn-link" target="_blank" href="<?= app_url('/admin/audit_print.php'); ?>">Open Print View</a>
     </div>
-
     <div class="dual-column-layout">
       <div class="section-card research-col" id="research-section">
         <div class="section-header">
-            <div class="section-header-left">
+          <div class="section-header-left">
               <div class="section-emoji"><i class="bi bi-trophy"></i></div>
               <h3 style="margin:0;">Top Research by Funding</h3>
             </div>
@@ -427,7 +435,7 @@ require_once __DIR__ . '/../partials/site_header.php';
                 <tr>
                   <td><?= $rankStart + $idx; ?></td>
                   <td>
-                    <a href="<?= app_url('/../public/research.php'); ?>?id=<?= (int)$tr['RESEARCH_ID']; ?>">
+                    <a href="<?= app_url('/public/research.php'); ?>?id=<?= (int)$tr['RESEARCH_ID']; ?>">
                       <?= htmlspecialchars($tr['RESEARCH_TITLE']); ?>
                     </a>
                   </td>
@@ -436,8 +444,7 @@ require_once __DIR__ . '/../partials/site_header.php';
               <?php endforeach; ?>
             </tbody>
           </table>
-          
-          <div class="pagination">
+           <div class="pagination">
             <?php
               $base  = app_url('/admin/dashboard.php');
               // Include current log_sort in other paginations too to preserve state
@@ -466,12 +473,11 @@ require_once __DIR__ . '/../partials/site_header.php';
                       <a href="<?= $base.'?'.$qs_tr(2); ?>#research-section" class="page-btn" >2</a>       
               <?php endif; ?>
             <?php endif; ?>
-            
+
             <?php for ($i = $tr_start; $i <= $tr_end; $i++): ?>
               <a class="page-btn <?= $i == $tr_page ? 'active' : '' ?>" href="<?= $base.'?'.$qs_tr($i); ?>#research-section"><?= $i ?></a>
             <?php endfor; ?>
-
-            <?php if ($tr_end < $tr_pages): ?>
+             <?php if ($tr_end < $tr_pages): ?>
               <?php if ($tr_end == $tr_pages - 2):?>
                 <a href="<?= $base.'?'.$qs_tr($tr_pages - 1); ?>#research-section" class="page-btn" > <?=$tr_pages - 1?></a>
               <?php endif; ?>
@@ -486,37 +492,36 @@ require_once __DIR__ . '/../partials/site_header.php';
           </div>
         <?php endif; ?>  
       </div>
-
       <div class="section-card calendar-col">
         <div class="section-header">
-            <div class="section-header-left">
+           <div class="section-header-left">
                 <div class="section-emoji"><i class="bi bi-calendar-check"></i></div>
                 <h3 style="margin:0;">Calendar</h3>
             </div>
         </div>
-        
+
         <div id="calendar-app" class="panel" style="padding: 0; border: none; box-shadow: none;">
             <div class="calendar-header">
                 <button id="prev-month" class="btn small">←</button>
                 <h2 id="current-month-year">Loading...</h2>
                 <button id="next-month" class="btn small">→</button>
             </div>
-            
+
             <div class="calendar-grid-header">
-                <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+              <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
             </div>
 
             <div id="calendar-days" class="calendar-grid">
             </div>
-            
+
             <span id="live-clock">Loading Time...</span>
         </div>
       </div>  
     </div> 
-    
+
     <div class="section-card" id="faculty-section">
       <div class="section-header">
-        <div class="section-header-left">
+         <div class="section-header-left">
             <div class="section-emoji"><i class="bi bi-people"></i></div>
             <h3 style="margin:0;">Top Faculty by Assignments</h3>
         </div>
@@ -601,7 +606,7 @@ require_once __DIR__ . '/../partials/site_header.php';
 
     <div class="section-card" id="audit-section">
       <div class="section-header">
-        <div class="section-header-left">
+         <div class="section-header-left">
             <div class="section-emoji"><i class="bi bi-receipt"></i></div>
             <h3 style="margin:0;">Live Activity</h3>
         </div>
@@ -658,7 +663,7 @@ require_once __DIR__ . '/../partials/site_header.php';
         <div class="pagination">
           <?php
             $base   = app_url('/admin/dashboard.php');
-            // Include log_sort in pagination link to preserve sort order
+              // Include log_sort in pagination link to preserve sort order
             $qs_log = function($p) use ($tr_page, $tf_page, $log_sort) {
               return 'tr_page='.$tr_page.'&tf_page='.$tf_page.'&log_page='.$p.'&log_sort='.$log_sort;
             };
@@ -709,161 +714,62 @@ require_once __DIR__ . '/../partials/site_header.php';
 
 <script>
 (function(){
-  // --- CONFIGURATION ---
-  const KPI_ENDPOINT      = "<?= app_url('/admin/api/dashboard_stats.php'); ?>";
-  const CALENDAR_ENDPOINT = "<?= app_url('/admin/api/get_calendar_events.php'); ?>";
-  
-  // FIX: Use a relative path to ensure we leave the admin folder correctly
-  // This assumes your structure is: /admin/dashboard.php and /public/research.php
-  const RESEARCH_DETAILS_URL = "/../public/research.php"; 
-
-  // --- ELEMENTS ---
+  const ENDPOINT = "<?= app_url('/admin/api/dashboard_stats.php'); ?>";
   const el = {
     fac:  document.getElementById('kpi-faculty'),
     res:  document.getElementById('kpi-research'),
     ag:   document.getElementById('kpi-agencies'),
     fund: document.getElementById('kpi-funding'),
     asg:  document.getElementById('kpi-assignment'),
-    clock: document.getElementById('live-clock'),
-    calendarDays: document.getElementById('calendar-days'),
-    monthYear: document.getElementById('current-month-year'),
-    prevMonthBtn: document.getElementById('prev-month'),
-    nextMonthBtn: document.getElementById('next-month')
+    clock: document.getElementById('live-clock') 
   };
-
-  // --- KPI & CLOCK ---
   function number(n){ return (Number(n)||0).toLocaleString(); }
-  
   function updateClock() {
     const now = new Date();
+    const timeString = now.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    });
     if (el.clock) {
-        el.clock.textContent = now.toLocaleTimeString('en-US', { 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            second: '2-digit', 
-            hour12: true 
-        });
+        el.clock.textContent = timeString;
     }
   }
 
   async function refreshKPIs(){
     try {
-      const r = await fetch(KPI_ENDPOINT);
+      const r = await fetch(ENDPOINT, { credentials: 'same-origin' });
       if (!r.ok) return;
       const d = await r.json();
       if (d && d.kpi) {
-        if(el.fac) el.fac.textContent = number(d.kpi.faculty);
-        if(el.res) el.res.textContent = number(d.kpi.research);
-        if(el.ag)  el.ag.textContent  = number(d.kpi.agencies);
-        if(el.fund) el.fund.textContent = number(d.kpi.funding);
-        if(el.asg) el.asg.textContent = number(d.kpi.assignment);
+        if (el.fac)  el.fac.textContent  = number(d.kpi.faculty);
+        if (el.res)  el.res.textContent  = number(d.kpi.research);
+        if (el.ag)   el.ag.textContent   = number(d.kpi.agencies);
+        if (el.fund) el.fund.textContent = number(d.kpi.funding);
+        if (el.asg)  el.asg.textContent  = number(d.kpi.assignment);
       }
-    } catch(e){ console.error("KPI Fetch Error:", e); }
+    } catch(e){ /* silent */ }
   }
-
-  // --- CALENDAR LOGIC ---
-  let currentDate = new Date();
-  let events = []; 
-
-  async function fetchEvents() {
-      try {
-          const res = await fetch(CALENDAR_ENDPOINT);
-          if(res.ok) {
-              events = await res.json();
-              console.log("Events loaded:", events); // Debugging
-              renderCalendar(); 
-          } else {
-              console.error("Failed to fetch calendar events");
-          }
-      } catch(e) { console.error("Calendar Error:", e); }
-  }
-
-  function renderCalendar() {
-      const year = currentDate.getFullYear();
-      const month = currentDate.getMonth();
-
-      // Update Header
-      const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-      if(el.monthYear) el.monthYear.textContent = `${monthNames[month]} ${year}`;
-
-      if(el.calendarDays) {
-          el.calendarDays.innerHTML = ""; // Clear grid
-
-          const firstDay = new Date(year, month, 1).getDay(); // 0-6
-          const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-          // Empty slots for previous month
-          for (let i = 0; i < firstDay; i++) {
-              const emptyDiv = document.createElement("div");
-              emptyDiv.classList.add("calendar-day");
-              emptyDiv.style.backgroundColor = "#f9fafb";
-              el.calendarDays.appendChild(emptyDiv);
-          }
-
-          // Days of current month
-          for (let day = 1; day <= daysInMonth; day++) {
-              const dayDiv = document.createElement("div");
-              dayDiv.classList.add("calendar-day");
-              
-              const numDiv = document.createElement("div");
-              numDiv.classList.add("calendar-day-number");
-              numDiv.textContent = day;
-              dayDiv.appendChild(numDiv);
-
-              // Format current day string YYYY-MM-DD
-              const currentDayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-              
-              // Filter events starting on this day
-              const daysEvents = events.filter(e => e.start === currentDayStr);
-
-              daysEvents.forEach(evt => {
-                  // Create ANCHOR tag
-                  const evtLink = document.createElement("a");
-                  evtLink.classList.add("calendar-event");
-                  evtLink.textContent = "Start: " + evt.title;
-                  evtLink.title = evt.title; 
-                  
-                  // BUILD URL MANUALLY using relative path
-                  const finalUrl = `${RESEARCH_DETAILS_URL}?id=${evt.id}`;
-                  evtLink.href = finalUrl;
-                  evtLink.target = "_self"; 
-
-                  dayDiv.appendChild(evtLink);
-              });
-
-              el.calendarDays.appendChild(dayDiv);
-          }
-      }
-  }
-
-  // Calendar Controls
-  if(el.prevMonthBtn) {
-      el.prevMonthBtn.onclick = () => {
-          currentDate.setMonth(currentDate.getMonth() - 1);
-          renderCalendar();
-      };
-  }
-  if(el.nextMonthBtn) {
-      el.nextMonthBtn.onclick = () => {
-          currentDate.setMonth(currentDate.getMonth() + 1);
-          renderCalendar();
-      };
-  }
-
-  // --- INITIALIZATION ---
   refreshKPIs();
   updateClock();
-  fetchEvents(); 
-  
   setInterval(refreshKPIs, 60000); 
   setInterval(updateClock, 1000); 
 
   // Sort Dropdown Logic
   const sortBtn = document.getElementById('dash-sort-btn');
   const sortMenu = document.getElementById('dash-sort-menu');
+  
   if(sortBtn && sortMenu) {
-      sortBtn.addEventListener('click', (e) => { e.stopPropagation(); sortMenu.classList.toggle('show'); });
-      document.addEventListener('click', (e) => { if (!sortMenu.contains(e.target) && e.target !== sortBtn) sortMenu.classList.remove('show'); });
+      sortBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          sortMenu.classList.toggle('show');
+      });
+      document.addEventListener('click', (e) => {
+          if (!sortMenu.contains(e.target) && e.target !== sortBtn) {
+              sortMenu.classList.remove('show');
+          }
+      });
   }
 
 })();
