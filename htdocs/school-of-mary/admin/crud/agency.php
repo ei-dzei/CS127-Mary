@@ -1,5 +1,5 @@
 <?php
-$pageTitle = 'Agencies (Admin)';
+$pageTitle = 'Agencies | Admin';
 
 require_once __DIR__ . '/../../partials/init.php';
 require_once __DIR__ . '/../../validators.php';

@@ -1,5 +1,5 @@
 <?php
-$pageTitle = 'Admin Login';
+$pageTitle = 'Login | Admin';
 
 // Load init first (sessions, helpers, csrf) BEFORE any output
 require_once __DIR__ . '/../partials/init.php';

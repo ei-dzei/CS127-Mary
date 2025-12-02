@@ -1,5 +1,5 @@
 <?php
-$pageTitle = 'Funding (Admin)';
+$pageTitle = 'Funding | Admin';
 
 // Core
 require_once __DIR__ . '/../../partials/init.php';

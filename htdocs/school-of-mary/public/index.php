@@ -15,9 +15,9 @@ require_once __DIR__ . '/../partials/site_header.php';
     <div class="hero__overlay"></div>
     <div class="hero__content">
       <div class="hero__icon" aria-hidden="true"><i class="bi bi-mortarboard-fill"></i></div>
-      <h1 class="hero__title">School of Mary Research Portal</h1>
+      <h1 class="hero__title">School of Mary Faculty and Research Portal</h1>
       <p class="hero__subtitle">
-        Discover faculty expertise, funded projects, and academic impact—all in one place.
+        Discover faculty expertise, funded projects, and academic impact.
       </p>
       <div class="hero__actions">
         <a href="<?= BASE_URL ?>/public/faculty.php" class="btn">Get Started</a>
@@ -68,7 +68,7 @@ require_once __DIR__ . '/../partials/site_header.php';
     <div class="feature-icon" aria-hidden="true"><i class="bi bi-info-circle-fill"></i></div>
     <h2 class="feature-title">About the Portal</h2>
     <p class="feature-text">
-      The <strong>School of Mary Research Portal</strong> provides a unified system for managing research,
+      The <strong>School of Mary Faculty and Research Portal</strong> provides a unified system for managing research,
       faculty information, funding records, and agencies involved in academic collaboration.
       While the general public can browse and view data, administrators can securely log in to manage
       records, ensuring accurate and up-to-date information.

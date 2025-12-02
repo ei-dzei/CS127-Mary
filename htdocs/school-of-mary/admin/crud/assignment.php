@@ -1,5 +1,5 @@
 <?php
-$pageTitle = 'Assignments (Admin)';
+$pageTitle = 'Assignments | Admin';
 
 require_once __DIR__ . '/../../partials/init.php';
 require_once __DIR__ . '/../../validators.php';
