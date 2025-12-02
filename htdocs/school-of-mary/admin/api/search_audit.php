@@ -108,8 +108,8 @@ $panel .= '<div class="table-scroll">
             <table>
                 <thead>
                     <tr>
-                        <th style="width:70px;">ID</th>
-                        <th style="width:160px;">When</th>
+                        <th>ID</th>
+                        <th>When</th>
                         <th>Actor</th>
                         <th>Action</th>
                         <th>Table</th>

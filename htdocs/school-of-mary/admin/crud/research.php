@@ -364,9 +364,9 @@ table td:first-child {
 }
 table th:nth-child(2),
 table td:nth-child(2) {
-  width: 600px;
+  width: 615px;
   min-width: 300px;
-  max-width: 600px;
+  max-width: 615px;
 }
 table th:nth-child(3),table td:nth-child(3){
   width: 120px; 
@@ -374,8 +374,8 @@ table th:nth-child(3),table td:nth-child(3){
 }
 table th:nth-child(4),table td:nth-child(4),
 table th:nth-child(5),table td:nth-child(5)  {
-  width: 130px; 
-  max-width: 130px;
+  width: 110px; 
+  max-width: 110px;
 }
 .table-clickable tbody tr:hover{background: #c7d2e4;}
 .btn svg {

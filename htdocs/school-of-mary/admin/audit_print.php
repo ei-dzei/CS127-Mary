@@ -107,8 +107,8 @@ require_once __DIR__ . '/../partials/site_header.php';
 /* TABLE STYLING */
 .table-scroll table { width: 100%; border-collapse: collapse; table-layout: fixed; }
 .table-scroll th, .table-scroll td { padding: 10px; text-align: left; border-bottom: 1px solid #e5e7eb; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.table-scroll th:nth-child(1), .table-scroll td:nth-child(1) { width: 60px; } /* ID */
-.table-scroll th:nth-child(2), .table-scroll td:nth-child(2) { width: 180px; } /* Date */
+.table-scroll th:nth-child(1), .table-scroll td:nth-child(1) { width: 150px;padding-left: 100px; } /* ID */
+.table-scroll th:nth-child(2), .table-scroll td:nth-child(2) { width: 300px; padding-left: 50px;} /* Date */
 </style>
 
 <section class="panel fade-in crud-header-card">
