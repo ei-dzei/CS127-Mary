@@ -645,7 +645,7 @@ th {
 .hero__subtitle {
   font-family: 'Newsreader', serif;
   color: var(--color-primary);
-  font-size: clamp(2rem, 2vw, 2rem);
+  font-size: clamp(2rem, 5vw, 2rem);
   line-height: 1.65;
   font-weight: 100;
   max-width: 58ch;
