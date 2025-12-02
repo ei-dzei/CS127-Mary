@@ -644,10 +644,11 @@ th {
 }
 .hero__subtitle {
   font-family: 'Newsreader', serif;
-  color: #374151;
-  font-size: clamp(1rem, 2vw, 1.125rem);
+  color: var(--color-primary);
+  font-size: clamp(2rem, 2vw, 2rem);
   line-height: 1.65;
   max-width: 58ch;
+  font-weight: bold;
 }
 .hero__actions {
   display: flex;
@@ -728,6 +729,7 @@ th {
   margin-bottom: 6px;
 }
 .feature-text {
+  font-family: 'Newsreader', serif;
   color: #344250;
   font-size: clamp(15px, 2vw, 17px);
   line-height: 1.65;
