@@ -647,6 +647,7 @@ th {
   color: var(--color-primary);
   font-size: clamp(2rem, 2vw, 2rem);
   line-height: 1.65;
+  font-weight: 100;
   max-width: 58ch;
   font-weight: bold;
 }
@@ -688,7 +689,7 @@ th {
    FEATURE SECTION (home)
    ======================================= */
 .feature {
-  padding: 3rem 0; 
+  padding: 5rem 0; 
   display: flex;
   justify-content: center;
 }
