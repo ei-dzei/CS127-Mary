@@ -497,6 +497,27 @@ $CSRF = csrf_token();
           <label for="f_email">Contact Email</label>
           <input class="input" id="f_email" name="FACULTY_EMAIL" type="email" required>
         </div>
+        
+        <div class="field">
+          <label for="f_rank">Rank</label>
+          <select class="input" id="f_rank" name="RANK_ID" required>
+            <?php foreach ($ranks as $r): ?>
+              <option value="<?= htmlspecialchars($r['RANK_ID'], ENT_QUOTES); ?>">
+                <?= htmlspecialchars($r['RANK_DESCRIPTION']); ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f_dept">Department</label>
+          <select class="input" id="f_dept" name="DEPT_ID" required>
+            <?php foreach ($depts as $d): ?>
+              <option value="<?= htmlspecialchars($d['DEPT_ID'], ENT_QUOTES); ?>">
+                <?= htmlspecialchars($d['DEPT_SPECIALIZATION']); ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
+        </div>
       </div>
 
       <div class="admin-modal__actions">
@@ -506,6 +527,7 @@ $CSRF = csrf_token();
     </form>
   </div>
 </div>
+
 <div class="admin-modal" id="facultyModal" hidden>
   <div class="admin-modal__backdrop" data-close="1"></div>
   <div class="admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="facultyModalTitle">
@@ -715,19 +737,28 @@ $CSRF = csrf_token();
       });
     });
   }
-  //Create Faculty
+  
+  // Create Faculty Logic (Fixed)
   const createFacultyModal = document.getElementById('createFacultyModal');
   const createFacultyForm = createFacultyModal.querySelector('form');
   const f_first = document.getElementById('f_first');
   const f_initial = document.getElementById('f_initial');
   const f_last = document.getElementById('f_last');
   const f_email = document.getElementById('f_email');
+  // New references
+  const f_rank = document.getElementById('f_rank');
+  const f_dept = document.getElementById('f_dept');
 
   function openFacultyModal() {
     f_first.value = '';
     f_initial.value = '';
     f_last.value = '';
     f_email.value = '';
+    
+    // Reset dropdowns to first option
+    if(f_rank && f_rank.options.length > 0) f_rank.selectedIndex = 0;
+    if(f_dept && f_dept.options.length > 0) f_dept.selectedIndex = 0;
+    
     createFacultyModal.hidden = false;
   }
   function closeFacultyModal() {
@@ -826,4 +857,3 @@ $CSRF = csrf_token();
 </script>
 
 <?php require_once __DIR__ . '/../../partials/site_footer.php'; ?>
-
