@@ -85,6 +85,25 @@ $kpi = [
   'assignment' => (int)$pdo->query("SELECT COUNT(*) FROM ASSIGNMENT")->fetchColumn(),
 ];
 
+/* -------------------- Top Faculty by Assignments (paginated) -------------------- */
+$tf_page   = get_page('tf_page');
+$tf_total  = (int)$pdo->query("SELECT COUNT(*) FROM FACULTY")->fetchColumn();
+$tf_pages  = max(1, (int)ceil($tf_total / $PAGE_SIZE));
+$tf_offset = ($tf_page - 1) * $PAGE_SIZE;
+
+$tf_stmt = $pdo->prepare("
+  SELECT f.FACULTY_ID, COUNT(a.ASSIGNMENT_ID) AS total_assignments
+  FROM FACULTY f
+  LEFT JOIN ASSIGNMENT a ON a.FACULTY_ID = f.FACULTY_ID
+  GROUP BY f.FACULTY_ID
+  ORDER BY total_assignments DESC
+  LIMIT :lim OFFSET :off
+");
+$tf_stmt->bindValue(':lim', $PAGE_SIZE, PDO::PARAM_INT);
+$tf_stmt->bindValue(':off', $tf_offset, PDO::PARAM_INT);
+$tf_stmt->execute();
+$topFaculty = $tf_stmt->fetchAll(PDO::FETCH_ASSOC);
+
 /* -------------------- Top Research by Funding (paginated) -------------------- */
 $tr_page   = get_page('tr_page');
 $tr_total  = (int)$pdo->query("SELECT COUNT(*) FROM RESEARCH")->fetchColumn();
@@ -104,25 +123,6 @@ $tr_stmt->bindValue(':lim', $PAGE_SIZE, PDO::PARAM_INT);
 $tr_stmt->bindValue(':off', $tr_offset, PDO::PARAM_INT);
 $tr_stmt->execute();
 $topResearch = $tr_stmt->fetchAll(PDO::FETCH_ASSOC);
-
-/* -------------------- Top Faculty by Assignments (paginated) -------------------- */
-$tf_page   = get_page('tf_page');
-$tf_total  = (int)$pdo->query("SELECT COUNT(*) FROM FACULTY")->fetchColumn();
-$tf_pages  = max(1, (int)ceil($tf_total / $PAGE_SIZE));
-$tf_offset = ($tf_page - 1) * $PAGE_SIZE;
-
-$tf_stmt = $pdo->prepare("
-  SELECT f.FACULTY_ID, COUNT(a.ASSIGNMENT_ID) AS total_assignments
-  FROM FACULTY f
-  LEFT JOIN ASSIGNMENT a ON a.FACULTY_ID = f.FACULTY_ID
-  GROUP BY f.FACULTY_ID
-  ORDER BY total_assignments DESC
-  LIMIT :lim OFFSET :off
-");
-$tf_stmt->bindValue(':lim', $PAGE_SIZE, PDO::PARAM_INT);
-$tf_stmt->bindValue(':off', $tf_offset, PDO::PARAM_INT);
-$tf_stmt->execute();
-$topFaculty = $tf_stmt->fetchAll(PDO::FETCH_ASSOC);
 
 /* -------------------- Audit (paginated + sorted) -------------------- */
 $log_page   = get_page('log_page');
@@ -190,7 +190,7 @@ require_once __DIR__ . '/../partials/site_header.php';
 
   .kpi-title { font-weight: 700; margin-top: 6px; }
   .kpi-value { font-size: 2rem; font-weight: 800; margin-top: 6px; }
-.btn-link {
+  .btn-link {
    align-self: stretch;
     display: flex;
     justify-content: center;
@@ -290,7 +290,6 @@ require_once __DIR__ . '/../partials/site_header.php';
   .list tr:last-child td { border-bottom:none; }
   .muted-small { color:#666; font-size:.9rem; }
 
-  /* New Dual Column Layout */
   .dual-column-layout {
     grid-column: span 12;
     display: grid;
@@ -309,7 +308,6 @@ require_once __DIR__ . '/../partials/site_header.php';
     .research-col, .calendar-col { grid-column: span 1; }
   }
 
-  /* Calendar Compact Overrides */
   .calendar-header .btn.small { padding: 4px 8px; }
   .calendar-header h2 { font-size: 1rem; }
   .calendar-grid-header > div { padding: 5px 3px; font-size: 0.8rem; }
@@ -352,7 +350,7 @@ require_once __DIR__ . '/../partials/site_header.php';
     <div class="hero-card">
       <span class="welcome-message">Welcome, Admin!</span>
       <h1 style="margin:0 0 6px;">Admin Dashboard</h1>
-      <p class="muted" style="margin:0;">Overview of your database and the latest changes in real time.</p>
+      <p class="muted" style="margin:0;">Overview of the database and the latest changes in real time.</p>
     </div>
 
     <div class="kpi-card kpi-col">
@@ -403,10 +401,10 @@ require_once __DIR__ . '/../partials/site_header.php';
     <div class="kpi-card kpi-col">
       <div>
         <div class="kpi-emoji"><i class="bi bi-printer"></i></div>
-        <div class="kpi-title">Audit (Print)</div>
+        <div class="kpi-title">Audit Log</div>
         <div class="muted-small">Formal printable log of changes</div>
       </div>
-      <a class="btn-link" target="_blank" href="<?= app_url('/admin/audit_print.php'); ?>">Open Print View</a>
+      <a class="btn-link" target="_blank" href="<?= app_url('/admin/audit_print.php'); ?>">Open Log</a>
     </div>
     <div class="dual-column-layout">
       <div class="section-card research-col" id="research-section">
