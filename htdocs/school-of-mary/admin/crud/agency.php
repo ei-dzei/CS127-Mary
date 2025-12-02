@@ -312,17 +312,13 @@ require_once __DIR__ . '/../../partials/site_header.php';
 td:has(.actions-cell) {
     vertical-align: top; 
 }
-
-
 .actions-cell {
   /* FIX 2: Align flex items to the top (start) of the container */
   display: flex;
   align-items: flex-start; 
-  /* The rest of your flex and size properties */
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px 10px;          
-  white-space: normal;    
-  /* Reduced min-width to give space to the Contact column */
+  white-space: nowrap;    
   min-width: 160px;      
 }
 .actions-cell .input,
@@ -338,16 +334,25 @@ td:has(.actions-cell) {
 
 /* --- Agency Table Specific Fixes --- */
 .table-scroll table {
-    table-layout: auto; /* Use auto layout to allow column flexibility */
+    table-layout: fixed; /* Use auto layout to allow column flexibility */
     width: 100%;
 }
-
+.table-scroll table td { 
+    height: 50px;
+    white-space: nowrap;
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+}
 .table-scroll table th:nth-child(1), /* ID */
 .table-scroll table td:nth-child(1) {
     width: 60px; /* Fixed width for ID */
     min-width: 60px;
 }
-
+.table-scroll table th:nth-child(2),
+.table-scroll table td:nth-child(2) {
+    width: 550px;
+    min-width: 550px;
+}
 .table-scroll table th:nth-child(3), /* Type */
 .table-scroll table td:nth-child(3) {
     width: 120px; /* Fixed width for Type (e.g., Government) */
@@ -366,12 +371,14 @@ td:has(.actions-cell) {
 .table-scroll table th:nth-child(5), /* Actions */
 .table-scroll table td:nth-child(5) {
     /* Set max-width for Actions to prevent it from taking too much space */
-    width: 160px;
-    min-width: 160px;
+    width: 180px;
+    min-width: 180px;
 }
-/* Name column (2nd child) remains flexible to take up maximum remaining space. */
-
-.table-scroll { overflow-x: auto; }
+.btn svg {
+    vertical-align: middle;
+    margin-right: 2px; 
+    margin-bottom: 2px; 
+} 
 </style>
 
 <section class="panel fade-in crud-header-card">
