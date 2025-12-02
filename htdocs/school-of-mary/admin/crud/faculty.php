@@ -348,10 +348,20 @@ $CSRF = csrf_token();
     overflow: visible; 
     text-overflow: clip; 
 }
+.table-scroll table th:nth-child(3), /* Email column */
+.table-scroll table td:nth-child(3) {
+  width:320px;
+}
 .table-scroll table th:nth-child(6), /* Actions column */
 .table-scroll table td:nth-child(6) {
-    width: 200px; /* Adjust based on button size */
+    width: 180px; /* Adjust based on button size */
 }
+.table-clickable tbody tr:hover{background: #c7d2e4;}
+.btn svg {
+    vertical-align: middle;
+    margin-right: 2px; 
+    margin-bottom: 2px;
+} 
 /* --- End of Fix --- */
 </style>
 
@@ -458,6 +468,7 @@ $CSRF = csrf_token();
 </section>
 
 <section class="panel" id="panel"></section>
+
 <div class="admin-modal" id="createFacultyModal" hidden>
   <div class="admin-modal__backdrop" data-close="1"></div>
   <div class="admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="createFacultyTitle">
@@ -578,6 +589,22 @@ $CSRF = csrf_token();
   const clearFiltersButton = document.querySelector('#clear-btn');
   let timer = null;
 
+  function attachTableRowEvents() {
+    const tableRows = document.querySelectorAll(".table-clickable tbody tr");
+    
+    tableRows.forEach(row => {
+      row.addEventListener("click", function(e) {
+        if (e.target.closest('.actions-cell')) {
+          return;
+        }
+        
+        const href = this.dataset.href;
+        if (href) {
+          window.location.href = href;
+        }
+      });
+    });
+  }
   // Toggle visibility of the filter dropdown
   function toggleFilters(e) {
       if (e) e.preventDefault();
@@ -657,6 +684,7 @@ $CSRF = csrf_token();
         facultyPanel.innerHTML = html;
         attachPaginationEvents();
         attachEditButtons();  
+        attachTableRowEvents();
       })
       .catch(err => {
         facultyPanel.innerHTML = "<div class='error'>Failed to load results.</div>";
