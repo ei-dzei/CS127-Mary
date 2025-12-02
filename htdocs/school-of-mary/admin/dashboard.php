@@ -297,6 +297,7 @@ require_once __DIR__ . '/../partials/site_header.php';
     gap: 16px;
     margin-top: 16px;
   }
+  /* Updated: research-col still used for sizing, but will apply to faculty now */
   .research-col { grid-column: span 1; }
   .calendar-col { grid-column: span 1; }
 
@@ -406,8 +407,122 @@ require_once __DIR__ . '/../partials/site_header.php';
       </div>
       <a class="btn-link" target="_blank" href="<?= app_url('/admin/audit_print.php'); ?>">Open Log</a>
     </div>
+
     <div class="dual-column-layout">
-      <div class="section-card research-col" id="research-section">
+      
+      <div class="section-card research-col" id="faculty-section">
+        <div class="section-header">
+           <div class="section-header-left">
+              <div class="section-emoji"><i class="bi bi-people"></i></div>
+              <h3 style="margin:0;">Top Faculty by Assignments</h3>
+          </div>
+        </div>
+        <?php if (!$topFaculty): ?>
+          <div class="muted">No data.</div>
+        <?php else: ?>
+          <table class="list">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Faculty</th>
+                <th>Total Assignments</th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php
+                $rankStart = $tf_offset + 1;
+                foreach ($topFaculty as $idx => $f):
+                  $name = faculty_label($pdo, (int)$f['FACULTY_ID']);
+              ?>
+                <tr>
+                  <td><?= $rankStart + $idx; ?></td>
+                  <td>
+                    <a href="<?= app_url('/public/faculty.php'); ?>?id=<?= (int)$f['FACULTY_ID']; ?>">
+                      <?= htmlspecialchars($name); ?>
+                    </a>
+                  </td>
+                  <td><?= (int)$f['total_assignments']; ?></td>
+                </tr>
+              <?php endforeach; ?>
+            </tbody>
+          </table>
+          <div class="pagination">
+            <?php
+              $base  = app_url('/admin/dashboard.php');
+              $qs_tf = function($p) use ($tr_page, $log_page, $log_sort) {
+                return 'tr_page='.$tr_page.'&tf_page='.$p.'&log_page='.$log_page.'&log_sort='.$log_sort;
+              };
+            ?>
+            <?php if ($tf_page > 1): ?>
+              <a class="page-btn" href="<?= $base.'?'.$qs_tf(max(1,$tf_page-1)); ?>#faculty-section" title = "Previous Page">&#x276E;</a>
+            <?php endif; ?>
+            <?php
+              $tf_maxPage = 5;
+              $tf_start = max(1, $tf_page - floor($tf_maxPage / 2));
+              $tf_end = min($tf_pages, $tf_start + $tf_maxPage - 1);
+
+              if ($tf_end - $tf_start < $tf_maxPage - 1) {
+                $tf_start = max(1, $tf_end - $tf_maxPage + 1);
+              } 
+            ?>
+            <?php if ($tf_start > 1): ?>
+              <a href="<?= $base.'?'.$qs_tf(1); ?>#faculty-section" class="page-btn" >1</a>
+              <?php if ($tf_start > 3): ?>
+                <a href="<?= $base.'?'.$qs_tf(max(1,$tf_page - 5)) ?>#faculty-section" class="page-btn" title="Jump backward 5 pages">...</a>        
+              <?php endif; ?>
+              <?php if ($tf_start == 3): ?>
+                    <a href="<?= $base.'?'.$qs_tf(2); ?>#faculty-section" class="page-btn" >2</a>       
+              <?php endif; ?>
+            <?php endif; ?>
+
+            <?php for ($i = $tf_start; $i <= $tf_end; $i++): ?>
+              <a class="page-btn <?= $i === $tf_page ? 'active' : '' ?>" href="<?= $base.'?'.$qs_tf($i); ?>#faculty-section"><?= $i ?></a>
+            <?php endfor; ?>
+
+            <?php if ($tf_end < $tf_pages): ?>
+              <?php if ($tf_end == $tf_pages - 2):?>
+                <a href="<?= $base.'?'.$qs_tf($tf_pages - 1); ?>#faculty-section" class="page-btn" > <?=$tf_pages - 1?></a>
+              <?php endif; ?>
+              <?php if ($tf_end < $tf_pages - 2): ?>
+                <a href="<?= $base.'?'.$qs_tf(min($tf_pages,$tf_page + 5)); ?>#faculty-section"class="page-btn" title="Jump forward 5 pages">...</a>
+              <?php endif; ?>
+                <a href="<?= $base.'?'.$qs_tf($tf_pages); ?>#faculty-section" class="page-btn" > <?=$tf_pages?></a>
+            <?php endif; ?>
+            <?php  if ($tf_page < $tf_pages): ?>
+              <a class="page-btn" href="<?= $base.'?'.$qs_tf(min($tf_pages,$tf_page+1)); ?>#faculty-section" title = "Next Page">&#x276F;</a>
+            <?php  endif;?>
+          </div>
+        <?php endif; ?>
+      </div>
+
+      <div class="section-card calendar-col">
+        <div class="section-header">
+           <div class="section-header-left">
+                <div class="section-emoji"><i class="bi bi-calendar-check"></i></div>
+                <h3 style="margin:0;">Calendar</h3>
+            </div>
+        </div>
+
+        <div id="calendar-app" class="panel" style="padding: 0; border: none; box-shadow: none;">
+            <div class="calendar-header">
+                <button id="prev-month" class="btn small">←</button>
+                <h2 id="current-month-year">Loading...</h2>
+                <button id="next-month" class="btn small">→</button>
+            </div>
+
+            <div class="calendar-grid-header">
+              <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+            </div>
+
+            <div id="calendar-days" class="calendar-grid">
+            </div>
+
+            <span id="live-clock">Loading Time...</span>
+        </div>
+      </div>  
+    </div> 
+
+    <div class="section-card" id="research-section">
         <div class="section-header">
           <div class="section-header-left">
               <div class="section-emoji"><i class="bi bi-trophy"></i></div>
@@ -490,117 +605,6 @@ require_once __DIR__ . '/../partials/site_header.php';
           </div>
         <?php endif; ?>  
       </div>
-      <div class="section-card calendar-col">
-        <div class="section-header">
-           <div class="section-header-left">
-                <div class="section-emoji"><i class="bi bi-calendar-check"></i></div>
-                <h3 style="margin:0;">Calendar</h3>
-            </div>
-        </div>
-
-        <div id="calendar-app" class="panel" style="padding: 0; border: none; box-shadow: none;">
-            <div class="calendar-header">
-                <button id="prev-month" class="btn small">←</button>
-                <h2 id="current-month-year">Loading...</h2>
-                <button id="next-month" class="btn small">→</button>
-            </div>
-
-            <div class="calendar-grid-header">
-              <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
-            </div>
-
-            <div id="calendar-days" class="calendar-grid">
-            </div>
-
-            <span id="live-clock">Loading Time...</span>
-        </div>
-      </div>  
-    </div> 
-
-    <div class="section-card" id="faculty-section">
-      <div class="section-header">
-         <div class="section-header-left">
-            <div class="section-emoji"><i class="bi bi-people"></i></div>
-            <h3 style="margin:0;">Top Faculty by Assignments</h3>
-        </div>
-      </div>
-      <?php if (!$topFaculty): ?>
-        <div class="muted">No data.</div>
-      <?php else: ?>
-        <table class="list">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Faculty</th>
-              <th>Total Assignments</th>
-            </tr>
-          </thead>
-          <tbody>
-            <?php
-              $rankStart = $tf_offset + 1;
-              foreach ($topFaculty as $idx => $f):
-                $name = faculty_label($pdo, (int)$f['FACULTY_ID']);
-            ?>
-              <tr>
-                <td><?= $rankStart + $idx; ?></td>
-                <td>
-                  <a href="<?= app_url('/public/faculty.php'); ?>?id=<?= (int)$f['FACULTY_ID']; ?>">
-                    <?= htmlspecialchars($name); ?>
-                  </a>
-                </td>
-                <td><?= (int)$f['total_assignments']; ?></td>
-              </tr>
-            <?php endforeach; ?>
-          </tbody>
-        </table>
-        <div class="pagination">
-          <?php
-            $base  = app_url('/admin/dashboard.php');
-            $qs_tf = function($p) use ($tr_page, $log_page, $log_sort) {
-              return 'tr_page='.$tr_page.'&tf_page='.$p.'&log_page='.$log_page.'&log_sort='.$log_sort;
-            };
-          ?>
-          <?php if ($tf_page > 1): ?>
-            <a class="page-btn" href="<?= $base.'?'.$qs_tf(max(1,$tf_page-1)); ?>#faculty-section" title = "Previous Page">&#x276E;</a>
-          <?php endif; ?>
-          <?php
-            $tf_maxPage = 5;
-            $tf_start = max(1, $tf_page - floor($tf_maxPage / 2));
-            $tf_end = min($tf_pages, $tf_start + $tf_maxPage - 1);
-
-            if ($tf_end - $tf_start < $tf_maxPage - 1) {
-              $tf_start = max(1, $tf_end - $tf_maxPage + 1);
-            } 
-          ?>
-          <?php if ($tf_start > 1): ?>
-            <a href="<?= $base.'?'.$qs_tf(1); ?>#faculty-section" class="page-btn" >1</a>
-            <?php if ($tf_start > 3): ?>
-              <a href="<?= $base.'?'.$qs_tf(max(1,$tf_page - 5)) ?>#faculty-section" class="page-btn" title="Jump backward 5 pages">...</a>        
-            <?php endif; ?>
-            <?php if ($tf_start == 3): ?>
-                    <a href="<?= $base.'?'.$qs_tf(2); ?>#faculty-section" class="page-btn" >2</a>       
-            <?php endif; ?>
-          <?php endif; ?>
-
-          <?php for ($i = $tf_start; $i <= $tf_end; $i++): ?>
-            <a class="page-btn <?= $i === $tf_page ? 'active' : '' ?>" href="<?= $base.'?'.$qs_tf($i); ?>#faculty-section"><?= $i ?></a>
-          <?php endfor; ?>
-
-          <?php if ($tf_end < $tf_pages): ?>
-            <?php if ($tf_end == $tf_pages - 2):?>
-              <a href="<?= $base.'?'.$qs_tf($tf_pages - 1); ?>#faculty-section" class="page-btn" > <?=$tf_pages - 1?></a>
-            <?php endif; ?>
-            <?php if ($tf_end < $tf_pages - 2): ?>
-              <a href="<?= $base.'?'.$qs_tf(min($tf_pages,$tf_page + 5)); ?>#faculty-section"class="page-btn" title="Jump forward 5 pages">...</a>
-            <?php endif; ?>
-              <a href="<?= $base.'?'.$qs_tf($tf_pages); ?>#faculty-section" class="page-btn" > <?=$tf_pages?></a>
-          <?php endif; ?>
-          <?php  if ($tf_page < $tf_pages): ?>
-            <a class="page-btn" href="<?= $base.'?'.$qs_tf(min($tf_pages,$tf_page+1)); ?>#faculty-section" title = "Next Page">&#x276F;</a>
-          <?php  endif;?>
-        </div>
-      <?php endif; ?>
-    </div>
 
     <div class="section-card" id="audit-section">
       <div class="section-header">
