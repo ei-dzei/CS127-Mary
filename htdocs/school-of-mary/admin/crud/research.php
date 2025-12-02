@@ -362,7 +362,7 @@ table td:first-child {
 }
 table th:nth-child(2),
 table td:nth-child(2) {
-  width: 580px;
+  width: 600px;
   min-width: 300px;
   max-width: 600px;
 }
@@ -375,11 +375,15 @@ table th:nth-child(5),table td:nth-child(5)  {
   width: 130px; 
   max-width: 130px;
 }
-
-
+.table-clickable tbody tr:hover{background: #c7d2e4;}
+.btn svg {
+    vertical-align: middle;
+    margin-right: 2px; 
+    margin-bottom: 2px; 
+} 
 /* Action buttons parity */
 .btn-action{
-  font-size: 0.8rem; /* Now it will work */
+  font-size: 0.8rem; 
   display:inline-flex;align-items:center;justify-content:center;
   min-width:130px;height:40px;padding:0 16px;
   border-radius:8px;border:1px solid var(--color-accent);
@@ -615,6 +619,22 @@ table th:nth-child(5),table td:nth-child(5)  {
   const clearFiltersButton = document.querySelector('#clear-btn');
   let timer = null;
   
+  function attachTableRowEvents() {
+    const tableRows = document.querySelectorAll(".table-clickable tbody tr");
+    
+    tableRows.forEach(row => {
+      row.addEventListener("click", function(e) {
+        if (e.target.closest('.actions-cell')) {
+          return;
+        }
+        
+        const href = this.dataset.href;
+        if (href) {
+          window.location.href = href;
+        }
+      });
+    });
+  }
   // Toggle visibility of the filter dropdown
   function toggleFilters(e) {
       if (e) e.preventDefault();
@@ -913,6 +933,7 @@ table th:nth-child(5),table td:nth-child(5)  {
         researchPanel.innerHTML = html;
         attachPaginationEvents();
         attachEditButtons(); 
+        attachTableRowEvents();
       })
       .catch(err => {
         researchPanel.innerHTML = "<div class='error'>Failed to load results.</div>";
