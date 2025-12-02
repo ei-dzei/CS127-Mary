@@ -361,13 +361,19 @@ require_once __DIR__ . '/../../partials/site_header.php';
 }
 .table-scroll table th:nth-child(6), /* Actions column */
 .table-scroll table td:nth-child(6) {
-    width: 200px; /* Actions width fixed */
+    width: 180px; /* Actions width fixed */
 }
 /* Research Title column (3rd child) is left flexible to take up maximum remaining space. */
 .table-scroll table th:nth-child(3),
 .table-scroll table td:nth-child(3) {
     text-align: left;
 }
+.table-clickable tbody tr:hover{background: #c7d2e4;}
+.btn svg {
+    vertical-align: middle;
+    margin-right: 2px; 
+    margin-bottom: 2px; 
+} 
 /* --- End of Fix --- */
 </style>
 
@@ -586,6 +592,22 @@ require_once __DIR__ . '/../../partials/site_header.php';
   const clearFiltersButton = document.querySelector('#clear-btn');
   let timer = null;
   
+  function attachTableRowEvents() {
+    const tableRows = document.querySelectorAll(".table-clickable tbody tr");
+    
+    tableRows.forEach(row => {
+      row.addEventListener("click", function(e) {
+        if (e.target.closest('.actions-cell')) {
+          return;
+        }
+        
+        const href = this.dataset.href;
+        if (href) {
+          window.location.href = href;
+        }
+      });
+    });
+  }
   // Toggle visibility of the filter dropdown
   function toggleFilters(e) {
       if (e) e.preventDefault();
@@ -661,6 +683,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
         assignmentPanel.innerHTML = html;
         attachPaginationEvents();
         attachEditButtons(); 
+        attachTableRowEvents();
       })
       .catch(err => {
         assignmentPanel.innerHTML = "<div class='error'>Failed to load results.</div>";
