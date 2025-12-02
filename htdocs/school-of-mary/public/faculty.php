@@ -42,7 +42,7 @@
         <p class="muted">Record not found.</p>
         <p><a class="btn small" href="<?= BASE_URL ?>/public/faculty.php">Back to list</a></p>
       <?php else: ?>
-        <button class="btn small" style="float:right;margin-top:-4px;" onclick="history.back()">← Back</button>
+        <button class="btn small" style="float:right;margin-top:-4px;" onclick="history.back()">Back</button>
         <h1 style="margin-bottom:6px">
           <?php
             echo htmlspecialchars($faculty['FACULTY_LNAME'].', '.$faculty['FACULTY_FNAME']);
@@ -70,7 +70,7 @@
           </div>
         </div>
 
-        <h2 style="font-family:'Patua One',serif; margin-top:16px;">Research Projects</h2>
+        <h2 style="font-family:'Patua One',serif; margin-top:18px; margin-bottom:16px;">Research Projects</h2>
         <?php if (empty($projects)): ?>
           <div class="panel">No assignments found for this faculty.</div>
         <?php else: ?>
@@ -208,17 +208,17 @@
 </style>
 <section class="container fade-in" style="margin-top:6px;">
   <h1 style="margin-bottom:6px;">Faculty</h1>
-  <p class="muted" style="margin-bottom:10px;">Explore the faculty of School of Mary</p>
+  <p class="muted" style="margin-bottom:10px;">Browse the faculty directory and explore their scholarly contributions.</p>
 
   <!-- Filter Bar -->
   <form method="get" class="filterbar" id="form" style="margin-bottom:14px;">
     <!-- Inputs row -->
     
-      <div class="searchbox">
+      <div class="searchbox" style="font-family: 'Newsreader', serif;">
         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M10 18a8 8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/>
         </svg>
-        <input type="search" name="q" value="<?= htmlspecialchars($q) ?>" style="width: 85%;"placeholder="Search by name or email…" />
+        <input type="search" name="q" value="<?= htmlspecialchars($q) ?>" style="width: 85%; font-family: 'Newsreader', serif;" placeholder="Search faculty name or email"/>
         <!-- <input type="reset" value="X" alt="Clear the search form"> -->
         <button class="filter-toggle-btn" id="filter-btn" title="Filter" type="button" onclick="toggleFilters(event)">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

@@ -136,6 +136,7 @@ $CSRF = csrf_token();
 
 /* --- SEARCH BAR AND TOGGLE STYLES (Full Width, Matching Look) --- */
 .searchbox {
+  font-family: 'Newsreader', serif;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -158,6 +159,7 @@ $CSRF = csrf_token();
     padding: 0;
     height: 1.5em; 
     font-size: 1rem;
+    font-family: 'Newsreader', serif;
 }
 /* FILTER */
 .filter-toggle-btn {
@@ -379,22 +381,22 @@ $CSRF = csrf_token();
       </svg>
       <span style="margin-left:5px; font-size: 0.8rem;">Export CSV</span>
     </a>
-    <button class="btn-action btn-primary" id="create-funding" style="font-size:0.8rem">
+    <button class="btn-action btn-primary" id="create-funding" style="font-size:0.8rem; font-family: 'Newsreader', serif;">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
         <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
       </svg> 
       Create Funding
     </button>
   </div>
-  <h1 style="margin-bottom:8px;">Funding</h1>
-  <p class="muted" style="margin-bottom:10px;">Manage funding rows. CSV import/export below.</p>
+  <h1 style="margin: 0;">Funding</h1>
+  <p class="muted" style="margin-bottom:10px;">Manage research funding by associating projects with partner agencies and setting allocated amounts.</p>
 
   <form method="get" class="filterbar" style="margin-bottom:10px;">
-    <div class="searchbox">
+    <div class="searchbox" style="font-family: 'Newsreader', serif;">
       <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M10 18a8 8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/>
       </svg>
-      <input class="input" name="q" value="<?= htmlspecialchars($q); ?>" placeholder="Search agency or research....">
+      <input class="input" type="search" name="q" value="<?= htmlspecialchars($q); ?>" placeholder="Search agency name or research project" style="width:70%; font-family: 'Newsreader', serif;"/>
       <button class="filter-toggle-btn" id="filter-btn" title="Filter" type="button" >
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
@@ -413,7 +415,7 @@ $CSRF = csrf_token();
         </div>
       </div>
       <div class="clear-btn-container">
-        <button class="btn-primary" id="clear-btn" type="button" >Clear Filters</button>
+        <button class="btn-primary" id="clear-btn" type="button" style="font-size:0.8rem; font-family: 'Newsreader', serif;">Clear Filters</button>
       </div>
     </div>
     <button class="sort-toggle-btn" id="sort-btn" title="Sort" type="button">

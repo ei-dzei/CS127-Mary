@@ -54,7 +54,7 @@ body {
   color: var(--color-text);
   line-height: 1.6;
   font-size: 16px;
-  font-family: 'Newsreader', 'Times New Roman', serif;
+  font-family: 'Newsreader', serif;
   min-height: 100vh;
   transition: padding-left var(--transition); /* Used for non-flex body shift (optional) */
   position: relative; /* Base for fixed elements */
@@ -198,6 +198,7 @@ main.container {
     height: auto;
 }
 .sidebar a {
+    font-family: 'Newsreader', serif;
     padding: 12px 20px;
     display: block;
     text-decoration: none;
@@ -230,6 +231,7 @@ main.container {
     background: #ffd166;
     font-weight: bold;
     text-align: center;
+    font-family: 'Newsreader', serif;
 }
 .sidebar .btn.small {
     background: var(--color-sidebar-active); 
@@ -294,6 +296,7 @@ main.container {
    BUTTONS
    ======================================= */
 .btn {
+  font-family: 'Newsreader', serif;
   padding: 8px 14px;
   border-radius: var(--radius);
   border: 1px solid var(--color-border);
@@ -314,6 +317,7 @@ main.container {
 .btn.small {
   padding: 6px 10px;
   font-size: 0.9rem;
+  font-family: 'Newsreader', serif;
 }
 .btn--primary {
   background: var(--color-accent);
@@ -418,12 +422,14 @@ th {
 }
 .footer__tagline {
     font-size: 0.85rem;
-    color: #a8dadc;
+    color: #f1f1f1;
     margin-bottom: 12px;
+    font-family: 'Newsreader', serif;
 }
 .footer__legal {
     font-size: 0.75rem;
     color: #92b8d0;
+    font-family: 'Newsreader', serif;
 }
 
 .footer__heading {
@@ -442,11 +448,13 @@ th {
 .footer__list li {
     margin-bottom: 6px; 
     line-height: 1.5;
+    font-family: 'Newsreader', serif;
 }
 .footer__list a {
     color: #f1f1f1;
     text-decoration: none;
     transition: color 0.2s ease;
+    font-family: 'Newsreader', serif;
 }
 .footer__list a:hover {
     color: #457b9d; 
@@ -456,6 +464,7 @@ th {
     display: flex;
     align-items: center;
     gap: 8px;
+    font-family: 'Newsreader', serif;
 }
 
 .footer__inline-links a {
@@ -464,6 +473,7 @@ th {
     transition: color 0.2s ease;
     margin: 0 5px; 
     display: inline-block; 
+    font-family: 'Newsreader', serif;
 }
 .footer__inline-links a:hover {
     color: #457b9d; 
@@ -537,6 +547,7 @@ th {
   color: #1b2a4a !important;
   text-decoration: none;
   transition: background var(--transition);
+  font-family: 'Newsreader', serif;
 }
 .dropdown__menu a:hover,
 .navbar .dropdown-menu a:hover,
@@ -645,11 +656,10 @@ th {
 .hero__subtitle {
   font-family: 'Newsreader', serif;
   color: var(--color-primary);
-  font-size: clamp(2rem, 5vw, 2rem);
+  font-size: clamp(1.25rem, 2vw, 1.25rem);
   line-height: 1.65;
-  font-weight: 100;
   max-width: 58ch;
-  font-weight: bold;
+  font-style: bold;
 }
 .hero__actions {
   display: flex;
@@ -689,7 +699,7 @@ th {
    FEATURE SECTION (home)
    ======================================= */
 .feature {
-  padding: 5rem 0; 
+  padding: 2rem 0; 
   display: flex;
   justify-content: center;
 }

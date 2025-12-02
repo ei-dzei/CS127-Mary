@@ -351,7 +351,9 @@ require_once __DIR__ . '/../partials/site_header.php';
     <div class="hero-card">
       <span class="welcome-message">Welcome, Admin!</span>
       <h1 style="margin:0 0 6px;">Admin Dashboard</h1>
-      <p class="muted" style="margin:0;">Overview of the database and the latest changes in real time.</p>
+      <p class="muted" style="margin:0;">
+        Real-time overview of the database. Manage records, track and monitor activities, and review recent changes.
+      </p>
     </div>
 
     <div class="kpi-card kpi-col">
@@ -374,6 +376,15 @@ require_once __DIR__ . '/../partials/site_header.php';
 
     <div class="kpi-card kpi-col">
       <div>
+        <div class="kpi-emoji"><i class="bi bi-list-check"></i></div>
+        <div class="kpi-title">Assignments</div>
+        <div class="kpi-value" id="kpi-assignment"><?= number_format($kpi['assignment']); ?></div>
+      </div>
+      <a class="btn-link" href="<?= app_url('/admin/crud/assignment.php'); ?>">Manage</a>
+    </div>
+
+    <div class="kpi-card kpi-col">
+      <div>
         <div class="kpi-emoji"><i class="bi bi-building"></i></div>
         <div class="kpi-title">Agencies</div>
         <div class="kpi-value" id="kpi-agencies"><?= number_format($kpi['agencies']); ?></div>
@@ -388,15 +399,6 @@ require_once __DIR__ . '/../partials/site_header.php';
         <div class="kpi-value" id="kpi-funding"><?= number_format($kpi['funding']); ?></div>
       </div>
       <a class="btn-link" href="<?= app_url('/admin/crud/funding.php'); ?>">Manage</a>
-    </div>
-
-    <div class="kpi-card kpi-col">
-      <div>
-        <div class="kpi-emoji"><i class="bi bi-list-check"></i></div>
-        <div class="kpi-title">Assignments</div>
-        <div class="kpi-value" id="kpi-assignment"><?= number_format($kpi['assignment']); ?></div>
-      </div>
-      <a class="btn-link" href="<?= app_url('/admin/crud/assignment.php'); ?>">Manage</a>
     </div>
 
     <div class="kpi-card kpi-col">

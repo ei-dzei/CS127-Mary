@@ -35,7 +35,7 @@ if (!function_exists('current_path')) {
     
     body {
         margin: 0;
-        font-family: Arial, sans-serif;
+        font-family: 'Newsreader', serif;
         background: #f8f9fa;
         min-height: 100vh; 
         position: relative;
@@ -155,6 +155,7 @@ if (!function_exists('current_path')) {
         opacity: 0;
         pointer-events: none;
         display: none;
+        font-family: 'Newsreader', serif;
     }
 
     /* Center the icons strictly when collapsed */
@@ -338,11 +339,11 @@ if (!function_exists('current_path')) {
                 <span class="link-text">Faculty</span>
             </a>
             <a href="<?= BASE_URL ?>/admin/crud/research.php" class="sub-link <?= strpos($path, '/admin/crud/research.php') !== false ? 'active' : '' ?>">
-                <i class="bi bi-file-earmark-text"></i>
+                <i class="bi bi-book"></i>
                 <span class="link-text">Research</span>
             </a>
             <a href="<?= BASE_URL ?>/admin/crud/assignment.php" class="sub-link <?= strpos($path, '/admin/crud/assignment.php') !== false ? 'active' : '' ?>">
-                <i class="bi bi-briefcase"></i>
+                <i class="bi bi-list-check"></i>
                 <span class="link-text">Assignments</span>
             </a>
             <a href="<?= BASE_URL ?>/admin/crud/agency.php" class="sub-link <?= strpos($path, '/admin/crud/agency.php') !== false ? 'active' : '' ?>">
@@ -350,12 +351,12 @@ if (!function_exists('current_path')) {
                 <span class="link-text">Agencies</span>
             </a>
             <a href="<?= BASE_URL ?>/admin/crud/funding.php" class="sub-link <?= strpos($path, '/admin/crud/funding.php') !== false ? 'active' : '' ?>">
-                <i class="bi bi-currency-dollar"></i>
+                <i class="bi bi-cash-stack"></i>
                 <span class="link-text">Funding</span>
             </a>
             <a href="<?= BASE_URL ?>/admin/audit_print.php" class="sub-link <?= strpos($path, '/admin/audit_print.php') !== false ? 'active' : '' ?>">
                 <i class="bi bi-printer"></i>
-                <span class="link-text">Audit (Print)</span>
+                <span class="link-text">Audit Log</span>
             </a>
 
             <a class="mt-auto-custom" href="<?= BASE_URL ?>/admin/logout.php">

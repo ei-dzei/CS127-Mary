@@ -2,7 +2,7 @@
             <div class="container footer__grid">
                 
                 <div class="footer__col footer__brand">
-                    <p>School of Mary</p>
+                    <h4 class="footer__heading">School of Mary Faculty and Research Portal</h4>
                     <p class="footer__tagline">Excellence in Research and Innovation</p>
                     <p class="footer__legal">
                         Copyright &copy; <?= date('Y'); ?> School of Mary. All Rights Reserved.

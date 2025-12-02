@@ -65,7 +65,7 @@ if ($id > 0) {
       <p class="muted">Record not found.</p>
       <p><a class="btn small" href="<?= BASE_URL ?>/public/research.php">Back to list</a></p>
     <?php else: ?>
-      <button class="btn small" style="float:right;margin-top:-4px;" onclick="history.back()">← Back</button>
+      <button class="btn small" style="float:right;margin-top:-4px;" onclick="history.back()">Back</button>
       <h1 style="margin-bottom:6px"><?= htmlspecialchars($research['RESEARCH_TITLE']); ?></h1>
       <div class="muted" style="margin-bottom:10px;">
         <span class="pill" style="background:#eef4ff; border:1px solid #cdd8f0; padding:2px 8px; border-radius:999px;">
@@ -148,7 +148,7 @@ if ($id > 0) {
           </div>
         </div>
       <?php endif; ?>
-      <h2 style="font-family:'Patua One',serif; margin-top:16px;">Assigned Faculty</h2>
+      <h2 style="font-family:'Patua One',serif; margin-top:18px; margin-bottom:16px;">Assigned Faculty</h2>
       <?php if (!$people): ?>
         <div class="panel">No assignments found.</div>
       <?php else: ?>
@@ -296,14 +296,14 @@ $to     = trim($_GET['to'] ?? '');
 
 <section class="container fade-in" style="margin-top:6px;">
   <h1 style="margin-bottom:6px;">Research</h1>
-  <p class="muted" style="margin-bottom:10px;">Browse the research database system of School of Mary.</p>
+  <p class="muted" style="margin-bottom:10px;">Browse the research project directory and explore faculty contributors.</p>
 
-  <form method="get" class="filterbar" id="research-filter-form">
-    <div class="searchbox">
+  <form method="get" class="filterbar" id="research-filter-form" style="margin-bottom:14px;">
+    <div class="searchbox" style="font-family: 'Newsreader', serif;">
       <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M10 18a8 8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/>
       </svg>
-      <input type="search" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search research titles…" id="q-input" />
+      <input type="search" name="q" value="<?= htmlspecialchars($q) ?>" style="width: 85%; font-family: 'Newsreader', serif;" placeholder="Search research projects" id="q-input" />
       
       <button class="filter-toggle-btn" id="filter-btn" title="Filter" type="button" onclick="toggleFilters(event)">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

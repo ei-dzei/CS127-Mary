@@ -24,14 +24,30 @@ require_once __DIR__ . '/../partials/site_header.php';
 
 /* SEARCH BAR CONTAINER */
 .searchbox {
-  display: flex; align-items: center; gap: 10px; padding: 8px 15px;
-  background: #fff; border: 1px solid #c7d2e4; border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex: 1; box-sizing: border-box;
-  width: auto; height: 57px;
+  font-family: 'Newsreader', serif;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 15px;
+  background: #fff;
+  border: 1px solid #c7d2e4;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  flex: 1; 
+  box-sizing: border-box;
+  width: auto;
+  height: 57px;
 }
-.searchbox svg:first-child { color: #6b7280; }
+.searchbox svg:first-child {
+    color: #6b7280;
+}
 .searchbox input[type="search"] { 
-  flex-grow: 1; border: none; padding: 0; height: 1.5em; font-size: 1rem;
+    flex-grow: 1;
+    border: none;
+    padding: 0;
+    height: 1.5em; 
+    font-size: 1rem;
+    font-family: 'Newsreader', serif;
 }
 
 /* BUTTONS */
@@ -77,6 +93,7 @@ require_once __DIR__ . '/../partials/site_header.php';
   border-radius:8px; border:1px solid #0b5394;
   font-weight:600; text-decoration:none; cursor:pointer;
   background:#0b5394; color:#fff;
+  font-family: 'Newsreader', serif;
 }
 .btn-action:hover { filter:brightness(.94); box-shadow:0 4px 10px rgba(0,0,0,.06); }
 
@@ -96,20 +113,20 @@ require_once __DIR__ . '/../partials/site_header.php';
 
 <section class="panel fade-in crud-header-card">
   <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; float:inline-end">
-    <button class="btn-action" onclick="window.print()" style="min-width:160px;">
-      <span style="font-size:1.2em; margin-right:8px;">&#x1F5B6;&#xFE0F;</span> Print Audit Log
+    <button class="btn-action" onclick="window.print()" style="min-width:160px; font-family: 'Newsreader', serif;">
+      <span style="font-size:1.2em; margin-right:8px; ">&#x1F5B6;&#xFE0F;</span> Print Audit Log
     </button>
   </div>
 
-  <h1 style="margin-bottom:8px;">Audit Log</h1>
-  <p class="muted" style="margin-bottom:10px;">Check changes made in database.</p>
+  <h1 style="margin: 0;">Audit Log</h1>
+  <p class="muted" style="margin-bottom:10px;">Track and review history of all system changes.</p>
   
   <form method="get" class="filterbar" onsubmit="return false;">
-    <div class="searchbox">
+    <div class="searchbox" style="font-family: 'Newsreader', serif;">
       <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M10 18a8 8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/>
       </svg>
-      <input class="input" type="search" name="actor" placeholder="Search actor..." autocomplete="off">
+      <input class="input" type="search" name="actor" placeholder="Search actor" autocomplete="off">
       
       <button class="filter-toggle-btn" id="filter-btn" title="Filter" type="button">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -148,7 +165,7 @@ require_once __DIR__ . '/../partials/site_header.php';
         </div>
       </div>
       <div class="clear-btn-container">
-        <button class="btn-primary" id="clear-btn" type="button">Clear Filters</button>
+        <button class="btn-primary" id="clear-btn" type="button" style="font-family: 'Newsreader', serif;">Clear Filters</button>
       </div>
     </div>
 
