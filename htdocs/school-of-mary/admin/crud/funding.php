@@ -97,7 +97,7 @@ if ($action === 'delete') {
 }
 
 /* Lookups */
-$research = $pdo->query("SELECT RESEARCH_ID, RESEARCH_TITLE FROM RESEARCH ORDER BY RESEARCH_STARTDATE DESC")
+$research = $pdo->query("SELECT RESEARCH_ID, RESEARCH_TITLE FROM RESEARCH ORDER BY RESEARCH_TITLE")
                 ->fetchAll(PDO::FETCH_ASSOC);
 $agencies = $pdo->query("SELECT AGENCY_ID, AGENCY_NAME FROM AGENCY ORDER BY AGENCY_NAME")
                 ->fetchAll(PDO::FETCH_ASSOC);
@@ -343,14 +343,30 @@ $CSRF = csrf_token();
 
 /* CRUD Table Fixes for Funding */
 .table-scroll table {
-    /* Enforce table-layout: fixed for better column control, but use auto if content needs to wrap */
-    table-layout: fixed; 
+  table-layout: fixed; 
+  width: 100%;
+  scrollbar-width: none; /*hide scrollbar*/
+  -ms-overflow-style: none; /*hide scrollbar*/
 }
-.table-scroll th:nth-child(1), .table-scroll td:nth-child(1) { width: 50px; }  /* ID */
-.table-scroll th:nth-child(4), .table-scroll td:nth-child(4) { width: 120px; } /* Amount */
-.table-scroll th:nth-child(5), .table-scroll td:nth-child(5) { width: 100px; } /* Date */
-.table-scroll th:nth-child(6), .table-scroll td:nth-child(6) { width: 150px; } /* Actions */
-/* Research (2nd) and Agency (3rd) share the remaining width */
+.table-scroll::-webkit-scrollbar {
+  display: none; /*hide scrollbar*/
+}
+.table-scroll table td { 
+    height: 50px;
+    white-space: nowrap;
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+}
+.table-scroll th:nth-child(1), .table-scroll td:nth-child(1) { width: 60px; }  /* ID */
+.table-scroll th:nth-child(4), .table-scroll td:nth-child(4) { width: 140px; } /* Amount */
+.table-scroll th:nth-child(5), .table-scroll td:nth-child(5) { width: 110px; } /* Date */
+.table-scroll th:nth-child(6), .table-scroll td:nth-child(6) { width: 180px; } /* Actions */
+.table-clickable tbody tr:hover{background: #c7d2e4;}
+.btn svg {
+    vertical-align: middle;
+    margin-right: 2px; 
+    margin-bottom: 2px; 
+}   
 </style>
 
 <section class="panel fade-in crud-header-card">
@@ -540,6 +556,22 @@ $CSRF = csrf_token();
 </div>
 
 <script>
+  function attachTableRowEvents() {
+    const tableRows = document.querySelectorAll(".table-clickable tbody tr");
+    
+    tableRows.forEach(row => {
+      row.addEventListener("click", function(e) {
+        if (e.target.closest('.actions-cell')) {
+          return;
+        }
+        
+        const href = this.dataset.href;
+        if (href) {
+          window.location.href = href;
+        }
+      });
+    });
+  }
   //Filter funding
    const fundingInputvalue = document.querySelectorAll(".funding-input input");
   let fundingGap = 100;
@@ -666,6 +698,7 @@ $CSRF = csrf_token();
         fundingPanel.innerHTML = html;
         attachPaginationEvents();
         attachEditButtons(); 
+        attachTableRowEvents();
       })
       .catch(err => {
         fundingPanel.innerHTML = "<div class='error'>Failed to load results.</div>";
