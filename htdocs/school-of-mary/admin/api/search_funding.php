@@ -3,6 +3,8 @@
     
     /* Filters / Sorting / Pagination */
     $q    = trim($_GET['q'] ?? '');
+    $minFunding = isset($_GET['min_funding']) ? (float)$_GET['min_funding'] : 0;
+    $maxFunding = isset($_GET['max_funding']) ? (float)$_GET['max_funding'] : 99999999.99;
     $sort = trim($_GET['sort'] ?? 'date_desc');
     $page = max(1, (int)($_GET['page'] ?? 1));
     $per  = 5;
@@ -31,7 +33,14 @@
     $baseSql .= " AND (re.RESEARCH_TITLE LIKE ? OR ag.AGENCY_NAME LIKE ?)";
     $params = ["%$q%","%$q%"];
     }
-
+    if ($minFunding > 0) {
+        $baseSql .= " AND fu.FUNDING_AMOUNT >= ?";
+        $params[] = $minFunding;
+    }
+    if ($maxFunding < 99999999.99) {
+        $baseSql .= " AND fu.FUNDING_AMOUNT <= ?";
+        $params[] = $maxFunding;
+    }
     /* Count for pagination */
     $stmtCnt = $pdo->prepare("SELECT COUNT(*) ".$baseSql);
     $stmtCnt->execute($params);

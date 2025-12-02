@@ -104,6 +104,8 @@ $agencies = $pdo->query("SELECT AGENCY_ID, AGENCY_NAME FROM AGENCY ORDER BY AGEN
 
 /* Filters / Sorting / Pagination */
 $q    = trim($_GET['q'] ?? '');
+$minFunding = isset($_GET['min_funding']) ? (float)$_GET['min_funding'] : 0;
+$maxFunding = isset($_GET['max_funding']) ? (float)$_GET['max_funding'] : 99999999.99;
 $sort = trim($_GET['sort'] ?? 'date_desc');
 $page = max(1, (int)($_GET['page'] ?? 1));
 $per  = 5;
@@ -177,7 +179,7 @@ $CSRF = csrf_token();
     top: 100%; 
     right: 0; 
     margin-top: 8px;
-    width: min(100%, 240px); 
+    width: min(100%, 300px); 
     background: #fff;
     border: 1px solid #c7d2e4;
     border-radius: 8px;
@@ -187,7 +189,7 @@ $CSRF = csrf_token();
 }
 #filter-options {
     display: grid;
-    grid-template-columns: repeat(1, 1fr); 
+    grid-template-columns: repeat(2, 1fr); 
     gap: 10px;
     margin-bottom: 15px;
 }
@@ -234,7 +236,7 @@ $CSRF = csrf_token();
     top: 100%; 
     right: 0;
     margin-top: 8px;
-    width: min(100%, 170px); 
+    width: min(100%, 200px); 
     background: #fff;
     border: 1px solid #c7d2e4;
     border-radius: 8px;
@@ -377,13 +379,27 @@ $CSRF = csrf_token();
         <path d="M10 18a8 8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/>
       </svg>
       <input class="input" name="q" value="<?= htmlspecialchars($q); ?>" placeholder="Search agency or research....">
-      <!-- <button class="filter-toggle-btn" id="filter-btn" title="Filter" type="button" >
+      <button class="filter-toggle-btn" id="filter-btn" title="Filter" type="button" >
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
         </svg>
-      </button> -->
+      </button> 
     </div>
-
+    <div id="filter-dropdown">
+      <div class="funding-input" id="filter-options">
+        <div class="field">
+            <label>Minimum Funding</label>
+            <input type="number" class="input min-input" value="0.00" step="0.01">
+        </div>
+        <div class="field">
+            <label>Maximum Funding</label>
+            <input type="number" class="input max-input" value="99999999.99" step="0.01">
+        </div>
+      </div>
+      <div class="clear-btn-container">
+        <button class="btn-primary" id="clear-btn" type="button" >Clear Filters</button>
+      </div>
+    </div>
     <button class="sort-toggle-btn" id="sort-btn" title="Sort" type="button">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-arrows-sort"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 9l4 -4l4 4m-4 -4v14" /><path d="M21 15l-4 4l-4 -4m4 4v-14" /></svg>
     </button>
@@ -400,11 +416,11 @@ $CSRF = csrf_token();
         </div>
         <div>
           <input type="radio" name="sort" value="amount_desc" <?= $sort==='amount_desc'?'checked':''; ?>>
-          <label>Amount (High → Low)</label>
+          <label>Amount (High–Low)</label>
         </div>
         <div>
           <input type="radio" name="sort" value="amount_asc" <?= $sort==='amount_asc'?'checked':''; ?>>
-          <label>Amount (Low → High)</label>
+          <label>Amount (Low–High)</label>
         </div>
         <div>
           <input type="radio" name="sort" value="title_asc" <?= $sort==='title_asc'?'checked':''; ?>>
@@ -524,13 +540,65 @@ $CSRF = csrf_token();
 </div>
 
 <script>
+  //Filter funding
+   const fundingInputvalue = document.querySelectorAll(".funding-input input");
+  let fundingGap = 100;
+
+  // Adding event listeners to funding input elements
+  for (let i = 0; i < fundingInputvalue.length; i++) {
+    fundingInputvalue[i].addEventListener("input", e => {
+      // Parse min and max values of the range input
+      let minp = parseFloat(fundingInputvalue[0].value) || 0.00;
+      let maxp = parseFloat(fundingInputvalue[1].value) || 9999999.99;
+      let diff = maxp - minp
+
+      // Validate the input values
+      if (minp < 0) {
+        alert("Minimum funding cannot be less than 0 pesos.");
+        fundingInputvalue[0].value = 0;
+        minp = 0;
+      }
+      if (maxp > 99999999.99) {
+        alert("Maximum funding cannot be greater than 99999999.99 pesos.");
+        fundingInputvalue[1].value = 99999999.99;
+        maxp = 99999999.99;
+      }
+      if (minp > maxp - fundingGap) {
+        alert("The minimum funding cannot be greater than maximum funding.");
+        fundingInputvalue[0].value = maxp - fundingGap;
+        minp = maxp - fundingGap;
+
+        if (minp < 0) {
+            fundingInputvalue[0].value = 0;
+            minp = 0;
+        }
+      }
+    });
+  }
+  fundingInputvalue.forEach(input => {
+    input.addEventListener('input', handleLiveInput);
+  });
   //Search
   const fundingPanel = document.querySelector('#panel');
   const queryInput = document.querySelector('input[name="q"]');
   const sortRadios = document.querySelectorAll('input[name="sort"]');
   const sortDropdown = document.querySelector('#sort-dropdown');
   const sortButton = document.querySelector('#sort-btn');
+  const filterDropdown = document.querySelector('#filter-dropdown');
+  const filterButton = document.querySelector('#filter-btn');
+  const clearFiltersButton = document.querySelector('#clear-btn');
   let timer = null;
+  // Toggle visibility of the filter dropdown
+  function toggleFilters(e) {
+      if (e) e.preventDefault();
+      e.stopPropagation();
+      sortDropdown.style.display = "none";
+      if (filterDropdown.style.display === "none" || filterDropdown.style.display === "") {
+        filterDropdown.style.display = "block";
+      } else {
+        filterDropdown.style.display = "none";
+      }
+  }
   function toggleSort(e) {
       if (e) e.preventDefault();
       e.stopPropagation();
@@ -541,6 +609,11 @@ $CSRF = csrf_token();
         sortDropdown.style.display = "none";
       }
   }
+  document.addEventListener('click', function(e) {
+  if (!filterDropdown.contains(e.target) && e.target !== filterButton) {
+    filterDropdown.style.display = "none";
+  }
+  });
   document.addEventListener('click', function(e) {
   if (!sortDropdown.contains(e.target) && e.target !== sortButton) {
     sortDropdown.style.display = "none";
@@ -553,19 +626,37 @@ $CSRF = csrf_token();
     const checkedRadio = document.querySelector('input[name="sort"]:checked');
     return checkedRadio ? checkedRadio.value : 'name_asc'; 
   }
+  // Clear button function
+  function clearFilters(e) {
+      if (e) e.preventDefault();
+      
+      // Reset inputs
+      queryInput.value = '';
+      fundingInputvalue[0].value = '0';
+      fundingInputvalue[1].value = '99999999.99';
+      
+      // Fetch results to show the unfiltered list
+      fetchResults(1);
+
+      // Hide the filter panel
+      filterDropdown.style.display = "none";
+  }
   sortRadios.forEach(radio => {
     radio.addEventListener('change', () => {
       fetchResults(1);
       closeSort(); 
     });
   });
-
+  clearFiltersButton.addEventListener('click', clearFilters);
+  filterButton.addEventListener('click', toggleFilters);
   sortButton.addEventListener('click', toggleSort);  
   // fetch func
   function fetchResults(page) {
     const q = queryInput.value;
+    const minFunding = fundingInputvalue[0].value || 0;
+    const maxFunding = fundingInputvalue[1].value || 99999999.99;
     const sort = getSelectedSort();
-    const url = `../api/search_funding.php?q=${encodeURIComponent(q)}&sort=${encodeURIComponent(sort)}&page=${page}`;
+    const url = `../api/search_funding.php?q=${encodeURIComponent(q)}&min_funding=${minFunding}&max_funding=${maxFunding}&sort=${encodeURIComponent(sort)}&page=${page}`;
     
     fundingPanel.innerHTML = "<div class='loading'>Loading...</div>";
     
