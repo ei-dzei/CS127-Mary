@@ -67,6 +67,106 @@ require_once __DIR__ . '/../partials/site_header.php';
 ?>
 
 <style>
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.field label {
+  font-weight: 500;
+  color: #4b5563;
+}
+.field .input { 
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  height: 38px; 
+  box-sizing: border-box;
+}
+
+/* --- SEARCH BAR AND TOGGLE STYLES (Full Width, Matching Look) --- */
+.searchbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 15px;
+  background: #fff;
+  border: 1px solid #c7d2e4;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  flex: 1; 
+  box-sizing: border-box;
+  width: auto;
+  height: 57px;
+}
+.searchbox svg:first-child {
+  color: #6b7280;
+}
+.searchbox input[type="search"] { 
+  flex-grow: 1;
+  border: none;
+  padding: 0;
+  height: 1.5em; 
+  font-size: 1rem;
+}
+/* FILTER */
+.filterbar {
+  position: relative; 
+  z-index: 10;
+  overflow: visible;
+}
+.filter-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #4b5563; 
+}
+.filter-toggle-btn:hover {
+  color: #1f2937;
+}
+#filter-dropdown {
+  display: none; 
+  position: absolute;
+  top: 100%; 
+  right: 0; 
+  margin-top: 8px;
+  width: min(100%, 550px); 
+  background: #fff;
+  border: 1px solid #c7d2e4;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  z-index: 9999;
+  padding: 15px;
+}
+#filter-options {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); 
+  gap: 10px;
+  margin-bottom: 15px;
+}
+/* CLEAR BUTTON */
+.clear-btn-container {
+  text-align: left;
+}
+.clear-btn-container .btn-primary {
+  background-color: #0b5394;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  width: 100%;
+}
+.clear-btn-container .btn-primary:hover {
+  background-color: #0b5394;
+}
+.panel.fade-in:first-of-type {
+  position: relative;
+  z-index: 5000;
+}
 /* === Buttons === */
 .btn-action{
   display:inline-flex; align-items:center; justify-content:center;
@@ -109,53 +209,59 @@ require_once __DIR__ . '/../partials/site_header.php';
 </style>
 
 <section class="panel fade-in">
+  <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; float:inline-end">
+    <button class="btn-action btn-primary" onclick="window.print()" style="min-width:160px;">
+      <span style="font-size:1.2em; margin-right:8px;">&#x1F5B6;&#xFE0F;</span> Print Audit Log
+    </button>
+  </div>
   <h1 style="margin-bottom:8px;">Audit Log — Print View</h1>
-  <p class="muted" style="margin-bottom:10px;">
-  </p>
-  <form method="get" class="grid filter-bar">
-    <div class="field" style="grid-column:span 3;">
-      <label>Actor</label>
-      <input class="input" name="actor" value="<?= htmlspecialchars($actor); ?>" placeholder="admin, user id, etc." />
+  <p class="muted" style="margin-bottom:10px;">Check changes made in database.</p>
+  <form method="get" class="filterbar">
+    <div class="searchbox">
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M10 18a8 8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/>
+      </svg>
+      <input class="input" name="actor" value="<?= htmlspecialchars($actor); ?>" placeholder="Search actor..." />
+      <button class="filter-toggle-btn" id="filter-btn" title="Filter" type="button" >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+        </svg>
+      </button>
     </div>
-    <div class="field" style="grid-column:span 2;">
-      <label>Action</label>
-      <select class="input" name="action">
-        <option value="">All</option>
-        <?php foreach ($actions as $a): ?>
-          <option value="<?= $a; ?>"<?= $action===$a?' selected':''; ?>><?= $a; ?></option>
-        <?php endforeach; ?>
-      </select>
-    </div>
-    <div class="field" style="grid-column:span 2;">
-      <label>Table</label>
-      <select class="input" name="table">
-        <option value="">All</option>
-        <?php foreach ($tables as $t): ?>
-          <option value="<?= $t; ?>"<?= $table===$t?' selected':''; ?>><?= $t; ?></option>
-        <?php endforeach; ?>
-      </select>
-    </div>
-    <div class="field" style="grid-column:span 2;">
-      <label>From</label>
-      <input class="input" type="date" name="from" value="<?= htmlspecialchars($from); ?>">
-    </div>
-    <div class="field" style="grid-column:span 2;">
-      <label>To</label>
-      <input class="input" type="date" name="to" value="<?= htmlspecialchars($to); ?>">
-    </div>
-    <div class="field" style="grid-column:span 1; display:flex; align-items:flex-end;">
-      <button class="btn-action btn-primary" type="submit">Apply</button>
-    </div>
-    <div class="field" style="grid-column:span 1; display:flex; align-items:flex-end;">
-      <a class="btn-action btn-ghost" href="<?= app_url('/admin/audit_print.php'); ?>">Clear</a>
+    <div id="filter-dropdown">
+      <div id="filter-options">
+          <div class="field">
+            <label>Action</label>
+            <select class="input" name="action">
+              <option value="">All</option>
+              <?php foreach ($actions as $a): ?>
+                <option value="<?= $a; ?>"<?= $action===$a?' selected':''; ?>><?= $a; ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="field">
+            <label>Table</label>
+            <select class="input" name="table">
+              <option value="">All</option>
+              <?php foreach ($tables as $t): ?>
+                <option value="<?= $t; ?>"<?= $table===$t?' selected':''; ?>><?= $t; ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="field">
+            <label>From</label>
+            <input class="input" type="date" name="from" value="<?= htmlspecialchars($from); ?>">
+          </div>
+          <div class="field">
+            <label>To</label>
+            <input class="input" type="date" name="to" value="<?= htmlspecialchars($to); ?>">
+          </div>
+      </div>
+      <div class="clear-btn-container">
+        <button class="btn-primary" id="clear-btn" type="button" >Clear Filters</button>
+      </div>
     </div>
   </form>
-</section>
-
-<section id="print-button-section" class="panel fade-in" style="margin-top:-10px; margin-bottom:15px; padding:15px 20px;">
-  <button class="btn-action btn-primary" onclick="window.print()" style="min-width:160px;">
-    <span style="font-size:1.2em; margin-right:8px;">&#x1F5B6;&#xFE0F;</span> Print Audit Log
-  </button>
 </section>
 
 <section class="panel fade-in" style="background:#fff;">
@@ -262,5 +368,41 @@ require_once __DIR__ . '/../partials/site_header.php';
     </div>
 
 </section>
-
+<script>
+  const actorInput = document.querySelector('input[name="actor"]');
+  const actionSelect = document.querySelector('select[name="action"]');
+  const tableSelect = document.querySelector('select[name="table"]');
+  const fromInput = document.querySelector('input[name="from"]');
+  const toInput = document.querySelector('input[name="to"]');
+  const filterDropdown = document.querySelector('#filter-dropdown');
+  const filterButton = document.querySelector('#filter-btn');
+  const clearFiltersButton = document.querySelector('#clear-btn');
+  // Toggle visibility of the filter dropdown
+  function toggleFilters(e) {
+      if (e) e.preventDefault();
+      e.stopPropagation();
+      if (filterDropdown.style.display === "none" || filterDropdown.style.display === "") {
+        filterDropdown.style.display = "block";
+      } else {
+        filterDropdown.style.display = "none";
+      }
+  }
+  document.addEventListener('click', function(e) {
+  if (!filterDropdown.contains(e.target) && e.target !== filterButton) {
+    filterDropdown.style.display = "none";
+  }
+  });
+  function clearFilters(e) {
+      if (e) e.preventDefault();
+      actorInput.value = '';
+      actionSelect.value = '';
+      tableSelect.value = '';
+      fromInput.value = '';
+      toInput.value = '';
+      fetchResults(1);
+      filterDropdown.style.display = "none";
+  }
+  clearFiltersButton.addEventListener('click', clearFilters);
+  filterButton.addEventListener('click', toggleFilters);
+</script>
 <?php require_once __DIR__ . '/../partials/site_footer.php'; ?>
