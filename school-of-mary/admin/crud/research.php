@@ -365,15 +365,19 @@ table td:first-child {
 }
 table th:nth-child(2),
 table td:nth-child(2) {
-  width: 605px;
+  width: 580px;
   min-width: 400px;
-  max-width: 605px;
+  max-width: 580px;
 }
 table th:nth-child(3),table td:nth-child(3){
   width: 125px; 
   max-width: 125px;
 }
-table th:nth-child(4),table td:nth-child(4), table th:nth-child(5),table td:nth-child(5) {
+table th:nth-child(4),table td:nth-child(4){
+  width: 115px; 
+  max-width: 115px;
+}
+table th:nth-child(5),table td:nth-child(5){
   width: 115px; 
   max-width: 115px;
 }

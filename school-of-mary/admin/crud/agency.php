@@ -358,8 +358,8 @@ td:has(.actions-cell) {
 }
 .table-scroll table th:nth-child(2),
 .table-scroll table td:nth-child(2) {
-    width: 650px; /* Fixed width for Name */
-    min-width: 650px;
+    width: 480px; /* Fixed width for Name */
+    min-width: 480px;
 }
 .table-scroll table th:nth-child(3), /* Type */
 .table-scroll table td:nth-child(3) {
