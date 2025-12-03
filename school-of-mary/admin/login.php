@@ -107,7 +107,7 @@ require_once __DIR__ . '/../partials/site_header.php';
 
     <div class="field" style="grid-column: span 12;">
       <label>Username</label>
-      <input class="input" name="username" autocomplete="username" required>
+      <input class="input" name="username" autocomplete="username" required style="font-family: 'Newsreader', serif;">
     </div>
 
     <div class="field" style="grid-column: span 12;">

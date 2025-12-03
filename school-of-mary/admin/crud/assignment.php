@@ -116,6 +116,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
   box-sizing: border-box;
   width: auto;
   height: 57px;
+  margin-top: 10px;
 }
 .searchbox svg:first-child {
     color: #6b7280;
