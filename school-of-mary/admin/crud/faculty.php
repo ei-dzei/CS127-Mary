@@ -354,6 +354,8 @@ $CSRF = csrf_token();
 .table-scroll table th:nth-child(3), /* Email column */
 .table-scroll table td:nth-child(3) {
   width:320px;
+  overflow: hidden; 
+  text-overflow: ellipsis; 
 }
 .table-scroll table th:nth-child(6), /* Actions column */
 .table-scroll table td:nth-child(6) {
@@ -491,7 +493,7 @@ $CSRF = csrf_token();
         </div>
         <div class="field">
           <label for="f_initial">Middle Initial</label>
-          <input class="input" id="f_initial" name="FACULTY_INITIAL" maxlength="2" required>
+          <input class="input" id="f_initial" name="FACULTY_INITIAL" maxlength="2" >
         </div>
         <div class="field">
           <label for="f_last">Last Name</label>
@@ -499,7 +501,7 @@ $CSRF = csrf_token();
         </div>
         <div class="field">
           <label for="f_email">Contact Email</label>
-          <input class="input" id="f_email" name="FACULTY_EMAIL" type="email" required>
+          <input class="input" id="f_email" name="FACULTY_EMAIL" type="email" size="65" required>
         </div>
         
         <div class="field">
