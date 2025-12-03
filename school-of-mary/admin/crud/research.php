@@ -365,23 +365,18 @@ table td:first-child {
 }
 table th:nth-child(2),
 table td:nth-child(2) {
-  width: 625px;
-  min-width: 300px;
-  max-width: 625px;
+  width: 605px;
+  min-width: 400px;
+  max-width: 605px;
 }
 table th:nth-child(3),table td:nth-child(3){
-  width: 180px; 
-  max-width: 180px;
+  width: 125px; 
+  max-width: 125px;
 }
-table th:nth-child(4),table td:nth-child(4) {
-  width: 120px; 
-  max-width: 120px;
+table th:nth-child(4),table td:nth-child(4), table th:nth-child(5),table td:nth-child(5) {
+  width: 115px; 
+  max-width: 115px;
 }
-table th:nth-child(5),table td:nth-child(5){
-  width: 200px; 
-  max-width: 200px;
-}
-
 .table-clickable tbody tr:hover{background: #c7d2e4;}
 .btn svg {
     vertical-align: middle;
@@ -574,7 +569,7 @@ table th:nth-child(5),table td:nth-child(5){
           <label for="m_title">Title</label>
           <input class="input" id="m_title" name="RESEARCH_TITLE" required>
         </div>
-        <div class="field">
+         <div class="field">
           <label for="m_status">Status</label>
           <select class="input" id="m_status" name="RESEARCH_STATUS" required>
             <?php foreach ($statuses as $s): ?>
@@ -858,8 +853,8 @@ table th:nth-child(5),table td:nth-child(5){
   const eI    = document.getElementById('m_end');
   const stI   = document.getElementById('m_status');
   form.addEventListener('submit', function(e) {
-    validateDates('m_start', 'm_end', e);
-  })
+    validateDates('m_start','m_end', e);
+  });
   // Add change listener to m_status
   stI.addEventListener('change', () => {
       // For Edit modal, title is always enabled, so we pass false for isNewRecord
