@@ -352,18 +352,19 @@ td:has(.actions-cell) {
 }
 .table-scroll table th:nth-child(2),
 .table-scroll table td:nth-child(2) {
-    width: 550px;
-    min-width: 550px;
+    width: 500px;
+    min-width: 500px;
 }
 .table-scroll table th:nth-child(3), /* Type */
 .table-scroll table td:nth-child(3) {
-    width: 120px; /* Fixed width for Type (e.g., Government) */
-    min-width: 120px;
+    width: 130px; /* Fixed width for Type (e.g., Government) */
+    min-width: 130px;
 }
 
 .table-scroll table th:nth-child(4), /* Contact (Email) */
 .table-scroll table td:nth-child(4) {
     /* Set a minimum width for the email address to reduce truncation */
+    width: 250px;
     min-width: 250px; 
     white-space: nowrap;
     overflow: hidden;

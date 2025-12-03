@@ -369,14 +369,18 @@ table td:nth-child(2) {
   max-width: 615px;
 }
 table th:nth-child(3),table td:nth-child(3){
+  width: 180px; 
+  max-width: 180px;
+}
+table th:nth-child(4),table td:nth-child(4) {
   width: 120px; 
   max-width: 120px;
 }
-table th:nth-child(4),table td:nth-child(4),
-table th:nth-child(5),table td:nth-child(5)  {
-  width: 110px; 
-  max-width: 110px;
+table th:nth-child(5),table td:nth-child(5){
+  width: 205px; 
+  max-width: 205px;
 }
+
 .table-clickable tbody tr:hover{background: #c7d2e4;}
 .btn svg {
     vertical-align: middle;
