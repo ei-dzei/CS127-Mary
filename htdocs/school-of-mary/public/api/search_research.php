@@ -156,7 +156,7 @@
         $pagination .= '<a href="' . $baseUrl . 'page=' . ($page+1) . '" class="page-btn" title= "Next page ">&#x276F;</a>';
     }
 
-  $output = '<p class="muted" style="margin:6px 0 12px;">Showing ' .(int)$totalRows .  ($total===1 ? " project" : " projects") . ' | Page '.$page.' of '. ($totalPages ===0? ' 1' : $totalPages) . '</p>';
+  $output = '<p class="muted" style="margin:6px 0 12px;">Showing ' .(int)$totalRows .  ($total===1 ? " research project" : " research projects") . ' | Page '.$page.' of '. ($totalPages ===0? ' 1' : $totalPages) . '</p>';
   $output .= '<div class = "cards">' . $cards . '</div>';
   $output .='<div class = "pagination">'.$pagination.'</div>';
   echo $output; 

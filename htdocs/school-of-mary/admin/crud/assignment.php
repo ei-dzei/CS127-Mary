@@ -349,7 +349,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
 }
 .table-scroll table th:nth-child(4), /* Role column */
 .table-scroll table td:nth-child(4) {
-    width: 180px;
+    width: 140px;
     text-align: left;
     /* IMPORTANT: Remove truncation rules for Role to make it fully visible */
     white-space: normal; 
@@ -358,17 +358,18 @@ require_once __DIR__ . '/../../partials/site_header.php';
 }
 .table-scroll table th:nth-child(5), /* Date column */
 .table-scroll table td:nth-child(5) {
-    width: 120px; /* Date width fixed */
-    text-align: center;
+    width: 130px; /* Date width fixed */
+    text-align: left;
 }
 .table-scroll table th:nth-child(6), /* Actions column */
 .table-scroll table td:nth-child(6) {
-    width: 180px; /* Actions width fixed */
+    width: 155px; /* Actions width fixed */
 }
 /* Research Title column (3rd child) is left flexible to take up maximum remaining space. */
 .table-scroll table th:nth-child(3),
 .table-scroll table td:nth-child(3) {
     text-align: left;
+    width: 500px;
 }
 .table-clickable tbody tr:hover{background: #c7d2e4;}
 .btn svg {

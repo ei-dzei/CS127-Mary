@@ -338,6 +338,11 @@ td:has(.actions-cell) {
 .table-scroll table {
     table-layout: fixed; /* Use auto layout to allow column flexibility */
     width: 100%;
+    scrollbar-width: none; /*hide scrollbar*/
+    -ms-overflow-style: none; /*hide scrollbar*/
+}
+.table-scroll::-webkit-scrollbar {
+  display: none; /*hide scrollbar*/
 }
 .table-scroll table td { 
     height: 50px;
@@ -352,20 +357,20 @@ td:has(.actions-cell) {
 }
 .table-scroll table th:nth-child(2),
 .table-scroll table td:nth-child(2) {
-    width: 500px;
-    min-width: 500px;
+    width: 650px; /* Fixed width for Name */
+    min-width: 650px;
 }
 .table-scroll table th:nth-child(3), /* Type */
 .table-scroll table td:nth-child(3) {
-    width: 130px; /* Fixed width for Type (e.g., Government) */
-    min-width: 130px;
+    width: 185px; /* Fixed width for Type (e.g., Government) */
+    min-width: 185px;
 }
 
 .table-scroll table th:nth-child(4), /* Contact (Email) */
 .table-scroll table td:nth-child(4) {
     /* Set a minimum width for the email address to reduce truncation */
-    width: 250px;
-    min-width: 250px; 
+    width: 260px;
+    min-width: 260px; 
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
