@@ -348,6 +348,9 @@ require_once __DIR__ . '/../../partials/site_header.php';
 .table-scroll table td:nth-child(2) {
     width: 160px; /* Faculty width fixed */
     text-align: left;
+    white-space: nowrap;
+    overflow: hidden; 
+    text-overflow: ellipsis; 
 }
 .table-scroll table th:nth-child(4), /* Role column */
 .table-scroll table td:nth-child(4) {
@@ -371,7 +374,11 @@ require_once __DIR__ . '/../../partials/site_header.php';
 .table-scroll table th:nth-child(3),
 .table-scroll table td:nth-child(3) {
     text-align: left;
-    width: 500px;
+    width: 400px;
+    white-space: nowrap;
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+
 }
 .table-clickable tbody tr:hover{background: #c7d2e4;}
 .btn svg {
