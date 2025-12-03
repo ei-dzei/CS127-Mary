@@ -575,14 +575,6 @@ table th:nth-child(5),table td:nth-child(5){
           <input class="input" id="m_title" name="RESEARCH_TITLE" required>
         </div>
         <div class="field">
-          <label for="m_start">Start</label>
-          <input class="input" id="m_start" type="date" name="RESEARCH_STARTDATE" required>
-        </div>
-        <div class="field">
-          <label for="m_end">End</label>
-          <input class="input" id="m_end" type="date" name="RESEARCH_ENDDATE">
-        </div>
-        <div class="field">
           <label for="m_status">Status</label>
           <select class="input" id="m_status" name="RESEARCH_STATUS" required>
             <?php foreach ($statuses as $s): ?>
@@ -591,6 +583,14 @@ table th:nth-child(5),table td:nth-child(5){
               </option>
             <?php endforeach; ?>
           </select>
+        </div>
+        <div class="field">
+          <label for="m_start">Start</label>
+          <input class="input" id="m_start" type="date" name="RESEARCH_STARTDATE" required>
+        </div>
+        <div class="field">
+          <label for="m_end">End</label>
+          <input class="input" id="m_end" type="date" name="RESEARCH_ENDDATE">
         </div>
       </div>
 
@@ -857,7 +857,9 @@ table th:nth-child(5),table td:nth-child(5){
   const sI    = document.getElementById('m_start');
   const eI    = document.getElementById('m_end');
   const stI   = document.getElementById('m_status');
-
+  form.addEventListener('submit', function(e) {
+    validateDates('m_start', 'm_end', e);
+  })
   // Add change listener to m_status
   stI.addEventListener('change', () => {
       // For Edit modal, title is always enabled, so we pass false for isNewRecord
