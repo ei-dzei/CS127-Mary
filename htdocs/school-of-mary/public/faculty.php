@@ -59,15 +59,15 @@
           <div class="grid">
             <div class="field" style="grid-column:span 6">
               <label>Email</label>
-              <input class="input" value="<?= htmlspecialchars($faculty['FACULTY_EMAIL']); ?>" readonly />
+              <input class="input" value="<?= htmlspecialchars($faculty['FACULTY_EMAIL']); ?>" readonly style="font-family: 'Newsreader', serif;"/>
             </div>
             <div class="field" style="grid-column:span 3">
               <label>Rank</label>
-              <input class="input" value="<?= htmlspecialchars($faculty['RANK_DESCRIPTION']); ?>" readonly />
+              <input class="input" value="<?= htmlspecialchars($faculty['RANK_DESCRIPTION']); ?>" readonly style="font-family: 'Newsreader', serif;"/>
             </div>
             <div class="field" style="grid-column:span 3">
               <label>Department</label>
-              <input class="input" value="<?= htmlspecialchars($faculty['DEPARTMENT']); ?>" readonly />
+              <input class="input" value="<?= htmlspecialchars($faculty['DEPARTMENT']); ?>" readonly style="font-family: 'Newsreader', serif;"/>
             </div>
           </div>
         </div>

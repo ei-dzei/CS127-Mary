@@ -84,20 +84,20 @@ if ($id > 0) {
           <h3 style="margin-top:0; font-family:'Patua One',serif;">Overview</h3>
           <div class="field">
             <label>Title</label>
-            <input class="input" value="<?= htmlspecialchars($research['RESEARCH_TITLE']); ?>" readonly />
+            <input class="input" value="<?= htmlspecialchars($research['RESEARCH_TITLE']); ?>" readonly style="font-family: 'Newsreader', serif;"/>
           </div>
           <div class="grid">
             <div class="field" style="grid-column: span 6;">
               <label>Status</label>
-              <input class="input" value="<?= htmlspecialchars($research['RESEARCH_STATUS']); ?>" readonly />
+              <input class="input" value="<?= htmlspecialchars($research['RESEARCH_STATUS']); ?>" readonly style="font-family: 'Newsreader', serif;"/>
             </div>
             <div class="field" style="grid-column: span 3;">
               <label>Start</label>
-              <input class="input" value="<?= htmlspecialchars($research['RESEARCH_STARTDATE']); ?>" readonly />
+              <input class="input" value="<?= htmlspecialchars($research['RESEARCH_STARTDATE']); ?>" readonly style="font-family: 'Newsreader', serif;"/>
             </div>
             <div class="field" style="grid-column: span 3;">
               <label>End</label>
-              <input class="input" value="<?= htmlspecialchars($research['RESEARCH_ENDDATE'] ?? '—'); ?>" readonly />
+              <input class="input" value="<?= htmlspecialchars($research['RESEARCH_ENDDATE'] ?? '—'); ?>" readonly style="font-family: 'Newsreader', serif;"/>
             </div>
           </div>
         </div>
@@ -106,7 +106,7 @@ if ($id > 0) {
             <h3 style="margin-top:0; font-family:'Patua One',serif;">Funding</h3>
             <div class="field" style="grid-column: span 6;">
               <label>Total Funding</label>
-              <input class="input" value="<?= '₱' . number_format($totalFunding, 2); ?>" readonly />
+              <input class="input" value="<?= '₱' . number_format($totalFunding, 2); ?>" readonly style="font-family: 'Newsreader', serif;"/>
             </div>
             <?php if ($funds): ?>
               <table style="margin-top:8px;">
