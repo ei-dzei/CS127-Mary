@@ -493,7 +493,7 @@ td:has(.actions-cell) {
         </div>
         <div class="field">
           <label for="a_contact">Contact Email</label>
-          <input class="input" id="a_contact" type="email" size="35" name="AGENCY_CONTACTINFO" required>
+          <input class="input" id="a_contact" name="AGENCY_CONTACTINFO" required>
         </div>
       </div>
 

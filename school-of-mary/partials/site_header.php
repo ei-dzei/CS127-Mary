@@ -157,6 +157,10 @@ if (!function_exists('current_path')) {
         opacity: 0;
         pointer-events: none;
         display: none;
+<<<<<<< HEAD
+=======
+        font-family: 'Newsreader', serif;
+>>>>>>> parent of c76cc6c (update)
     }
 
     /* Center the icons strictly when collapsed */
@@ -376,7 +380,11 @@ if (!function_exists('current_path')) {
       </div>
 
       <button class="desktop-toggler" id="desktop-collapse-btn" title="Toggle Sidebar">
+<<<<<<< HEAD
           <i class="bi bi-list"></i>
+=======
+          <i class="bi bi-arrow-bar-right"></i>
+>>>>>>> parent of c76cc6c (update)
       </button>
 
     </aside>
