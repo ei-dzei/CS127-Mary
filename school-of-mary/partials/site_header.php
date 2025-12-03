@@ -32,12 +32,12 @@ if (!function_exists('current_path')) {
     /* ---------------------------------------------------------------- */
     /* GLOBAL LAYOUT STYLES                                             */
     /* ---------------------------------------------------------------- */
-    
+
     body {
         margin: 0;
-        font-family: 'Newsreader', serif;
+        font-family: Arial, sans-serif;
         background: #f8f9fa;
-        min-height: 100vh; 
+         min-height: 100vh; 
         position: relative;
     }
 
@@ -76,7 +76,7 @@ if (!function_exists('current_path')) {
         transition: margin-left 0.3s ease-in-out;
     }
 
-    /* === 4. Sidebar Link Styles === */
+     /* === 4. Sidebar Link Styles === */
     .sidebar .brand {
         display: flex;
         align-items: center;
@@ -93,7 +93,7 @@ if (!function_exists('current_path')) {
     }
     
     .sidebar-menu {
-        padding: 0px 0;
+        padding: 20px 0;
         overflow-y: auto;
         overflow-x: hidden;
         flex-grow: 1; 
@@ -107,7 +107,7 @@ if (!function_exists('current_path')) {
         align-items: center;
         gap: 15px;
         text-decoration: none;
-        color: #b8c7d9;
+         color: #b8c7d9;
         font-size: 16px;
         transition: all 0.2s;
         border-left: 4px solid transparent;
@@ -124,12 +124,12 @@ if (!function_exists('current_path')) {
         color: #fff;
     }
     .sidebar .active {
-        background: #2a4f78;
+         background: #2a4f78;
         color: #fff;
         border-left-color: #ffd166; 
     }
     .sidebar .sub-link {
-        background: #182e4d;
+         background: #182e4d;
     }
 
     .mt-auto-custom {
@@ -137,28 +137,26 @@ if (!function_exists('current_path')) {
         border-top: 1px solid #ffffff10;
     }
 
+
     /* === 5. The "Desktop Collapse" Logic === */
     
     /* When body has class 'collapsed', shrink sidebar */
     body.collapsed .sidebar {
         width: 80px; 
     }
-    
+
+
     /* Adjust content margin */
     body.collapsed .main-content-area {
         margin-left: 80px;
     }
-    
+
     /* Hide the text spans */
     body.collapsed .sidebar .link-text, 
     body.collapsed .sidebar .brand span {
         opacity: 0;
         pointer-events: none;
         display: none;
-        font-family: 'Newsreader', serif;
-        padding-left: 0;
-        padding-right: 0;
-        gap: 0;
     }
 
     /* Center the icons strictly when collapsed */
@@ -177,18 +175,15 @@ if (!function_exists('current_path')) {
     .desktop-toggler {
         background: #112035; 
         border: none;
-        color: #ffd166; 
+         color: #ffd166; 
         height: 60px; 
         width: 100%;
         cursor: pointer;
         display: flex;
-        text-align: center;
-        justify-content: center;
         align-items: center;
+        justify-content: center; 
         transition: background 0.3s;
         border-top: 1px solid #ffffff20;
-        padding: 30px;
-        padding-bottom: 30px;
     }
     .desktop-toggler i {
         font-size: 1.8rem; 
@@ -205,7 +200,7 @@ if (!function_exists('current_path')) {
     }
 
     @media (max-width: 1024px) {
-        /* Reset collapse logic on mobile */
+         /* Reset collapse logic on mobile */
         body.collapsed .sidebar { width: 250px; }
         body.collapsed .main-content-area { margin-left: 0; }
         body.collapsed .sidebar .link-text { display: inline; opacity: 1; }
@@ -232,7 +227,7 @@ if (!function_exists('current_path')) {
             transform: translateX(-100%); 
             width: 250px; 
         }
-        .main-content-area {
+         .main-content-area {
             margin-left: 0; 
         }
         
@@ -240,9 +235,9 @@ if (!function_exists('current_path')) {
             transform: translateX(0); 
         }
     }
-  </style>
+    </style>
 
-  <script>
+     <script>
     document.addEventListener('DOMContentLoaded', function() {
         
         // --- 1. MEMORY LOGIC ---
@@ -296,11 +291,12 @@ if (!function_exists('current_path')) {
         }
     });
   </script>
+
 </head>
 
 <body class="collapsed">
 
-<!-- <button id="mobile-toggle"><i class="bi bi-list"></i></button> -->
+<button id="mobile-toggle"><i class="bi bi-list"></i></button>
 
 <div class="app-wrapper" id="app-wrapper">
 
@@ -310,9 +306,7 @@ if (!function_exists('current_path')) {
         <img class="brand__logo" src="<?= BASE_URL ?>/public/logo.png" alt="Logo" onerror="this.style.display='none'">
         <span class="link-text">School of Mary</span>
       </a>
-
       <div class="sidebar-menu">
-
           <a href="<?= BASE_URL ?>/public/"
              class="<?= current_path()=== BASE_URL.'/public/' || current_path()==='/public/' ? 'active' : '' ?>">
              <i class="bi bi-house-door-fill"></i>
@@ -346,11 +340,11 @@ if (!function_exists('current_path')) {
                 <span class="link-text">Faculty</span>
             </a>
             <a href="<?= BASE_URL ?>/admin/crud/research.php" class="sub-link <?= strpos($path, '/admin/crud/research.php') !== false ? 'active' : '' ?>">
-                <i class="bi bi-book"></i>
+                <i class="bi bi-file-earmark-text"></i>
                 <span class="link-text">Research</span>
             </a>
             <a href="<?= BASE_URL ?>/admin/crud/assignment.php" class="sub-link <?= strpos($path, '/admin/crud/assignment.php') !== false ? 'active' : '' ?>">
-                <i class="bi bi-list-check"></i>
+                <i class="bi bi-briefcase"></i>
                 <span class="link-text">Assignments</span>
             </a>
             <a href="<?= BASE_URL ?>/admin/crud/agency.php" class="sub-link <?= strpos($path, '/admin/crud/agency.php') !== false ? 'active' : '' ?>">
@@ -358,12 +352,12 @@ if (!function_exists('current_path')) {
                 <span class="link-text">Agencies</span>
             </a>
             <a href="<?= BASE_URL ?>/admin/crud/funding.php" class="sub-link <?= strpos($path, '/admin/crud/funding.php') !== false ? 'active' : '' ?>">
-                <i class="bi bi-cash-stack"></i>
+                <i class="bi bi-currency-dollar"></i>
                 <span class="link-text">Funding</span>
             </a>
             <a href="<?= BASE_URL ?>/admin/audit_print.php" class="sub-link <?= strpos($path, '/admin/audit_print.php') !== false ? 'active' : '' ?>">
                 <i class="bi bi-printer"></i>
-                <span class="link-text">Audit Log</span>
+                <span class="link-text">Audit (Print)</span>
             </a>
 
             <a class="mt-auto-custom" href="<?= BASE_URL ?>/admin/logout.php">
@@ -381,9 +375,9 @@ if (!function_exists('current_path')) {
           <?php endif; ?>
       </div>
 
-    <button class="desktop-toggler" id="desktop-collapse-btn" title="Toggle Sidebar">
+      <button class="desktop-toggler" id="desktop-collapse-btn" title="Toggle Sidebar">
           <i class="bi bi-list"></i>
-     </button>
+      </button>
 
     </aside>
 
@@ -392,5 +386,3 @@ if (!function_exists('current_path')) {
         <?php if ($inAdmin): ?>
           <div class="admin-stripe">Admin Area</div>
         <?php endif; ?>
-
-        <main class="container">
