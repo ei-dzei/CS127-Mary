@@ -20,6 +20,7 @@ require_once __DIR__ . '/../partials/site_header.php';
 .field label { font-weight: 500; color: #4b5563; }
 .field .input { 
   padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; height: 38px; box-sizing: border-box;
+  font-family: 'Newsreader', serif;
 }
 
 /* SEARCH BAR CONTAINER */

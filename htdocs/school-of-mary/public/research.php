@@ -214,6 +214,7 @@ $to     = trim($_GET['to'] ?? '');
     border-radius: 6px;
     height: 38px; 
     box-sizing: border-box;
+    font-family: 'Newsreader', serif;
 }
 
 /* --- SEARCH BAR AND TOGGLE STYLES (Full Width, Matching Look) --- */
@@ -340,7 +341,7 @@ $to     = trim($_GET['to'] ?? '');
         </div>
         
         <div class="clear-btn-container">
-          <button class="btn-primary" type="button" onclick="clearFilters(event)">Clear Filters</button>
+          <button class="btn-primary" type="button" onclick="clearFilters(event)" style="font-family: 'Newsreader', serif;">Clear Filters</button>
         </div>
     </div>
   </form>

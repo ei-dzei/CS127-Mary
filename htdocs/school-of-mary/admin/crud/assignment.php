@@ -98,6 +98,7 @@ require_once __DIR__ . '/../../partials/site_header.php';
     border-radius: 6px;
     height: 38px; 
     box-sizing: border-box;
+    font-family: 'Newsreader', serif;
 }
 
 /* --- SEARCH BAR AND TOGGLE STYLES (Full Width, Matching Look) --- */
