@@ -614,7 +614,7 @@ th {
 }
 .hero__slide.is-active {
   display: block;
-  animation: slideIn 0.5s ease both;
+  animation: slideIn 2000ms ease both;
 }
 @keyframes slideIn {
   from { opacity: 0; transform: scale(1.01) translateY(6px); }

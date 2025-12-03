@@ -25,10 +25,10 @@ require_once __DIR__ . '/../partials/site_header.php';
       <p class="hero__subtitle">
         Excellence in Research and Innovation
       </p>
-      <div class="hero__actions">
+      <!-- <div class="hero__actions">
         <a href="<?= BASE_URL ?>/public/faculty.php" class="btn">Get Started</a>
         <a href="<?= BASE_URL ?>/public/research.php" class="btn" style="background:#0a4c80">Browse Research</a>
-      </div>
+      </div> -->
     </div>
   </article>
 

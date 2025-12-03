@@ -93,7 +93,7 @@ if (!function_exists('current_path')) {
     }
     
     .sidebar-menu {
-        padding: 20px 0;
+        padding: 0px 0;
         overflow-y: auto;
         overflow-x: hidden;
         flex-grow: 1; 
@@ -156,6 +156,9 @@ if (!function_exists('current_path')) {
         pointer-events: none;
         display: none;
         font-family: 'Newsreader', serif;
+        padding-left: 0;
+        padding-right: 0;
+        gap: 0;
     }
 
     /* Center the icons strictly when collapsed */
@@ -179,10 +182,13 @@ if (!function_exists('current_path')) {
         width: 100%;
         cursor: pointer;
         display: flex;
+        text-align: center;
+        justify-content: center;
         align-items: center;
-        justify-content: center; 
         transition: background 0.3s;
         border-top: 1px solid #ffffff20;
+        padding: 30px;
+        padding-bottom: 30px;
     }
     .desktop-toggler i {
         font-size: 1.8rem; 
@@ -294,7 +300,7 @@ if (!function_exists('current_path')) {
 
 <body class="collapsed">
 
-<button id="mobile-toggle"><i class="bi bi-list"></i></button>
+<!-- <button id="mobile-toggle"><i class="bi bi-list"></i></button> -->
 
 <div class="app-wrapper" id="app-wrapper">
 
@@ -306,6 +312,7 @@ if (!function_exists('current_path')) {
       </a>
 
       <div class="sidebar-menu">
+
           <a href="<?= BASE_URL ?>/public/"
              class="<?= current_path()=== BASE_URL.'/public/' || current_path()==='/public/' ? 'active' : '' ?>">
              <i class="bi bi-house-door-fill"></i>
@@ -374,9 +381,9 @@ if (!function_exists('current_path')) {
           <?php endif; ?>
       </div>
 
-      <button class="desktop-toggler" id="desktop-collapse-btn" title="Toggle Sidebar">
-          <i class="bi bi-arrow-bar-right"></i>
-      </button>
+    <button class="desktop-toggler" id="desktop-collapse-btn" title="Toggle Sidebar">
+          <i class="bi bi-list"></i>
+     </button>
 
     </aside>
 
