@@ -1,224 +1,155 @@
 <?php
-// Page Title & Header
+// Page Title
 $pageTitle = 'Research';
+// Header
 require_once __DIR__ . '/../partials/site_header.php';
 
+$admin = is_admin();
+
 // Filter Lookups
-// Fetch data to populate filter dropdown
+// Fetch data to populate filter dropdowns
 $statuses = $pdo->query("SELECT STATUS_CODE, STATUS_LABEL FROM RESEARCH_STATUS ORDER BY STATUS_LABEL")->fetchAll();
 
 // Detail View Logic
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
-// Pagination setup (These are only used for list view if no JS is present, but kept for list view parameters)
-$perPage = 6;
-$page    = (isset($_GET['page']) && is_numeric($_GET['page'])) ? (int)$_GET['page'] : 1;
-$offset  = ($page - 1) * $perPage;
-
 if ($id > 0) {
-  // ... (Detail view remains unchanged)
-  $stmt = $pdo->prepare("
-    SELECT re.*
-    FROM RESEARCH re
-    WHERE re.RESEARCH_ID = ?
-    LIMIT 1
-  ");
-  $stmt->execute([$id]);
-  $research = $stmt->fetch();
+    // Fetch Research Details
+    $stmt = $pdo->prepare("SELECT re.* FROM RESEARCH re WHERE re.RESEARCH_ID = ? LIMIT 1");
+    $stmt->execute([$id]);
+    $research = $stmt->fetch();
 
-  if ($research) {
-    // Assignments/Faculty fetch
-    $as = $pdo->prepare("
-      SELECT a.ASSIGNMENT_ID, a.DATE_ASSIGNED, a.ROLE_ID,
-             f.FACULTY_ID, f.FACULTY_FNAME, f.FACULTY_INITIAL, f.FACULTY_LNAME,
-             r.RANK_DESCRIPTION,
-             ro.ROLE_DESCRIPTION 
-      FROM ASSIGNMENT a
-      JOIN FACULTY f ON f.FACULTY_ID = a.FACULTY_ID
-      JOIN `RANK` r ON r.RANK_ID = f.RANK_ID
-      JOIN `ROLE` ro ON ro.ROLE_ID = a.ROLE_ID 
-      WHERE a.RESEARCH_ID = ?
-      ORDER BY a.DATE_ASSIGNED DESC, a.ASSIGNMENT_ID DESC
-    ");
-    $as->execute([$id]);
-    $people = $as->fetchAll();
+    if ($research) {
+        // Fetch Assigned Faculty
+        $as = $pdo->prepare("
+            SELECT a.ASSIGNMENT_ID, a.DATE_ASSIGNED, a.ROLE_ID,
+                   f.FACULTY_ID, f.FACULTY_FNAME, f.FACULTY_INITIAL, f.FACULTY_LNAME,
+                   r.RANK_DESCRIPTION,
+                   ro.ROLE_DESCRIPTION 
+            FROM ASSIGNMENT a
+            JOIN FACULTY f ON f.FACULTY_ID = a.FACULTY_ID
+            JOIN `RANK` r ON r.RANK_ID = f.RANK_ID
+            JOIN `ROLE` ro ON ro.ROLE_ID = a.ROLE_ID 
+            WHERE a.RESEARCH_ID = ?
+            ORDER BY a.DATE_ASSIGNED DESC, a.ASSIGNMENT_ID DESC
+        ");
+        $as->execute([$id]);
+        $people = $as->fetchAll();
 
-    // Funding fetch
-    $fs = $pdo->prepare("
-      SELECT fu.FUNDING_ID, fu.FUNDING_AMOUNT, fu.DATE_FUNDED,
-             ag.AGENCY_ID, ag.AGENCY_NAME
-      FROM FUNDING fu
-      JOIN AGENCY ag ON ag.AGENCY_ID = fu.AGENCY_ID
-      WHERE fu.RESEARCH_ID = ?
-      ORDER BY fu.DATE_FUNDED DESC, fu.FUNDING_ID DESC
-    ");
-    $fs->execute([$id]);
-    $funds = $fs->fetchAll();
-
-    $totalFunding = 0.0;
-    foreach ($funds as $f) {
-      if ($f['FUNDING_AMOUNT'] !== null) $totalFunding += (float)$f['FUNDING_AMOUNT'];
+        // Fetch Funding
+        $fs = $pdo->prepare("
+            SELECT fu.FUNDING_ID, fu.FUNDING_AMOUNT, fu.DATE_FUNDED,
+                   ag.AGENCY_ID, ag.AGENCY_NAME
+            FROM FUNDING fu
+            JOIN AGENCY ag ON ag.AGENCY_ID = fu.AGENCY_ID
+            WHERE fu.RESEARCH_ID = ?
+            ORDER BY fu.DATE_FUNDED DESC, fu.FUNDING_ID DESC
+        ");
+        $fs->execute([$id]);
+        $funds = $fs->fetchAll();
+        // If none (no assigned funding)
+        $totalFunding = 0.0;
+        foreach ($funds as $f) {
+            if ($f['FUNDING_AMOUNT'] !== null) $totalFunding += (float)$f['FUNDING_AMOUNT'];
+        }
     }
-  }
-  ?>
-  
-  <section class="panel fade-in">
-    <?php if (!$research): ?>
-      <h1>Research</h1>
-      <p class="muted">Record not found.</p>
-      <p><a class="btn small" href="<?= BASE_URL ?>/public/research.php">Back to list</a></p>
-    <?php else: ?>
-      <button class="btn small" style="float:right;margin-top:-4px;" onclick="history.back()">Back</button>
-      <h1 style="margin-bottom:6px"><?= htmlspecialchars($research['RESEARCH_TITLE']); ?></h1>
-      <div class="muted" style="margin-bottom:10px;">
-        <span class="pill" style="background:#eef4ff; border:1px solid #cdd8f0; padding:2px 8px; border-radius:999px;">
-          <?= htmlspecialchars($research['RESEARCH_STATUS']); ?>
-        </span>
-        <span style="margin-left:6px;">Start: <?= htmlspecialchars($research['RESEARCH_STARTDATE']); ?></span>
-        <?php if ($research['RESEARCH_ENDDATE']) : ?>
-          <span style="margin-left:6px;">End: <?= htmlspecialchars($research['RESEARCH_ENDDATE']); ?></span>
-        <?php endif; ?>
-      </div>
-      <?php if($admin):?>
-      <div class="grid">
-        <div class="panel" style="grid-column: span 6; background:#fff;">
-          <h3 style="margin-top:0; font-family:'Patua One',serif;">Overview</h3>
-          <div class="field">
-            <label>Title</label>
-            <input class="input" value="<?= htmlspecialchars($research['RESEARCH_TITLE']); ?>" readonly style="font-family: 'Newsreader', serif;"/>
-          </div>
-          <div class="grid">
-            <div class="field" style="grid-column: span 6;">
-              <label>Status</label>
-              <input class="input" value="<?= htmlspecialchars($research['RESEARCH_STATUS']); ?>" readonly style="font-family: 'Newsreader', serif;"/>
-            </div>
-            <div class="field" style="grid-column: span 3;">
-              <label>Start</label>
-              <input class="input" value="<?= htmlspecialchars($research['RESEARCH_STARTDATE']); ?>" readonly style="font-family: 'Newsreader', serif;"/>
-            </div>
-            <div class="field" style="grid-column: span 3;">
-              <label>End</label>
-              <input class="input" value="<?= htmlspecialchars($research['RESEARCH_ENDDATE'] ?? '—'); ?>" readonly style="font-family: 'Newsreader', serif;"/>
-            </div>
-          </div>
-        </div>
+    ?>
+    <section class="panel fade-in">
+      <?php if (!$research): ?>
+        <h1>Research</h1>
+        <p class="muted">Record not found.</p>
+        <p><a class="btn small" href="<?= BASE_URL ?>/public/research.php">Back to list</a></p>
+      <?php else: ?>
+        <button class="btn small" style="float:right;margin-top:1px;" onclick="history.back()">Back</button>
         
-          <div class="panel" style="grid-column: span 6; background:#fff;">
-            <h3 style="margin-top:0; font-family:'Patua One',serif;">Funding</h3>
-            <div class="field" style="grid-column: span 6;">
-              <label>Total Funding</label>
-              <input class="input" value="<?= '₱' . number_format($totalFunding, 2); ?>" readonly style="font-family: 'Newsreader', serif;"/>
-            </div>
-            <?php if ($funds): ?>
-              <table style="margin-top:8px;">
-                <thead><tr><th>Agency</th><th>Amount</th><th>Date Funded</th></tr></thead>
-                <tbody>
-                  <?php foreach ($funds as $f): ?>
-                    <tr>
-                      <td><?= htmlspecialchars($f['AGENCY_NAME']); ?></td>
-                      <td><?= $f['FUNDING_AMOUNT'] !== null ? '₱'.number_format($f['FUNDING_AMOUNT'],2) : '—'; ?></td>
-                      <td><?= htmlspecialchars($f['DATE_FUNDED'] ?? '—'); ?></td>
-                    </tr>
-                  <?php endforeach; ?>
-                </tbody>
-              </table>
-            <?php else: ?>
-              <div class="muted">No recorded funding.</div>
-            <?php endif; ?>
-          
+        <h1 style="margin:6px;">
+            <?= htmlspecialchars($research['RESEARCH_TITLE']); ?>
+        </h1>
+        
+        <div class="muted" style="margin-bottom:10px;">
+           <span class="pill" style="background:#eef4ff; border:1px solid #cdd8f0; padding:2px 8px; border-radius:999px;">
+             <?= htmlspecialchars($research['RESEARCH_STATUS']); ?>
+           </span>
+           <span style="margin-left:6px;">
+             Start: <?= htmlspecialchars($research['RESEARCH_STARTDATE']); ?>
+             <?php if (!empty($research['RESEARCH_ENDDATE'])) echo ' · End: ' . htmlspecialchars($research['RESEARCH_ENDDATE']); ?>
+           </span>
         </div>
-      </div>
-      <?php else: ?>
-        <div class="panel" style="grid-column: span 6; background:#fff;">
-          <h3 style="margin-top:0; font-family:'Patua One',serif;">Overview</h3>
-          <div class="field">
-            <label>Title</label>
-            <input class="input" value="<?= htmlspecialchars($research['RESEARCH_TITLE']); ?>" readonly />
-          </div>
+
+        <div class="panel" style="background:#fff;">
           <div class="grid">
-            <div class="field" style="grid-column: span 6;">
-              <label>Status</label>
-              <input class="input" value="<?= htmlspecialchars($research['RESEARCH_STATUS']); ?>" readonly />
-            </div>
-            <div class="field" style="grid-column: span 3;">
-              <label>Start</label>
-              <input class="input" value="<?= htmlspecialchars($research['RESEARCH_STARTDATE']); ?>" readonly />
-            </div>
-            <div class="field" style="grid-column: span 3;">
-              <label>End</label>
-              <input class="input" value="<?= htmlspecialchars($research['RESEARCH_ENDDATE'] ?? '—'); ?>" readonly />
-            </div>
+             <div class="field" style="grid-column: span 6;">
+               <label>Title:</label>
+               <span class="input" readonly style="color:#0b5394; font-family: 'Newsreader', serif; border: none"><?= htmlspecialchars($research['RESEARCH_TITLE']); ?></span>
+             </div>
+             <div class="field" style="grid-column: span 3;">
+               <label>Status:</label>
+               <span class="input" readonly style="color:#0b5394; font-family: 'Newsreader', serif; border: none"><?= htmlspecialchars($research['RESEARCH_STATUS']); ?></span>
+             </div>
+             <div class="field" style="grid-column: span 3;">
+               <label>Total Funding:</label>
+               <span class="input" readonly style="color:#0b5394; font-family: 'Newsreader', serif; border: none"><?= '₱ ' . number_format($totalFunding, 2); ?></span>
+             </div>
           </div>
         </div>
+
+        <h2 style="font-family:'Patua One',serif; margin-top:18px; margin-bottom:16px;">Assigned Faculty</h2>
+        <?php if (empty($people)): ?>
+            <div class="panel">No faculty assigned to this project.</div>
+        <?php else: ?>
+            <div class="grid" style="gap:12px;">
+            <?php foreach ($people as $p): ?>
+                <a class="panel slide-up" href="<?= BASE_URL ?>/public/faculty.php?id=<?= (int)$p['FACULTY_ID']; ?>" style="grid-column: span 6; text-decoration:none; color:inherit;">
+                <h3 style="margin-top:0">
+                    <?php
+                    echo htmlspecialchars($p['FACULTY_LNAME'].', '.$p['FACULTY_FNAME']);
+                    if (!empty($p['FACULTY_INITIAL'])) echo ' '.htmlspecialchars($p['FACULTY_INITIAL']);
+                    ?>
+                </h3>
+                <div class="muted" style="font-size:.95rem; margin-top:4px;">
+                    <?= htmlspecialchars($p['RANK_DESCRIPTION']); ?>
+                    · <span style="color:#0b5394"><?= htmlspecialchars($p['ROLE_DESCRIPTION']); ?></span>
+                </div>
+                </a>
+            <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
       <?php endif; ?>
-      <h2 style="font-family:'Patua One',serif; margin-top:18px; margin-bottom:16px;">Assigned Faculty</h2>
-      <?php if (!$people): ?>
-        <div class="panel">No assignments found.</div>
-      <?php else: ?>
-        <div class="grid" style="gap:12px;">
-          <?php foreach ($people as $p): ?>
-            <a class="panel slide-up" href="<?= BASE_URL ?>/public/faculty.php?id=<?= (int)$p['FACULTY_ID']; ?>" style="grid-column: span 6; text-decoration:none; color:inherit;">
-              <h3 style="margin-top:0">
-                <?php
-                  echo htmlspecialchars($p['FACULTY_LNAME'].', '.$p['FACULTY_FNAME']);
-                  if (!empty($p['FACULTY_INITIAL'])) echo ' '.htmlspecialchars($p['FACULTY_INITIAL']);
-                ?>
-              </h3>
-              <div class="muted" style="font-size:.95rem; margin-top:4px;">
-                <?= htmlspecialchars($p['RANK_DESCRIPTION']); ?>
-                · Role: <?= htmlspecialchars($p['ROLE_DESCRIPTION']); ?>
-                · Assigned: <?= htmlspecialchars($p['DATE_ASSIGNED']); ?>
-              </div>
-            </a>
-          <?php endforeach; ?>
-        </div>
-      <?php endif; ?>
-    <?php endif; ?>
-  </section>
-  <?php
-  require_once __DIR__ . '/../partials/site_footer.php';
-  exit;
+    </section>
+    <?php
+    require_once __DIR__ . '/../partials/site_footer.php';
+    exit;
 }
 
-/* --- List view (filters + AJAX container) --- */
+// List View Logic
 $q      = trim($_GET['q'] ?? '');
 $status = trim($_GET['status'] ?? '');
 $from   = trim($_GET['from'] ?? '');
 $to     = trim($_GET['to'] ?? '');
-
 ?>
 
 <style>
 .panel {
-    background: #fff;
-    border: 1px solid #c7d2e4;
     border-radius: 8px;
-    padding: 15px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 .filterbar {
-    position: relative; /* Essential for absolute positioning of the dropdown */
+    position: relative; /* Absolute positioning for dropdown */
     margin-bottom: 20px;
 }
 .field {
     display: flex;
     flex-direction: column;
-    gap: 4px;
 }
 .field label {
     font-weight: 500;
     color: #4b5563;
 }
 .field .input { 
-    padding: 10px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
+    padding: 5px;
     height: 38px; 
-    box-sizing: border-box;
     font-family: 'Newsreader', serif;
 }
-
-/* --- SEARCH BAR AND TOGGLE STYLES (Full Width, Matching Look) --- */
+/* Search Bar and Toggle  */
 .searchbox {
     display: flex;
     align-items: center;
@@ -228,7 +159,7 @@ $to     = trim($_GET['to'] ?? '');
     border: 1px solid #c7d2e4;
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    width: 100%; /* Full width */
+    width: 100%;
     box-sizing: border-box;
 }
 .searchbox svg:first-child {
@@ -255,14 +186,14 @@ $to     = trim($_GET['to'] ?? '');
     color: #1f2937;
 }
 
-/* --- ADVANCED FILTER PANEL STYLES --- */
+/* Advanced Filter Panel */
 #filter-dropdown {
-    display: none; /* Initially hidden */
+    display: none; 
     position: absolute;
     top: 100%; 
-    right: 0; /* Aligned to the right edge of the filterbar/container */
+    right: 0; 
     margin-top: 8px;
-    width: min(100%, 480px); /* Max width for panel */
+    width: min(100%, 480px); 
     background: #fff;
     border: 1px solid #c7d2e4;
     border-radius: 8px;
@@ -272,8 +203,7 @@ $to     = trim($_GET['to'] ?? '');
 }
 #filter-options {
     display: grid;
-    /* 3 columns for Status, Start, End */
-    grid-template-columns: repeat(3, 1fr); 
+    grid-template-columns: repeat(2, 1fr); 
     gap: 10px;
     margin-bottom: 15px;
 }
@@ -288,199 +218,156 @@ $to     = trim($_GET['to'] ?? '');
     border-radius: 6px;
     cursor: pointer;
     font-weight: 600;
-    width: 100%;
+    width: 100%; /* Full width within container */
 }
 .clear-btn-container .btn-primary:hover {
     background-color: #0b5394;
-}
-.field input[type="date"] {
-    border-radius: 8px;
 }
 </style>
 
 <section class="container fade-in" style="margin-top:6px;">
   <h1 style="margin-bottom:6px;">Research</h1>
   <p class="muted" style="margin-bottom:10px;">Browse the research project directory and explore faculty contributors.</p>
-
-  <form method="get" class="filterbar" id="research-filter-form" style="margin-bottom:14px;">
-    <div class="searchbox" style="font-family: 'Newsreader', serif;">
-      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M10 18a8 8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/>
-      </svg>
-      <input type="search" name="q" value="<?= htmlspecialchars($q) ?>" style="width: 85%; font-family: 'Newsreader', serif;" placeholder="Search research projects" id="q-input" />
-      
-      <button class="filter-toggle-btn" id="filter-btn" title="Filter" type="button" onclick="toggleFilters(event)">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+  <!-- Filter Bar -->
+  <form method="get" class="filterbar" id="form" style="margin-bottom:14px;">
+      <!-- Inputs row -->
+      <div class="searchbox" style="font-family: 'Newsreader', serif;">
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M10 18a8 8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/>
         </svg>
-      </button>
-    </div>
-    
-    <div id ="filter-dropdown">
-        <div id="filter-options">
-          <div class="field">
-            <label>Status</label>
-            <select class="input" name="status" id="status-select">
-              <option value="">All</option>
-              <?php foreach ($statuses as $s): ?>
-                <option value="<?= htmlspecialchars($s['STATUS_CODE']) ?>"<?= $status===$s['STATUS_CODE'] ? ' selected' : '' ?>>
-                  <?= htmlspecialchars($s['STATUS_LABEL']) ?>
-                </option>
-              <?php endforeach; ?>
-            </select>
+        <input type="search" name="q" value="<?= htmlspecialchars($q) ?>" style="width: 85%; font-family: 'Newsreader', serif;" placeholder="Search project title" autocomplete="off"/>
+        <button class="filter-toggle-btn" id="filter-btn" title="Filter" type="button" onclick="toggleFilters(event)">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+          </svg>
+        </button>
+      </div>
+      <div id ="filter-dropdown">
+          <div id="filter-options">
+            <!-- Status -->
+            <div class="field" style="grid-column: span 2;">
+              <label>Status</label>
+              <select class="input" name="status">
+                <option value="">All</option>
+                <?php foreach ($statuses as $s): ?>
+                  <option value="<?= htmlspecialchars($s['STATUS_CODE']) ?>"<?= $status===$s['STATUS_CODE'] ? ' selected' : '' ?>>
+                    <?= htmlspecialchars($s['STATUS_LABEL']) ?>
+                  </option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+            <!-- Start From & End By -->
+            <div class="field">
+              <label>Start From</label>
+              <input type="date" class="input" name="from" value="<?= htmlspecialchars($from) ?>">
+            </div>
+            <div class="field">
+              <label>End By</label>
+              <input type="date" class="input" name="to" value="<?= htmlspecialchars($to) ?>">
+            </div>
           </div>
-          
-          <div class="field">
-            <label>Start from</label>
-            <input class="input" type="date" name="from" id="from-input" value="<?= htmlspecialchars($from) ?>" />
+          <div class="clear-btn-container">
+            <button class="btn-primary" type="button" onclick="clearFilters(event)" style="font-family: 'Newsreader', serif;">Clear Filters</button>
           </div>
-
-          <div class="field">
-            <label>End by</label>
-            <input class="input" type="date" name="to" id="to-input" value="<?= htmlspecialchars($to) ?>" />
-          </div>
-        </div>
-        
-        <div class="clear-btn-container">
-          <button class="btn-primary" type="button" onclick="clearFilters(event)" style="font-family: 'Newsreader', serif;">Clear Filters</button>
-        </div>
-    </div>
+      </div>
   </form>
 
-  <div id="research-results" class="fade-in">
-    <div class='loading'>Loading initial results...</div>
-  </div>
-
+  <div id="research-results" class="fade-in"></div>
 </section>
 
 <script>
-  const resultsContainer = document.querySelector('#research-results');
-  const qInput = document.querySelector('#q-input');
-  const statusSelect = document.querySelector('#status-select');
-  const fromInput = document.querySelector('#from-input');
-  const toInput = document.querySelector('#to-input');
+  // DOM Elements
+  const researchResults = document.querySelector('#research-results');
+  const queryInput = document.querySelector('input[name="q"]');
+  const statusSelect = document.querySelector('select[name="status"]');
+  const fromInput = document.querySelector('input[name="from"]');
+  const toInput = document.querySelector('input[name="to"]');
   const filterDropdown = document.querySelector('#filter-dropdown');
   const filterButton = document.querySelector('#filter-btn');
-  let timer = null;
+  let timer = null; // Debounce timer
   
+  // Toggle visibility of the filter dropdown
   function toggleFilters(e) {
       if (e) e.preventDefault();
-      e.stopPropagation();
+      e.stopPropagation(); 
       if (filterDropdown.style.display === "none" || filterDropdown.style.display === "") {
         filterDropdown.style.display = "block";
       } else {
         filterDropdown.style.display = "none";
       }
   }
-
-  document.addEventListener('click', function(e) {
-  if (!filterDropdown.contains(e.target) && e.target !== filterButton) {
-    filterDropdown.style.display = "none";
-  }
-  });
-  // Clear button function
+  // Clear filters and reset search
   function clearFilters(e) {
       if (e) e.preventDefault();
-      
-      // Reset inputs
+      queryInput.value = '';
       statusSelect.value = '';
       fromInput.value = '';
       toInput.value = '';
       
-      // Fetch results to show the unfiltered list
-      fetchResults(1);
+      fetchResults(1); // Refresh results
 
-      // Hide the filter panel
-      filterDropdown.style.display = "none";
+      filterDropdown.style.display = "none"; // Close dropdown
   }
-
-  // --- Live Search / Fetching Logic ---
+  // Close dropdown when clicking outside
+  document.addEventListener('click', function(e) {
+    if (!filterDropdown.contains(e.target) && e.target !== filterButton) {
+      filterDropdown.style.display = "none";
+    }
+  });
+  // Fetch results based on current filters and page
   function fetchResults(page) {
-    const q = qInput.value;
+    const q = queryInput.value;
     const status = statusSelect.value;
     const from = fromInput.value;
     const to = toInput.value;
-    const isOngoing = status === 'ONGOING';
-    
-    // Construct the URL to the API endpoint
     const url = `api/search_research.php?q=${encodeURIComponent(q)}&status=${encodeURIComponent(status)}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&page=${page}`;
     
-    resultsContainer.innerHTML = "<div class='loading'>Loading results...</div>";
-    
+    researchResults.innerHTML = "<div class='loading'>Loading...</div>";
     fetch(url)
-      .then(res => {
-        if (!res.ok) throw new Error('Network response was not ok.');
-        return res.text();
-      })
+      .then(res => res.text())
       .then(html => {
-        if(isOngoing) {
-          toInput.disabled = true;
-          toInput.style.cursor = 'not-allowed';
-        } else {
-          toInput.disabled = false;
-          toInput.style.cursor = 'initial';
-        }
-        resultsContainer.innerHTML = html;
-        attachPaginationEvents(); 
+        researchResults.innerHTML = html;
+        // Reattach pagination events
+        attachPaginationEvents();
       })
       .catch (err => {
-        resultsContainer.innerHTML = "<div class='error'>Failed to load research results.</div>";
-        console.error("Error fetching research: ", err);
-      });
+        researchResults.innerHTML = "<div class='error'>Failed to load results.</div>";
+        console.error("Error: ", err);
+      })
   }
   
-  // Debounced input for text search (prevents excessive API calls)
+  // Debounced input
   function handleLiveInput() {
     clearTimeout(timer);
-    timer = setTimeout(() => fetchResults(1), 300);
-  }
-  
-  // Instant fetch for select/date changes
-  function handleFilterChange() {
-    clearTimeout(timer); // Clear any pending debounced search
-    fetchResults(1); 
+    timer = setTimeout(() => fetchResults(1), 300); 
   }
 
-  // --- Event Handlers ---
+  // Event Listeners
+  queryInput.addEventListener('input', handleLiveInput);
   
-  // 1. Text Search Input (Debounced)
-  qInput.addEventListener('input', handleLiveInput);
+  // Instant update on specific filter changes
+  statusSelect.addEventListener('change', () => fetchResults(1)); 
+  fromInput.addEventListener('change', () => fetchResults(1));
+  toInput.addEventListener('change', () => fetchResults(1));
   
-  // 2. Select and Date Inputs (Immediate fetch on change)
-  statusSelect.addEventListener('change', handleFilterChange);
-  fromInput.addEventListener('change', handleFilterChange);
-  toInput.addEventListener('change', handleFilterChange);
-  
-  // 3. Prevent form default submission
-  document.getElementById('research-filter-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      fetchResults(1);
-  });
-  
-  // 4. Pagination Event Listener Attachment
+  // Attach pagination link events
   function attachPaginationEvents() {
-    const links = document.querySelectorAll('.pagination .page-btn');
-
+    const links = document.querySelectorAll('.page-btn');
     links.forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
-
             const url = new URL(this.href);
             const page = url.searchParams.get('page') || 1;
-            
-            // Sync filters with URL parameters
-            qInput.value = url.searchParams.get('q') || '';
-            statusSelect.value = url.searchParams.get('status') || '';
-            fromInput.value = url.searchParams.get('from') || '';
-            toInput.value = url.searchParams.get('to') || '';
-
             fetchResults(page);
         });
     });
   }
 
-  // Initial load when the page is ready
   fetchResults(1);
+  attachPaginationEvents();
 </script>
 
-<?php require_once __DIR__ . '/../partials/site_footer.php'; ?>
+<?php 
+// Footer
+require_once __DIR__ . '/../partials/site_footer.php'; 
+?>

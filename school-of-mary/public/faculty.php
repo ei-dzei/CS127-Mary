@@ -48,30 +48,32 @@
         <p class="muted">Record not found.</p>
         <p><a class="btn small" href="<?= BASE_URL ?>/public/faculty.php">Back to list</a></p>
       <?php else: ?>
-        <button class="btn small" style="float:right;margin-top:-4px;" onclick="history.back()">Back</button>
-        <h1 style="margin-bottom:6px">
+        <button class="btn small" style="float:right;margin-top:1px;" onclick="history.back()">Back</button>
+        <h1 style="margin:6px">
           <?php
             echo htmlspecialchars($faculty['FACULTY_LNAME'].', '.$faculty['FACULTY_FNAME']);
             if (!empty($faculty['FACULTY_INITIAL'])) echo ' '.htmlspecialchars($faculty['FACULTY_INITIAL']);
           ?>
         </h1>
         <div class="muted" style="margin-bottom:10px">
-          <?= htmlspecialchars($faculty['RANK_DESCRIPTION']); ?> ·
-          <?= htmlspecialchars($faculty['DEPARTMENT']); ?> (<?= htmlspecialchars($faculty['DEPT_CLASSIFICATION']); ?>)
+          <span style="margin-left:7px;">
+            <?= htmlspecialchars($faculty['RANK_DESCRIPTION']); ?> ·
+            <?= htmlspecialchars($faculty['DEPARTMENT']); ?> (<?= htmlspecialchars($faculty['DEPT_CLASSIFICATION']); ?>)
         </div>
+          </span>
         <div class="panel" style="background:#fff;">
           <div class="grid">
             <div class="field" style="grid-column:span 6">
-              <label>Email</label>
-              <input class="input" value="<?= htmlspecialchars($faculty['FACULTY_EMAIL']); ?>" readonly style="font-family: 'Newsreader', serif;"/>
+              <label>Email:</label>
+              <span class="input" readonly style="color:#0b5394; font-family: 'Newsreader', serif; border: none"><?= htmlspecialchars($faculty['FACULTY_EMAIL']); ?></span>
             </div>
             <div class="field" style="grid-column:span 3">
-              <label>Rank</label>
-              <input class="input" value="<?= htmlspecialchars($faculty['RANK_DESCRIPTION']); ?>" readonly style="font-family: 'Newsreader', serif;"/>
+              <label>Rank:</label>
+              <span class="input" readonly style="color:#0b5394; font-family: 'Newsreader', serif; border: none"><?= htmlspecialchars($faculty['RANK_DESCRIPTION']); ?></span>
             </div>
             <div class="field" style="grid-column:span 3">
-              <label>Department</label>
-              <input class="input" value="<?= htmlspecialchars($faculty['DEPARTMENT']); ?>" readonly style="font-family: 'Newsreader', serif;"/>
+              <label>Department:</label>
+              <span class="input" readonly style="color:#0b5394; font-family: 'Newsreader', serif; border: none"><?= htmlspecialchars($faculty['DEPARTMENT']); ?></span>
             </div>
           </div>
         </div>
@@ -83,14 +85,22 @@
           <div class="grid" style="gap:12px">
             <?php foreach ($projects as $p): ?>
               <a class="panel slide-up" href="<?= BASE_URL ?>/public/research.php?id=<?= (int)$p['RESEARCH_ID']; ?>" style="grid-column:span 6; text-decoration:none; color:inherit;">
-                <h3 style="margin-top:0"><?= htmlspecialchars($p['RESEARCH_TITLE']); ?></h3>
+                <h3 style="margin-top:0">
+                  <?=
+                   htmlspecialchars($p['RESEARCH_TITLE']); 
+                  ?>
+                </h3>
                 <div class="muted" style="font-size:.95rem; margin-top:4px;">
                   <span class="pill" style="background:#eef4ff; border:1px solid #cdd8f0; padding:2px 8px; border-radius:999px;"><?= htmlspecialchars($p['RESEARCH_STATUS']); ?></span>
-                  <span style="margin-left:6px;">
-                    Start: <?= htmlspecialchars($p['RESEARCH_STARTDATE']); ?>
-                    <?php if (!empty($p['RESEARCH_ENDDATE'])) echo " · End: ".htmlspecialchars($p['RESEARCH_ENDDATE']); ?>
-                  </span>
-                  <span style="margin-left:6px;">Role: <?= htmlspecialchars($p['ROLE_DESCRIPTION']); ?></span>
+                  <div>
+                    <span style="margin-left:6px;">
+                      Start: <?= htmlspecialchars($p['RESEARCH_STARTDATE']); ?>
+                      <?php if (!empty($p['RESEARCH_ENDDATE'])) echo " · End: ".htmlspecialchars($p['RESEARCH_ENDDATE']); ?>
+                    </span>
+                  </div>
+                  <div>
+                      <span style="margin-left:6px; color:#0b5394"><?= htmlspecialchars($p['ROLE_DESCRIPTION']);?></span>
+                  </div>
                 </div>
               </a>
             <?php endforeach; ?>
@@ -113,7 +123,6 @@
 <style>
 .panel {
     border-radius: 8px;
-    padding: 15px;
 }
 .filterbar {
     position: relative; /* Absolute positioning for dropdown */
@@ -122,18 +131,14 @@
 .field {
     display: flex;
     flex-direction: column;
-    gap: 4px;
 }
 .field label {
     font-weight: 500;
     color: #4b5563;
 }
 .field .input { 
-    padding: 10px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    height: 38px; 
-    box-sizing: border-box;
+    padding: 5px;
+    height: 38px;
     font-family: 'Newsreader', serif;
 }
 /* Search Bar and Toggle  */
@@ -205,7 +210,7 @@
     border-radius: 6px;
     cursor: pointer;
     font-weight: 600;
-    width: 95.7%;
+    width: 100%;
 }
 .clear-btn-container .btn-primary:hover {
     background-color: #0b5394;
@@ -261,7 +266,6 @@
             <button class="btn-primary" type="button" onclick="clearFilters(event)" style="font-family: 'Newsreader', serif;">Clear Filters</button>
           </div>
         </div>
-    
   </form>
 
   <div id="faculty-results" class="fade-in"></div>
