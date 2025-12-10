@@ -1,20 +1,22 @@
 <?php
+// Load shared helpers
 require_once __DIR__ . '/init.php';
 $pageTitle = $pageTitle ?? 'Mary ';
 $isAdmin   = is_admin();
 $inAdmin   = in_admin_area();
 
-/* Active link helper */
+// Active link helper
 $uri  = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 $path = preg_replace('#^' . preg_quote(BASE_URL, '#') . '#', '', $uri);
 $path = $path === '' ? '/' : $path;
-
+// Fallback safety
 if (!function_exists('current_path')) {
     function current_path() {
         return parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
     }
 }
 ?>
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -29,9 +31,7 @@ if (!function_exists('current_path')) {
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
   <style>
-    /* ---------------------------------------------------------------- */
-    /* GLOBAL LAYOUT STYLES                                             */
-    /* ---------------------------------------------------------------- */
+    /* Global Styles */
     
     body {
         margin: 0;
@@ -41,14 +41,14 @@ if (!function_exists('current_path')) {
         position: relative;
     }
 
-    /* === 1. Layout Container === */
+    /* Layout Container */
     .app-wrapper {
         display: flex; 
         min-height: 100vh;
         transition: all 0.3s ease; 
     }
 
-    /* === 2. Sidebar (Base Styles) === */
+    /* Sidebar (Base Styles) */
     .sidebar {
         width: 250px; 
         flex-shrink: 0;
@@ -66,7 +66,7 @@ if (!function_exists('current_path')) {
         white-space: nowrap;
     }
 
-    /* === 3. Main Content Area === */
+    /* Main Content Area */
     .main-content-area {
         flex-grow: 1;
         margin-left: 250px; 
@@ -76,7 +76,7 @@ if (!function_exists('current_path')) {
         transition: margin-left 0.3s ease-in-out;
     }
 
-    /* === 4. Sidebar Link Styles === */
+    /* Sidebar Link Styles */
     .sidebar .brand {
         display: flex;
         align-items: center;
@@ -137,19 +137,14 @@ if (!function_exists('current_path')) {
         border-top: 1px solid #ffffff10;
     }
 
-    /* === 5. The "Desktop Collapse" Logic === */
-    
-    /* When body has class 'collapsed', shrink sidebar */
+    /* The "Desktop Collapse" Logic */
     body.collapsed .sidebar {
         width: 80px; 
     }
-    
-    /* Adjust content margin */
     body.collapsed .main-content-area {
         margin-left: 80px;
     }
-    
-    /* Hide the text spans */
+
     body.collapsed .sidebar .link-text, 
     body.collapsed .sidebar .brand span {
         opacity: 0;
@@ -199,7 +194,7 @@ if (!function_exists('current_path')) {
         color: #fff;
     }
 
-    /* === 6. Mobile Logic (Max-width 1024px) === */
+    /* Mobile Logic (Max-width 1024px) */
     #mobile-toggle {
         display: none;
     }
@@ -244,8 +239,7 @@ if (!function_exists('current_path')) {
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-        
-        // --- 1. MEMORY LOGIC ---
+        // Memory Logic
         // Check if user previously preferred it 'expanded'
         const savedState = localStorage.getItem('sidebar-state');
         const body = document.body;
@@ -262,7 +256,7 @@ if (!function_exists('current_path')) {
             }
         }
 
-        // --- 2. MOBILE TOGGLE LOGIC ---
+        // Mobile Toggle Logic
         const mobileBtn = document.getElementById('mobile-toggle');
         const appWrapper = document.getElementById('app-wrapper');
         
@@ -272,7 +266,7 @@ if (!function_exists('current_path')) {
             });
         }
 
-        // --- 3. DESKTOP COLLAPSE LOGIC ---
+        // Desktop Collapse Logic
         if (desktopBtn) {
             desktopBtn.addEventListener('click', () => {
                 // Toggle the class
@@ -299,8 +293,6 @@ if (!function_exists('current_path')) {
 </head>
 
 <body class="collapsed">
-
-<!-- <button id="mobile-toggle"><i class="bi bi-list"></i></button> -->
 
 <div class="app-wrapper" id="app-wrapper">
 

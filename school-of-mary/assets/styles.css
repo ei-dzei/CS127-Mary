@@ -56,11 +56,8 @@ body {
   font-size: 16px;
   font-family: 'Newsreader', serif;
   min-height: 100vh;
-  transition: padding-left var(--transition); /* Used for non-flex body shift (optional) */
-  position: relative; /* Base for fixed elements */
-
-  /* If body is used as the main flex container, this would apply,
-     but we are using .app-wrapper as the main flex container. */
+  transition: padding-left var(--transition); 
+  position: relative; 
 }
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Patua One', serif;
@@ -1039,8 +1036,6 @@ th {
 .card__meta{ color:#5b6675; font-size:.95rem; margin-bottom:12px; }
 .card__actions{ margin-top:auto; display:flex; justify-content:flex-start; }
 .card .btn.small{ border-radius:9999px; }
-
-
 /* =======================================
    PAGINATION 
    ======================================= */
@@ -1152,7 +1147,9 @@ th {
   }
 }
 
-/* ======================================= ADMIN CALENDAR STYLES ======================================= */
+/* ======================================= 
+    ADMIN CALENDAR STYLES 
+    ======================================= */
 .dual-column-layout {
     grid-column: span 12;
     display: grid;

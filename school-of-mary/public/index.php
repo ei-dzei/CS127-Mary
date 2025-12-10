@@ -1,13 +1,17 @@
 <?php
+// Config & Error Handling
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
-
+// Initialization
 require_once __DIR__ . '/../partials/init.php';
+// Page Title
 $pageTitle = 'Home';
+// Header
 require_once __DIR__ . '/../partials/site_header.php';
 ?>
 
+<!-- Hero Section -->
 <section class="hero fade-in" aria-label="Featured highlights">
 
   <article class="hero__slide is-active"
@@ -25,10 +29,6 @@ require_once __DIR__ . '/../partials/site_header.php';
       <p class="hero__subtitle">
         Excellence in Research and Innovation
       </p>
-      <!-- <div class="hero__actions">
-        <a href="<?= BASE_URL ?>/public/faculty.php" class="btn">Get Started</a>
-        <a href="<?= BASE_URL ?>/public/research.php" class="btn" style="background:#0a4c80">Browse Research</a>
-      </div> -->
     </div>
   </article>
 
@@ -69,6 +69,7 @@ require_once __DIR__ . '/../partials/site_header.php';
   </nav>
 </section>
 
+<!-- Features Section (About us) -->
 <section class="feature">
   <div class="feature-card">
     <div class="feature-icon" aria-hidden="true"><i class="bi bi-info-circle-fill"></i></div>
@@ -93,4 +94,7 @@ require_once __DIR__ . '/../partials/site_header.php';
   </div>
 </section>
 
-<?php require_once __DIR__ . '/../partials/site_footer.php'; ?>
+<?php 
+// Footer
+require_once __DIR__ . '/../partials/site_footer.php'; 
+?>

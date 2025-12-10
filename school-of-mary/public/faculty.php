@@ -1,15 +1,19 @@
 <?php
+  // Page Title
   $pageTitle = 'Faculty';
+  // Header
   require_once __DIR__ . '/../partials/site_header.php';
 
-  /* --- Lookups for filters --- */
+  // Filter Lookups
+  // Fetch data to populate filter dropdowns
   $ranks = $pdo->query("SELECT RANK_ID, RANK_DESCRIPTION FROM `RANK` ORDER BY RANK_LEVEL")->fetchAll();
   $depts = $pdo->query("SELECT DEPT_ID, DEPT_SPECIALIZATION FROM DEPARTMENT ORDER BY DEPT_SPECIALIZATION")->fetchAll();
 
-  /* --- Detail view (if ?id=) --- */
+  // Detail View Logic
   $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
   if ($id > 0) {
+    // Fetch faculty Info
     $stmt = $pdo->prepare("
       SELECT f.FACULTY_ID, f.FACULTY_FNAME, f.FACULTY_INITIAL, f.FACULTY_LNAME, f.FACULTY_EMAIL,
             f.RANK_ID, r.RANK_DESCRIPTION,
@@ -22,7 +26,7 @@
     ");
     $stmt->execute([$id]);
     $faculty = $stmt->fetch();
-
+    // Fetch assigned research projects
     if ($faculty) {
       $rs = $pdo->prepare("
         SELECT re.RESEARCH_ID, re.RESEARCH_TITLE, re.RESEARCH_STATUS, re.RESEARCH_STARTDATE, re.RESEARCH_ENDDATE,
@@ -99,7 +103,7 @@
     exit;
   }
 
-  /* --- List view --- */
+  // List View Logic
     $q    = trim($_GET['q'] ?? '');
     $rank = trim($_GET['rank'] ?? '');
     $dept = trim($_GET['dept'] ?? '');
@@ -112,7 +116,7 @@
     padding: 15px;
 }
 .filterbar {
-    position: relative; /* Essential for absolute positioning of the dropdown */
+    position: relative; /* Absolute positioning for dropdown */
     margin-bottom: 20px;
 }
 .field {
@@ -132,8 +136,7 @@
     box-sizing: border-box;
     font-family: 'Newsreader', serif;
 }
-
-/* --- SEARCH BAR AND TOGGLE STYLES (Full Width, Matching Look) --- */
+/* Search Bar and Toggle  */
 .searchbox {
     display: flex;
     align-items: center;
@@ -170,7 +173,7 @@
     color: #1f2937;
 }
 
-/* --- ADVANCED FILTER PANEL STYLES --- */
+/* Advanced Filter Panel */
 #filter-dropdown {
     display: none; /* Initially hidden */
     position: absolute;
@@ -187,7 +190,6 @@
 }
 #filter-options {
     display: grid;
-    /* 3 columns for Status, Start, End */
     grid-template-columns: repeat(2, 1fr); 
     gap: 10px;
     margin-bottom: 15px;
@@ -209,6 +211,7 @@
     background-color: #0b5394;
 }
 </style>
+
 <section class="container fade-in" style="margin-top:6px;">
   <h1 style="margin-bottom:6px;">Faculty</h1>
   <p class="muted" style="margin-bottom:10px;">Browse the faculty directory and explore their scholarly contributions.</p>
@@ -216,13 +219,11 @@
   <!-- Filter Bar -->
   <form method="get" class="filterbar" id="form" style="margin-bottom:14px;">
     <!-- Inputs row -->
-    
       <div class="searchbox" style="font-family: 'Newsreader', serif;">
         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M10 18a8 8 0 1 1 6.32-3.1l4.39 4.39-1.42 1.42-4.39-4.39A7.98 7.98 0 0 1 10 18Zm0-2a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" fill="currentColor"/>
         </svg>
         <input type="search" name="q" value="<?= htmlspecialchars($q) ?>" style="width: 85%; font-family: 'Newsreader', serif;" placeholder="Search faculty name or email"/>
-        <!-- <input type="reset" value="X" alt="Clear the search form"> -->
         <button class="filter-toggle-btn" id="filter-btn" title="Filter" type="button" onclick="toggleFilters(event)">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
@@ -267,53 +268,55 @@
 </section>
 
 <script>
+  // DOM Elements
   const facultyResults = document.querySelector('#faculty-results');
   const queryInput = document.querySelector('input[name="q"]');
   const rankSelect = document.querySelector('select[name="rank"]');
   const deptSelect = document.querySelector('select[name="dept"]'); 
   const filterDropdown = document.querySelector('#filter-dropdown');
   const filterButton = document.querySelector('#filter-btn');
-  let timer = null;
+  let timer = null; // Debouonce timer
   
   // Toggle visibility of the filter dropdown
   function toggleFilters(e) {
       if (e) e.preventDefault();
-      e.stopPropagation();
+      e.stopPropagation(); // Prevent event from bubbling up
       if (filterDropdown.style.display === "none" || filterDropdown.style.display === "") {
         filterDropdown.style.display = "block";
       } else {
         filterDropdown.style.display = "none";
       }
   }
-  // Clear button function
+  // Clear filters and reset search
   function clearFilters(e) {
       if (e) e.preventDefault();
       queryInput.value = '';
       rankSelect.value = '';
       deptSelect.value = '';
       
-      fetchResults(1);
+      fetchResults(1); // Refresh results
 
-      filterDropdown.style.display = "none";
+      filterDropdown.style.display = "none"; // Close dropdown
   }
+  // Close dropdown when clicking outside
   document.addEventListener('click', function(e) {
   if (!filterDropdown.contains(e.target) && e.target !== filterButton) {
     filterDropdown.style.display = "none";
   }
   });
-  //fetch func
+  // Fetch results based on current filters and page
   function fetchResults(page) {
     const q = queryInput.value;
     const rank = rankSelect.value;
     const dept = deptSelect.value;
     const url =  `api/search_faculty.php?q=${q}&rank=${rank}&dept=${dept}&page=${page}`;
     
-    
     facultyResults.innerHTML = "<div class='loading'>Loading...</div>";
     fetch(url)
       .then(res => res.text())
       .then(html => {
         facultyResults.innerHTML = html;
+        // Reattach pagination events
         attachPaginationEvents();
       })
       .catch (err => {
@@ -322,16 +325,18 @@
       })
   }
   
-  //Debounced input
+  // Debounced input
   function handleLiveInput() {
     clearTimeout(timer);
-    timer = setTimeout(() => fetchResults(1), 300);//300ms
+    timer = setTimeout(() => fetchResults(1), 300); // 300ms
   }
-  
+  // Event Listeners
   queryInput.addEventListener('input', handleLiveInput);
-  rankSelect.addEventListener('change', () => fetchResults(1));
+  // Instant update on dropdown change
+  rankSelect.addEventListener('change', () => fetchResults(1)); 
   deptSelect.addEventListener('change', () => fetchResults(1));
   
+  // Attach pagination link events
   function attachPaginationEvents() {
     const links = document.querySelectorAll('.page-btn');
 
@@ -346,9 +351,12 @@
         });
     });
   }
-  //Load all faculty
+
   fetchResults(1);
   attachPaginationEvents();
 </script>
 
-<?php require_once __DIR__ . '/../partials/site_footer.php'; ?>
+<?php 
+// Footer
+require_once __DIR__ . '/../partials/site_footer.php'; 
+?>

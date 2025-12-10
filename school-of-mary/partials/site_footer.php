@@ -1,36 +1,41 @@
-</main> <footer class="footer">
-            <div class="container footer__grid">
-                
-                <div class="footer__col footer__brand">
-                    <h4 class="footer__heading">School of Mary Faculty and Research Portal</h4>
-                    <p class="footer__tagline">Excellence in Research and Innovation</p>
-                    <p class="footer__legal">
-                        Copyright &copy; <?= date('Y'); ?> School of Mary. All Rights Reserved.
-                    </p>
-                </div>
-                <div class="footer__col">
-                    <h4 class="footer__heading">Quick Links</h4>
-                    <div class="footer__inline-links">
-                        <a href="<?= BASE_URL ?>/public/">Home</a> |
-                        <a href="<?= BASE_URL ?>/public/faculty.php">Faculty</a> |
-                        <a href="<?= BASE_URL ?>/public/research.php">Research</a> |
-                        <a href="<?= BASE_URL ?>/admin/login.php">Admin Login</a>
-                    </div>
-                </div>
+</main> 
 
-                <div class="footer__col">
-                    <h4 class="footer__heading">Contact Us</h4>
-                    <ul class="footer__list footer__contact">
-                        <li><i class="icon">📞</i> (02) 0000-1234</li>
-                        <li><i class="icon">📧</i> schoolofmary@university.edu</li>
-                        <li><i class="icon">📍</i> 127 TBA Section, Mary City, 0127</li>
-                        <li><i class="icon">🕒</i> Mon - Fri: 8:00 AM - 5:00 PM</li>
-                    </ul>
-                </div>
+<footer class="footer">
+    <div class="container footer__grid">
+        
+        <div class="footer__col footer__brand">
+            <h4 class="footer__heading">School of Mary Faculty and Research Portal</h4>
+            <p class="footer__tagline">Excellence in Research and Innovation</p>
+            <p class="footer__legal">
+                Copyright &copy; <?= date('Y'); ?> School of Mary. All Rights Reserved.
+            </p>
+        </div>
+
+        <div class="footer__col">
+            <h4 class="footer__heading">Quick Links</h4>
+            <div class="footer__inline-links">
+                <a href="<?= BASE_URL ?>/public/">Home</a> |
+                <a href="<?= BASE_URL ?>/public/faculty.php">Faculty</a> |
+                <a href="<?= BASE_URL ?>/public/research.php">Research</a> |
+                <a href="<?= BASE_URL ?>/admin/login.php">Admin Login</a>
             </div>
-        </footer>
+        </div>
 
-    </div> </div> <div id="modal" class="modal" hidden>
+        <div class="footer__col">
+            <h4 class="footer__heading">Contact Us</h4>
+            <ul class="footer__list footer__contact">
+                <li><i class="icon">📞</i> (02) 0000-1234</li>
+                <li><i class="icon">📧</i> schoolofmary@university.edu</li>
+                <li><i class="icon">📍</i> 127 TBA Section, Mary City, 0127</li>
+                <li><i class="icon">🕒</i> Mon - Fri: 8:00 AM - 5:00 PM</li>
+            </ul>
+        </div>
+    </div>
+</footer>
+
+</div> </div> 
+
+<div id="modal" class="modal" hidden>
   <div class="modal__dialog">
     <div class="modal__head">
       <h3 id="modal-title">Edit</h3>
@@ -40,6 +45,7 @@
     <form id="modal-form" method="post" class="grid">
       <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
       <input type="hidden" name="action" value="">
+      
       <div class="modal__actions">
         <button class="btn primary" type="submit">Save</button>
         <button class="btn" type="button" data-close="modal">Cancel</button>

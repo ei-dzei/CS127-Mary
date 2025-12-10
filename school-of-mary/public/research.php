@@ -1,12 +1,13 @@
 <?php
+// Page Title & Header
 $pageTitle = 'Research';
 require_once __DIR__ . '/../partials/site_header.php';
 
-$admin = is_admin();
-/* --- Lookups --- */
+// Filter Lookups
+// Fetch data to populate filter dropdown
 $statuses = $pdo->query("SELECT STATUS_CODE, STATUS_LABEL FROM RESEARCH_STATUS ORDER BY STATUS_LABEL")->fetchAll();
 
-/* --- Detail view --- */
+// Detail View Logic
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 // Pagination setup (These are only used for list view if no JS is present, but kept for list view parameters)
