@@ -22,7 +22,7 @@ html,
 body {
   color: var(--ink) !important;
   background: #fff !important;
-  font: 12pt/1.45 "Newsreader", Georgia, "Times New Roman", serif !important;
+  font: 12pt/1.45 "Newsreader" !important;
 }
 
 /* Hide non-print UI */
@@ -49,7 +49,7 @@ form {
 
 /* Headings & metadata */
 h1, h2, h3 {
-  font-family: "Patua One", "Times New Roman", serif !important;
+  font-family: "Patua One" !important;
   margin: 0 0 6pt;
   color: var(--ink) !important;
 }
