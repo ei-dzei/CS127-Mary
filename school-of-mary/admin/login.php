@@ -1,7 +1,8 @@
 <?php
+// Page Title
 $pageTitle = 'Login | Admin';
 
-// Load init first (sessions, helpers, csrf) BEFORE any output
+// Load init first (sessions, helpers, csrf) before any output
 require_once __DIR__ . '/../partials/init.php';
 
 // If already logged in, go straight to dashboard
@@ -24,37 +25,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   } else {
     $ADMIN_USER = getenv('SOM_ADMIN_USER') ?: 'admin';
     $ADMIN_PASS = getenv('SOM_ADMIN_PASS') ?: 'admin123'; // can be changed
-
+    // Verify Credentials
+    // hash_equals() is used for the password check to prevent Timing Attacks
     if ($user === $ADMIN_USER && hash_equals($ADMIN_PASS, $pass)) {
+      // Generate a new Session ID upon successful login so the user annot be tracked using a previous ID. 'true' deletes the old session file
       session_regenerate_id(true);
+      // Set the session flag indicating the user is an admin
       $_SESSION['admin_user'] = $user;
       // Use project-aware redirect to avoid /admin/ missing when app is in a subfolder
       redirect_to('/admin/dashboard.php');
     } else {
+      // Login Failed
       if(!($user === $ADMIN_USER)) {
         $error = 'Incorrect username.';
       } elseif (!(hash_equals($ADMIN_PASS, $pass))) {
-        $error = 'Incorrect password.';//shows at opening, if close tab dapat wala na
+        $error = 'Incorrect password.'; // shows at opening, if close tab dapat wala na
       }
     }
   }
 }
 
-// Only include the header AFTER redirects are settled
+// Only include the header after redirects are settled
 require_once __DIR__ . '/../partials/site_header.php';
 ?>
 
 <style>
   .panel {box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;}
-  /* Styling for the large, blue, circular indicator */
+  
   #caps-lock-indicator {
-    /* Style the button container */
     display: none; /* Initially hidden */
-    /* background-color: #007bff; Bright blue background */
-    color: #4b5563; /* White arrow */
-    width: 40px; /* Size of the circle */
-    height: 40px; /* Size of the circle */
-    border-radius: 50%; /* Make it perfectly circular */
+    color: #4b5563; 
+    width: 40px; 
+    height: 40px;
+    border-radius: 50%;
     margin-left: 1em;
     
     /* Center the arrow inside the circle */
@@ -62,19 +65,16 @@ require_once __DIR__ . '/../partials/site_header.php';
     align-items: center;
     
     /* Positioning near the password field */
-    position: absolute; /* Position it relative to the parent container */
-    right: 0; /* Adjust this value to position it correctly outside the field */
-    top: 50%; /* Start at the vertical center */
-    transform: translateY(-50%); /* Shift up by half its height to perfectly center */
+    position: absolute;
+    right: 0; 
+    top: 50%; 
+    transform: translateY(-50%);
     
-    /* Visual enhancements */
-    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); Subtle shadow for depth */
-    cursor: default; /* Indicate it's not clickable */
+    cursor: default; 
   }
 
   #caps-lock-indicator::before {
-    /* Use a larger font size for the arrow icon */
-    content: '⇧'; /* Using the Unicode up-arrow ⇧ or use &#8679; */
+    content: '⇧'; 
     font-size: 1.5em; 
     line-height: 1; /* Keep the icon centered */
   }
@@ -83,7 +83,7 @@ require_once __DIR__ . '/../partials/site_header.php';
   .password-field-container {
     display: flex;
     align-items: center;
-    position: relative; /* CRITICAL: Allows absolute positioning of the indicator */
+    position: relative; /* Allows absolute positioning of the indicator */
   }
 
   /* Ensure the input takes up full width available */
@@ -94,7 +94,7 @@ require_once __DIR__ . '/../partials/site_header.php';
 
 <section class="panel fade-in" style="max-width: 560px; margin: 24px auto;">
   <h1 style="margin-bottom:8px;">Admin Login</h1>
-  <p class="muted" style="margin-bottom:12px;">Admins manage faculty, research, agencies, funding, and assignments.</p>
+  <p class="muted" style="margin-bottom:12px;">Admins view and manage database records in real time.</p>
 
   <?php if ($error): ?>
     <div class="panel" style="background:#fff3f3; border-color:#f3c2c2; color:#7a1111; margin-bottom:10px;">
@@ -127,9 +127,7 @@ require_once __DIR__ . '/../partials/site_header.php';
 </section>
 
 <script>
-  /**
-   * Caps Lock Detection Script (Unchanged)
-   */
+  // Caps Lock Detection Script
   document.addEventListener('DOMContentLoaded', function() {
     const passwordInput = document.getElementById('password');
     const indicator = document.getElementById('caps-lock-indicator');

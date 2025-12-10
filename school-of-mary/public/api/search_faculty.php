@@ -1,54 +1,67 @@
 <?php 
-    // FIX: Changed grave accent ` to single quote ' in the path.
+    // Initialization
     require_once __DIR__ . '/../../partials/init.php';
 
-    /* --- Pagination setup --- */
+    // Faculty members to show per page
     $perPage = 6;
+
+    // Get current page number
+    // Logic explanation for me: Is it set? Is it a number? Is it > 0? If yes, use it; otherwise, default to 1.
     $page    = (isset($_GET['page']) && is_numeric($_GET['page']) && (int)$_GET['page'] > 0) ? (int)$_GET['page'] : 1;
+    
+    // Calculate the offset (how many records to skip in the SQL query)
     $offset  = ($page - 1) * $perPage;
     
-    /* --- List view --- */
-    $q    = trim($_GET['q'] ?? '');
-    $rank = trim($_GET['rank'] ?? '');
-    $dept = trim($_GET['dept'] ?? '');
+    // Retrieve filter inputs to handle missing parameters
+    $q    = trim($_GET['q'] ?? '');     // Search text
+    $rank = trim($_GET['rank'] ?? '');  // Rank ID
+    $dept = trim($_GET['dept'] ?? '');  // Department ID
     
-    /* Build WHERE and bind parameters (all named) */
+    // Start with a base WHERE clause (1=1 is always true, allowing us to simply append "AND..." later)
     $where  = " WHERE 1=1 ";
-    $params = [];
+    $params = []; // Array to store parameters for secure PDO binding
 
+    // Filter by Search Query (First Name, Last Name, or Email)
     if ($q !== '') {
         $where .= " AND (f.FACULTY_LNAME LIKE :q_like OR f.FACULTY_FNAME LIKE :q_like OR f.FACULTY_EMAIL LIKE :q_like)";
-        // FIX: Use a single, unique named parameter for all LIKE conditions for simplicity.
-        // PHP's PDO requires unique named parameters, even if the value is the same.
-        // NOTE: The previous code had :q1, :q2, :q3 but the binding was repetitive, which is fine, 
-        // but using a single placeholder is cleaner for simple LIKE searches.
-        $params[':q_like'] = "%{$q}%"; // Changed from {$q}% to %{$q}% for more robust searching
+        
+        // LIKE condition using %
+        $params[':q_like'] = "%{$q}%"; 
     }
+
+    // Filter by Rank
     if ($rank !== '') {
         $where .= " AND f.RANK_ID = :rank";
         $params[':rank'] = $rank;
     }
+
+    // Filter by Department
     if ($dept !== '') {
         $where .= " AND f.DEPT_ID = :dept";
         $params[':dept'] = $dept;
     }
     
-    /* Count with the same filters (no ORDER/LIMIT) */
+    // Count query for pagination
+    // We need to know the total number of matching records *before* we limit the results.
     $countSql = "
         SELECT COUNT(*)
         FROM FACULTY f
         JOIN `RANK` r ON r.RANK_ID = f.RANK_ID
         JOIN DEPARTMENT d ON d.DEPT_ID = f.DEPT_ID
-        " . $where;
+        " . $where; // Appends the dynamic WHERE clause built above
 
     $countStmt = $pdo->prepare($countSql);
-    // Use bindValue directly in the loop for binding all filter parameters
+    
+    // Bind the parameters dynamically
     foreach ($params as $k => $v) { $countStmt->bindValue($k, $v); }
+    
     $countStmt->execute();
+    
+    // Calculate total rows and total pages required
     $totalRows  = (int)$countStmt->fetchColumn();
     $totalPages = (int)ceil($totalRows / $perPage);
 
-    /* Paged SELECT using the same WHERE */
+    // Main data select query
     $sql = "
         SELECT
             f.FACULTY_ID, f.FACULTY_FNAME, f.FACULTY_INITIAL, f.FACULTY_LNAME, f.FACULTY_EMAIL,
@@ -63,19 +76,22 @@
 
     $stmt = $pdo->prepare($sql);
     
-    /* Bind filter params */
+    // Bind the filter params again for the main query
     foreach ($params as $k => $v) { $stmt->bindValue($k, $v); }
     
-    /* Bind pagination as integers */
+    // Bind LIMIT and OFFSET specifically as Integers
     $stmt->bindValue(':limit', (int)$perPage, PDO::PARAM_INT);
     $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
 
     $stmt->execute();
     $rows  = $stmt->fetchAll();
-    $total = count($rows);
+    $total = count($rows); // Count rows on *this* specific page
     
+    
+    // Faculty Cards
     $output = "";
     $cards = "";
+
     if (!$rows) {
         $cards .= '<div class="panel">No matching faculty.</div>';
     } else {
@@ -106,28 +122,35 @@
         }
     }
 
+    // Pagination Links
     $pagination = "";
+    
+    // Rebuild the query string (search filters) so pagination links don't reset filters
     $queryParams = $_GET;
-    // Ensure 'page' is removed before rebuilding the query string
-    unset($queryParams["page"]);
+    unset($queryParams["page"]); // Remove current page to avoid duplication
     $baseQuery = http_build_query($queryParams);
+    
+    // Create the base URL for links
     $baseUrl = basename($_SERVER['PHP_SELF']) . "?" . ($baseQuery ? $baseQuery . "&" : "");
+    
+    // Max number of page links to show at once (sliding window)
     $maxPage = 5;
 
-    // The pagination logic here seems complex for a simple API result and is designed for a full-page reload, 
-    // but we will keep the structure and just ensure the links are correct for AJAX use.
-
+    // Previous Button
     if ($page > 1) {
         $pagination .= '<a href="' . $baseUrl . 'page=' . ($page-1) . '" class="page-btn" title="Previous page">&#x276E;</a>';
     }
 
+    // Calculate Window Start/End
     $start = max(1, $page - floor($maxPage/2));
     $end = min($totalPages, $start + $maxPage - 1);
 
+    // Adjust if we are near the end of the list to keep showing $maxPage buttons
     if ($end - $start < $maxPage - 1) {
         $start = max(1, $end - $maxPage + 1);
     }
 
+    // First Page & Leading Ellipsis
     if ($start > 1) {
         $pagination .= '<a href="' . $baseUrl . 'page=1" class="page-btn">1</a>';
 
@@ -139,10 +162,13 @@
         }
     }
 
+    // Numbered Pages Loop
     for ($i = $start; $i <= $end; $i++) {
+        // Add 'active' class if this is the current page
         $pagination .= '<a href="' . $baseUrl . 'page=' . $i . '" class="page-btn ' . ($i == $page ? 'active' : '') . '">' . $i . '</a>';
     }
 
+    // Last Page & Trailing Ellipsis
     if ($end < $totalPages) {
         if ($end == $totalPages - 2) {
             $pagination .= '<a href="' . $baseUrl . 'page=' . ($totalPages - 1) . '" class="page-btn">' . ($totalPages - 1) . '</a>';
@@ -153,15 +179,17 @@
         $pagination .= '<a href="' . $baseUrl . 'page=' . $totalPages . '" class="page-btn">' . $totalPages . '</a>';
     }
 
+    // Next Button
     if ($page < $totalPages) {
         $pagination .= '<a href="' . $baseUrl . 'page=' . ($page+1) . '" class="page-btn" title= "Next page ">&#x276F;</a>';
     }
 
-
-    $output = '
-    <p class="muted" style="margin:6px 0 12px;"> Showing '  . (int)$totalRows . ($total===1 ? ' faculty' : ' faculties') .' | Page '.$page.' of '.  ($totalPages ===0? ' 1' : $totalPages)  .'</p>
-    ';
+    // Status line (Showing #, page # of #)
+    $output = '<p class="muted" style="margin:6px 0 12px;"> Showing '  . (int)$totalRows . ($total===1 ? ' faculty' : ' faculties') .' | Page '.$page.' of '.  ($totalPages ===0? ' 1' : $totalPages)  .'</p>';
+    // Append Cards
     $output .='<div class = "cards">'.$cards.'</div>';
+    // Append Pagination
     $output .='<div class = "pagination">'.$pagination.'</div>';
+    // Echo final HTML to the browser/client
     echo $output;
 ?>

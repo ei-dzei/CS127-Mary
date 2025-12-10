@@ -1,7 +1,8 @@
 <?php
+// Page Title
 $pageTitle = 'Admin Dashboard';
 
-// Load init (sessions, db, helpers) BEFORE any output
+// Load init first (sessions, helpers, csrf) before any output
 require_once __DIR__ . '/../partials/init.php';
 
 // Require admin auth before rendering
@@ -9,14 +10,15 @@ if (!is_admin()) {
   redirect_to('/admin/login.php');
 }
 
-/* -------------------- Helpers -------------------- */
+// Helper Functions
+// Safely retrieving page numbers from GET requests. Casts to int to prevent injection and ensures value is >= 1
 function get_page(string $param): int {
   $p = isset($_GET[$param]) ? (int)$_GET[$param] : 1;
   return $p > 0 ? $p : 1;
 }
 $PAGE_SIZE = 10;
 
-/** Build a label for a faculty row given the ID */
+// Build a label for a faculty row given the ID
 function faculty_label(PDO $pdo, int $facultyId): string {
   $stmt = $pdo->prepare("SELECT FACULTY_FNAME, FACULTY_INITIAL, FACULTY_LNAME FROM FACULTY WHERE FACULTY_ID = ?");
   $stmt->execute([$facultyId]);
@@ -25,13 +27,13 @@ function faculty_label(PDO $pdo, int $facultyId): string {
   $first = trim((string)($row['FACULTY_FNAME'] ?? ''));
   $init  = trim((string)($row['FACULTY_INITIAL'] ?? ''));
   $last  = trim((string)($row['FACULTY_LNAME'] ?? ''));
-  // Format as: Last, First Initial
   $name = trim($last . ', ' . $first . ($init !== '' ? ' ' . $init : ''));
   return $name !== '' ? $name : 'Faculty #'.$facultyId;
 }
 
-/** Fetch a page of audit rows with robust column aliasing AND SORTING */
+// Fetch Audit Logs with Dynamic Sorting
 function fetch_audit_page(PDO $pdo, int $limit, int $offset, string $sortMode = 'newest'): array {
+  // Whitelists for column names (Allow-list approach)
   $idCandidates   = ['ID', 'id', 'log_id', 'audit_id'];
   $timeCandidates = ['CREATED_AT', 'created_at', 'logged_at', 'timestamp', 'createdOn'];
 
@@ -76,7 +78,7 @@ function count_audit(PDO $pdo): int {
   }
 }
 
-/* -------------------- KPIs -------------------- */
+// Key Performance Indicators (KPIs) - dashboard widgets, counts - top cards
 $kpi = [
   'faculty'    => (int)$pdo->query("SELECT COUNT(*) FROM FACULTY")->fetchColumn(),
   'research'   => (int)$pdo->query("SELECT COUNT(*) FROM RESEARCH")->fetchColumn(),
@@ -85,7 +87,7 @@ $kpi = [
   'assignment' => (int)$pdo->query("SELECT COUNT(*) FROM ASSIGNMENT")->fetchColumn(),
 ];
 
-/* -------------------- Top Faculty by Assignments (paginated) -------------------- */
+// Top Faculty by Assignments (Paginated)
 $tf_page   = get_page('tf_page');
 $tf_total  = (int)$pdo->query("SELECT COUNT(*) FROM FACULTY")->fetchColumn();
 $tf_pages  = max(1, (int)ceil($tf_total / $PAGE_SIZE));
@@ -104,12 +106,13 @@ $tf_stmt->bindValue(':off', $tf_offset, PDO::PARAM_INT);
 $tf_stmt->execute();
 $topFaculty = $tf_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-/* -------------------- Top Research by Funding (paginated) -------------------- */
+// Top Research by Funding (Paginated)
 $tr_page   = get_page('tr_page');
 $tr_total  = (int)$pdo->query("SELECT COUNT(*) FROM RESEARCH")->fetchColumn();
 $tr_pages  = max(1, (int)ceil($tr_total / $PAGE_SIZE));
 $tr_offset = ($tr_page - 1) * $PAGE_SIZE;
 
+// COALESCE(SUM(...), 0) turns NULLs (no funding) into 0 for correct sorting
 $tr_stmt = $pdo->prepare("
   SELECT re.RESEARCH_ID, re.RESEARCH_TITLE,
          COALESCE(SUM(fu.FUNDING_AMOUNT),0) AS total
@@ -124,14 +127,14 @@ $tr_stmt->bindValue(':off', $tr_offset, PDO::PARAM_INT);
 $tr_stmt->execute();
 $topResearch = $tr_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-/* -------------------- Audit (paginated + sorted) -------------------- */
+// Audit Log (Paginated + Sorted)
 $log_page   = get_page('log_page');
 $log_sort   = $_GET['log_sort'] ?? 'newest'; // Catch the sort parameter
 $log_total  = count_audit($pdo);
 $log_pages  = max(1, (int)ceil($log_total / $PAGE_SIZE));
 $log_offset = ($log_page - 1) * $PAGE_SIZE;
 
-// Pass $log_sort to the fetch function
+// Fetch the specific page of audit logs
 $audit      = fetch_audit_page($pdo, $PAGE_SIZE, $log_offset, $log_sort);
 
 require_once __DIR__ . '/../partials/site_header.php';
@@ -297,7 +300,6 @@ require_once __DIR__ . '/../partials/site_header.php';
     gap: 16px;
     margin-top: 16px;
   }
-  /* Updated: research-col still used for sizing, but will apply to faculty now */
   .research-col { grid-column: span 1; }
   .calendar-col { grid-column: span 1; }
 
@@ -425,7 +427,7 @@ require_once __DIR__ . '/../partials/site_header.php';
           <table class="list">
             <thead>
               <tr>
-                <th>#</th>
+                <th>No.</th>
                 <th>Faculty</th>
                 <th>Total Assignments</th>
               </tr>
@@ -537,7 +539,7 @@ require_once __DIR__ . '/../partials/site_header.php';
           <table class="list">
             <thead>
               <tr>
-                <th>#</th>
+                <th>No.</th>
                 <th>Research</th>
                 <th>Total Funding</th>
               </tr>
@@ -562,7 +564,6 @@ require_once __DIR__ . '/../partials/site_header.php';
            <div class="pagination">
             <?php
               $base  = app_url('/admin/dashboard.php');
-              // Include current log_sort in other paginations too to preserve state
               $qs_tr = function($p) use ($tf_page, $log_page, $log_sort) {
                 return 'tr_page='.$p.'&tf_page='.$tf_page.'&log_page='.$log_page.'&log_sort='.$log_sort;
               };
@@ -667,7 +668,6 @@ require_once __DIR__ . '/../partials/site_header.php';
         <div class="pagination">
           <?php
             $base   = app_url('/admin/dashboard.php');
-              // Include log_sort in pagination link to preserve sort order
             $qs_log = function($p) use ($tr_page, $tf_page, $log_sort) {
               return 'tr_page='.$tr_page.'&tf_page='.$tf_page.'&log_page='.$p.'&log_sort='.$log_sort;
             };
@@ -779,4 +779,6 @@ require_once __DIR__ . '/../partials/site_header.php';
 })();
 </script>
 
-<?php require_once __DIR__ . '/../partials/site_footer.php'; ?>
+<?php 
+// Footer
+require_once __DIR__ . '/../partials/site_footer.php'; ?>
