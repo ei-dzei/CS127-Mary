@@ -343,11 +343,6 @@ main.container {
   border-radius: var(--radius);
   transition: border var(--transition), box-shadow var(--transition);
 }
-.input:focus, select:focus, textarea:focus {
-  /* border-color: var(--color-accent); */
-  /* outline: none;
-  box-shadow: 0 0 0 3px rgba(11, 83, 148, 0.2); */
-}
 .field {
   display: flex;
   flex-direction: column;
