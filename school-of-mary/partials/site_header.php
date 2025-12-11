@@ -178,12 +178,12 @@ if (!function_exists('current_path')) {
         position: fixed;
         background: #162a45;
         left: 250px;
-        top: 17px;
+        top: 15px;
         padding: 10px;
         padding-right: 13px;
         border: none;
         color: #ffd166; 
-        height: 33px; 
+        height: 35px; 
         width: 25px;
         cursor: pointer;
         display: flex;
