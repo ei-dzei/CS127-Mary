@@ -180,7 +180,7 @@ if (!function_exists('current_path')) {
         left: 250px;
         top: 17px;
         padding: 10px;
-        padding-right: 15px;
+        padding-right: 13px;
         border: none;
         color: #ffd166; 
         height: 33px; 
