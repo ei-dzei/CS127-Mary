@@ -64,6 +64,12 @@ if (!function_exists('current_path')) {
         z-index: 1000;
         transition: width 0.3s ease-in-out;
         white-space: nowrap;
+        scrollbar-width: none; /*hide scrollbar*/
+        -ms-overflow-style: none; /*hide scrollbar*/
+        overflow: hidden;
+    }
+    .sidebar::-webkit-scrollbar {
+        display: none; /*hide scrollbar*/
     }
 
     /* Main Content Area */
@@ -84,7 +90,6 @@ if (!function_exists('current_path')) {
         padding: 0 20px;
         background: #162a45; 
         gap: 15px;
-        overflow: hidden;
     }
     .sidebar .brand__logo {
         width: 40px;
@@ -94,7 +99,7 @@ if (!function_exists('current_path')) {
     
     .sidebar-menu {
         padding: 0px 0;
-        overflow-y: auto;
+        overflow-y: hidden;
         overflow-x: hidden;
         flex-grow: 1; 
         display: flex;
@@ -170,30 +175,36 @@ if (!function_exists('current_path')) {
 
     /* The Collapse Toggle Button (Desktop) */
     .desktop-toggler {
-        background: #112035; 
+        position: fixed;
+        background: #162a45;
+        left: 250px;
+        top: 17px;
+        padding: 10px;
         border: none;
         color: #ffd166; 
-        height: 60px; 
-        width: 100%;
+        height: 33px; 
+        width: 25px;
         cursor: pointer;
         display: flex;
         text-align: center;
         justify-content: center;
         align-items: center;
-        transition: background 0.3s;
+        transition: background 0.3s ease;
         border-top: 1px solid #ffffff20;
-        padding: 30px;
-        padding-bottom: 30px;
+        border-radius: 0 50% 50% 0;
+        box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+        transition: left 0.3s ease-in-out, background 0.3s ease;
     }
+    .desktop-toggler:hover {background: #26466d;}
     .desktop-toggler i {
-        font-size: 1.8rem; 
+        font-size: 1rem; 
         font-weight: bold;
+        transition: transform 0.3s ease;
     }
-    .desktop-toggler:hover {
-        background: #000;
-        color: #fff;
+    body.collapsed .desktop-toggler {left: 80px;}
+    body:not(.collapsed) .desktop-toggler .i {
+        transform: rotate(180deg);
     }
-
     /* Mobile Logic (Max-width 1024px) */
     #mobile-toggle {
         display: none;
@@ -204,7 +215,6 @@ if (!function_exists('current_path')) {
         body.collapsed .sidebar { width: 250px; }
         body.collapsed .main-content-area { margin-left: 0; }
         body.collapsed .sidebar .link-text { display: inline; opacity: 1; }
-        
         .desktop-toggler { display: none; }
 
         /* Show mobile toggle */
@@ -251,8 +261,15 @@ if (!function_exists('current_path')) {
             body.classList.remove('collapsed');
             // Update icon to the "collapse" arrow (left)
             if(icon) {
-                icon.classList.remove('bi-arrow-bar-right');
-                icon.classList.add('bi-arrow-bar-left');
+                icon.classList.remove('bi-chevron-right');
+                icon.classList.add('bi-chevron-left');
+            }
+        } else {
+            body.classList.add('collapsed');
+            // Update icon to the "collapse" arrow (left)
+            if(icon) {
+                icon.classList.remove('bi-chevron-left');
+                icon.classList.add('bi-chevron-right');
             }
         }
 
@@ -276,15 +293,17 @@ if (!function_exists('current_path')) {
                 const isNowCollapsed = body.classList.contains('collapsed');
                 
                 if (isNowCollapsed) {
+                    // desktopBtn.style.left = "80px";
                     // It is now small
                     localStorage.setItem('sidebar-state', 'collapsed');
-                    icon.classList.remove('bi-arrow-bar-left');
-                    icon.classList.add('bi-arrow-bar-right');
+                    icon.classList.remove('bi-chevron-left');
+                    icon.classList.add('bi-chevron-right');
                 } else {
                     // It is now big
+                    // desktopBtn.style.left = "250px";
                     localStorage.setItem('sidebar-state', 'expanded');
-                    icon.classList.remove('bi-arrow-bar-right');
-                    icon.classList.add('bi-arrow-bar-left');
+                    icon.classList.remove('bi-chevron-right');
+                    icon.classList.add('bi-chevron-left');
                 }
             });
         }
@@ -297,7 +316,9 @@ if (!function_exists('current_path')) {
 <div class="app-wrapper" id="app-wrapper">
 
     <aside class="sidebar" id="sidebar">
-
+      <button class="desktop-toggler" id="desktop-collapse-btn" title="Toggle Sidebar">
+        <i class="bi bi-chevron-right"></i>
+      </button>
       <a class="brand" href="<?= BASE_URL ?>/public/">
         <img class="brand__logo" src="<?= BASE_URL ?>/public/logo.png" alt="Logo" onerror="this.style.display='none'">
         <span class="link-text">School of Mary</span>
@@ -359,24 +380,19 @@ if (!function_exists('current_path')) {
             </a>
 
             <a class="mt-auto-custom" href="<?= BASE_URL ?>/admin/logout.php">
-               <i class="bi bi-box-arrow-left"></i>
+               <i class="bi bi-box-arrow-right"></i>
                <span class="link-text">Logout</span>
             </a>
 
           <?php else: ?>
 
             <a class="mt-auto-custom" href="<?= BASE_URL ?>/admin/login.php">
-              <i class="bi bi-box-arrow-in-right"></i>
+              <i class="bi bi-person-workspace"></i>
               <span class="link-text">Admin Login</span>
             </a>
 
           <?php endif; ?>
       </div>
-
-    <button class="desktop-toggler" id="desktop-collapse-btn" title="Toggle Sidebar">
-          <i class="bi bi-list"></i>
-     </button>
-
     </aside>
 
     <div class="main-content-area">
