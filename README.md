@@ -125,8 +125,6 @@ Although the current system satisfies the basic requirements, several enhancemen
 
 ## References and Inspirations
 
-This project’s design, interface, and implementation were informed by the following publicly available resources, which are used strictly as learning references and remain under their respective licenses:
-
 * **Harvard Business School**, “Faculty & Research,” [https://www.hbs.edu/faculty/Pages/default.aspx](https://www.hbs.edu/faculty/Pages/default.aspx).
 * **CodeAstro**, “Employee Task Management System in PHP with Source Code,” YouTube video (2021-08-27), [https://youtu.be/t4ZFF5z-T1U](https://youtu.be/t4ZFF5z-T1U).
 * **Coding with Elias**, “Building a Task Management System using PHP and MySQL,” YouTube playlist (2024-08-30), [https://youtube.com/playlist?list=PL2WFgdVk-usHC-HHC0SkpsmHquwHB0Aiy](https://youtube.com/playlist?list=PL2WFgdVk-usHC-HHC0SkpsmHquwHB0Aiy).
